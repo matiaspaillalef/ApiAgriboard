@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node ./src/index.js",
     "serve": "nodemon ./src/index.js",
-    "gendoc": "node swagger.js"
+     "gendoc": "node swagger.js > public/swagger/swagger.json"
   },
   "author": "",
   "license": "ISC",
