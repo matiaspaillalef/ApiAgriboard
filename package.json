@@ -1,5 +1,5 @@
 {
-  "name": "login-api",
+  "name": "api-agrisoft",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,13 +7,13 @@
   "scripts": {
     "start": "node ./src/index.js",
     "serve": "nodemon ./src/index.js",
-     "gendoc": "node swagger.js > public/swagger/swagger.json"
+    "gendoc": "node swagger.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.1.3",
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dayjs": "^1.11.10",
@@ -21,6 +21,7 @@
     "express": "^4.18.2",
     "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.2",
+    "mysql": "^2.18.1",
     "pg": "^8.11.3",
     "swagger-ui-express": "^4.6.0"
   },

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "API Login",
+    "title": "Api Agrisoft",
     "description": ""
   },
   "host": "localhost:4000",
@@ -16,7 +16,7 @@
       "type": "apiKey",
       "in": "header",
       "name": "X-API-KEY",
-      "description": "Genere apiKey desde /api/v1/signin"
+      "description": "api agrisoft"
     }
   },
   "consumes": [
@@ -26,80 +26,26 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/login": {
-      "post": {
+    "/api/v1/getToken": {
+      "get": {
         "tags": [
-          "login"
+          "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "mail": {
-                  "type": "string",
-                  "example": "ejemplo@ejemplo.cl"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "pass"
-                }
-              }
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
               "type": "object",
               "properties": {
-                "menu": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "Configuración del sistema"
-                      },
-                      "url": {
-                        "type": "string",
-                        "example": "/enviroment"
-                      },
-                      "children": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "number",
-                              "example": 1
-                            },
-                            "name": {
-                              "type": "string",
-                              "example": "Instituciones Previsionales"
-                            },
-                            "url": {
-                              "type": "string",
-                              "example": "/enviroment/AFP"
-                            }
-                          }
-                        }
-                      },
-                      "icon": {
-                        "type": "string",
-                        "example": "Cog8ToothIcon"
-                      }
-                    }
-                  }
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ1c3VhcmlvIiwiaWF0IjoxNzE2MTcwMzUzLCJleHAiOjE3MTYyMDAzNTN9.iRXYwJK1rHsmg2vS5hR7ZBbUb8ZxppOavQxWwPKX8qg"
                 }
               },
               "xml": {
@@ -110,7 +56,7 @@
         }
       }
     },
-    "/api/v1/signin": {
+    "/api/v1/login": {
       "post": {
         "tags": [
           "Auth"
@@ -141,13 +87,33 @@
             "schema": {
               "type": "object",
               "properties": {
-                "token": {
+                "code": {
                   "type": "string",
-                  "example": "asdgaetjsfdf"
+                  "example": "OK"
                 },
-                "error": {
+                "userId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "nombre": {
                   "type": "string",
-                  "example": "Usuario o Password incorrectos."
+                  "example": "Javier"
+                },
+                "apellido": {
+                  "type": "string",
+                  "example": "Donoso"
+                },
+                "mail": {
+                  "type": "string",
+                  "example": "Donoso.javier@gmail.com"
+                },
+                "rol": {
+                  "type": "number",
+                  "example": 1
+                },
+                "estado": {
+                  "type": "number",
+                  "example": 1
                 }
               },
               "xml": {
@@ -156,6 +122,712 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/configuracion/usuarios/getUsuarios": {
+      "get": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "userId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "nombre": {
+                  "type": "string",
+                  "example": "Javier"
+                },
+                "apellido": {
+                  "type": "string",
+                  "example": "Donoso"
+                },
+                "mail": {
+                  "type": "string",
+                  "example": "Donoso.javier@gmail.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "demo123"
+                },
+                "rol": {
+                  "type": "number",
+                  "example": 1
+                },
+                "rol_descripcion": {
+                  "type": "string",
+                  "example": "superadmin"
+                },
+                "estado": {
+                  "type": "number",
+                  "example": 1
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/usuarios/crearUsuarios": {
+      "post": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "javier"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Donoso"
+                },
+                "userEmail": {
+                  "type": "string",
+                  "example": "donoso.javier@gmail.com"
+                },
+                "menuRol": {
+                  "type": "number",
+                  "example": 1
+                },
+                "userPassword": {
+                  "type": "string",
+                  "example": "Mierda123"
+                },
+                "menuState": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Usuario creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/usuarios/actualizarUsuarios": {
+      "post": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "1"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "javier"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Donoso"
+                },
+                "userEmail": {
+                  "type": "string",
+                  "example": "donoso.javier@gmail.com"
+                },
+                "menuRol": {
+                  "type": "number",
+                  "example": 1
+                },
+                "userPassword": {
+                  "type": "string",
+                  "example": "Mierda123"
+                },
+                "menuState": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Usuario actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/usuarios/eliminarUsuarios": {
+      "post": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Usuario borrado correctamente"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/usuarios/getRoles": {
+      "get": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id_rol": {
+                        "type": "number",
+                        "example": 4
+                      },
+                      "descripcion": {
+                        "type": "string",
+                        "example": "Cosecheros"
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/usuarios/getEstados": {
+      "get": {
+        "tags": [
+          "Configuración - Usuarios"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "estados": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id_estado": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "descripcion": {
+                        "type": "string",
+                        "example": "ACTIVO"
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/empresas/getEmpresas": {
+      "get": {
+        "tags": [
+          "Configuración - Empresas"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name_company": {
+                        "type": "string",
+                        "example": "Empresa 1"
+                      },
+                      "rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "giro": {
+                        "type": "string",
+                        "example": "Comercio"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "Estado 1"
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Ciudad 1"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "Dirección 1"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "123456789"
+                      },
+                      "web": {
+                        "type": "string",
+                        "example": "www.empresa1.com"
+                      },
+                      "compensation_box": {
+                        "type": "string",
+                        "example": "Caja 1"
+                      },
+                      "legal_representative_name": {
+                        "type": "string",
+                        "example": "Representante 1"
+                      },
+                      "legal_representative_rut": {
+                        "type": "string",
+                        "example": "98765432-1"
+                      },
+                      "legal_representative_phone": {
+                        "type": "string",
+                        "example": "987654321"
+                      },
+                      "legal_representative_email": {
+                        "type": "string",
+                        "example": "representante1@empresa1.com"
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/empresas/createCompany": {
+      "post": {
+        "tags": [
+          "Configuración - Empresas"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name_company": {
+                  "type": "string",
+                  "example": "Empresa 1"
+                },
+                "rut": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "giro": {
+                  "type": "string",
+                  "example": "Comercio"
+                },
+                "state": {
+                  "type": "string",
+                  "example": "Estado 1"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "Ciudad 1"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "Dirección 1"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "123456789"
+                },
+                "web": {
+                  "type": "string",
+                  "example": "www.empresa1.com"
+                },
+                "compensation_box": {
+                  "type": "string",
+                  "example": "Caja 1"
+                },
+                "legal_representative_name": {
+                  "type": "string",
+                  "example": "Representante 1"
+                },
+                "legal_representative_rut": {
+                  "type": "string",
+                  "example": "98765432-1"
+                },
+                "legal_representative_phone": {
+                  "type": "string",
+                  "example": "987654321"
+                },
+                "legal_representative_email": {
+                  "type": "string",
+                  "example": "representante1@empresa1.com"
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Empresa creada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/empresas/updateCompany": {
+      "post": {
+        "tags": [
+          "Configuración - Empresas"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name_company": {
+                  "type": "string",
+                  "example": "Empresa 1"
+                },
+                "rut": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "giro": {
+                  "type": "string",
+                  "example": "Comercio"
+                },
+                "state": {
+                  "type": "string",
+                  "example": "Estado 1"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "Ciudad 1"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "Dirección 1"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "123456789"
+                },
+                "web": {
+                  "type": "string",
+                  "example": "www.empresa1.com"
+                },
+                "compensation_box": {
+                  "type": "string",
+                  "example": "Caja 1"
+                },
+                "legal_representative_name": {
+                  "type": "string",
+                  "example": "Representante 1"
+                },
+                "legal_representative_rut": {
+                  "type": "string",
+                  "example": "98765432-1"
+                },
+                "legal_representative_phone": {
+                  "type": "string",
+                  "example": "987654321"
+                },
+                "legal_representative_email": {
+                  "type": "string",
+                  "example": "representante1@empresa1.com"
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Empresa actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/empresas/deleteCompany": {
+      "post": {
+        "tags": [
+          "Configuración - Empresas"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Empresa borrada correctamente"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     }
   }

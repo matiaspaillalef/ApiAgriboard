@@ -10,8 +10,11 @@ import fs from 'fs'
 
 const swaggerFile = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf-8'));
 
-import authRouter from './routes/auth.route.js'
-import demoRouter from './routes/login.route.js'
+import tokenRouter from './routes/auth.route.js'
+import configurationRouter from './routes/configuration.route.js'
+import loginRouter from './routes/login.route.js'
+
+
 
 const app = express()
 const port = process.env.PORT
@@ -21,14 +24,18 @@ app.use(express.json());
 app.use(compression());
 app.use(helmet());
 
-app.use('/api/v1', demoRouter);
-app.use('/api/v1', authRouter);
+
+app.use('/api/v1', tokenRouter);
+app.use('/api/v1', loginRouter);
+app.use('/api/v1', configurationRouter);
+
+
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 console.clear();
 console.log("*************************************************");
-console.log("*API LOGIN                                       *");
+console.log("*API AGRISOFT                                       *");
 console.log("*************************************************");
 
 app.listen(port, () => console.log('http://localhost:' + port));

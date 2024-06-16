@@ -5,7 +5,7 @@ import swaggerAutogen from 'swagger-autogen'
 const doc = {
     info: {
         version: "1.0.0",
-        title: "API Login",
+        title: "Api Agrisoft",
         description: ""
     },
     host: "localhost:" + process.env.PORT,
@@ -18,7 +18,7 @@ const doc = {
             type: 'apiKey',
             in: 'header',
             name: 'X-API-KEY',
-            description: 'Genere apiKey desde /api/v1/signin'
+            description: 'api agrisoft'
         }
     },
     
