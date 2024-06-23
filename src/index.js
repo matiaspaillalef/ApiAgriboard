@@ -12,6 +12,7 @@ const swaggerFile = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf-8')
 
 import tokenRouter from './routes/auth.route.js'
 import configurationRouter from './routes/configuration.route.js'
+import managementPeopleRouter from './routes/management-people.route.js'
 import loginRouter from './routes/login.route.js'
 
 
@@ -28,6 +29,7 @@ app.use(helmet());
 app.use('/api/v1', tokenRouter);
 app.use('/api/v1', loginRouter);
 app.use('/api/v1', configurationRouter);
+app.use('/api/v1', managementPeopleRouter);
 
 
 
