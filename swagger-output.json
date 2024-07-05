@@ -2318,6 +2318,173 @@
           }
         ]
       }
+    },
+    "/api/v1/management-people/squads/updateSquad": {
+      "post": {
+        "tags": [
+          "Management People - Squads"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name": {
+                  "type": "string",
+                  "example": "cuadrilla 1"
+                },
+                "group": {
+                  "type": "number",
+                  "example": 1
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro actualizado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/squads/deleteSquad": {
+      "post": {
+        "tags": [
+          "Management People - Squads"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/squads/createSquad": {
+      "post": {
+        "tags": [
+          "Management People - Squads"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "cuadrilla 1"
+                },
+                "group": {
+                  "type": "number",
+                  "example": 1
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
     }
   }
 }
