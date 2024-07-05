@@ -65,7 +65,7 @@ router.post('/login', (req, res) => {
                     }
                     else {
                         
-                        if (results.length > 0 ) {
+                        if (results) {
 
                             //Javi coloque esto porque estaba agregando a la contraseña espacios enblanco y no los podia controlar
                             const storedPasswordHash = results[0].password.trim();

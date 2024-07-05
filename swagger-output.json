@@ -2012,6 +2012,312 @@
           }
         ]
       }
+    },
+    "/api/v1/management-people/workers/updateWorker": {
+      "post": {
+        "tags": [
+          "Management People - Workers"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Actualizar Trabajador",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "rut": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Juan"
+                },
+                "lastname": {
+                  "type": "string",
+                  "example": "Perez"
+                },
+                "lastname2": {
+                  "type": "string",
+                  "example": "Perez"
+                },
+                "born_date": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Masculino"
+                },
+                "state_civil": {
+                  "type": "string",
+                  "example": "Soltero"
+                },
+                "state": {
+                  "type": "string",
+                  "example": "Maule"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "Talca"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "Calle 123"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "phone_company": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "date_admission": {
+                  "type": "string",
+                  "example": "2021-01-01"
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro actualizado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/workers/deleteWorker": {
+      "post": {
+        "tags": [
+          "Management People - Workers"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/workers/createWorker": {
+      "post": {
+        "tags": [
+          "Management People - Workers"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Crear Trabajador",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Juan"
+                },
+                "lastname": {
+                  "type": "string",
+                  "example": "Perez"
+                },
+                "lastname2": {
+                  "type": "string",
+                  "example": "Perez"
+                },
+                "born_date": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Masculino"
+                },
+                "state_civil": {
+                  "type": "string",
+                  "example": "Soltero"
+                },
+                "state": {
+                  "type": "string",
+                  "example": "Maule"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "Talca"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "Calle 123"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "phone_company": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "date_admission": {
+                  "type": "string",
+                  "example": "2021-01-01"
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/squads/getSquads": {
+      "get": {
+        "tags": [
+          "Management People - Squads"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name": {
+                  "type": "string",
+                  "example": "cuadrilla 1"
+                },
+                "group": {
+                  "type": "number",
+                  "example": 1
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
     }
   }
 }

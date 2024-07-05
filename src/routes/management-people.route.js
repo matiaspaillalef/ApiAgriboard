@@ -1219,7 +1219,6 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
     }
 });
 
-
 router.post('/management-people/shifts/deleteShift', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Shifts']
@@ -1740,6 +1739,89 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
         });
     } catch (e) {
         console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+//Management People - Squads
+
+router.get('/management-people/squads/getSquads', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Squads']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "id": 1,
+                "name": "cuadrilla 1",
+                "group": 1,
+                "status": 1
+            }
+        } 
+    */
+    try {
+        let squads = [];
+
+        let mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error al conectar: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                return res.json(jsonResult);
+            }
+
+            let queryString = "SELECT id, name, `group`, status FROM squads";
+            console.log(queryString);
+
+            mysqlConn.query(queryString, function (error, results, fields) {
+                if (error) {
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    }
+                    return res.json(jsonResult);
+                }
+
+                if (results && results.length > 0) {
+                    results.forEach(element => {
+                        const jsonResult = {
+                            "id": element.id,
+                            "name": element.name,
+                            "group": element.group,
+                            "status": element.status,
+                        };
+                        squads.push(jsonResult);
+                    });
+
+                    const jsonResult = {
+                        "code": "OK",
+                        "squads": squads
+                    }
+                    res.json(jsonResult);
+
+                } else {
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": "No se encontraron registros"
+                    }
+                    res.json(jsonResult);
+                }
+
+                // Terminar la conexión después de manejar los resultados
+                mysqlConn.end();
+            });
+        });
+    } catch (e) {
+        console.error(e);
         res.json({ error: e.message });
     }
 });
