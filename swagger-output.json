@@ -2425,6 +2425,19 @@
                 "status": {
                   "type": "number",
                   "example": 1
+                },
+                "workers": {
+                  "type": "array",
+                  "example": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    6
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
                 }
               }
             }

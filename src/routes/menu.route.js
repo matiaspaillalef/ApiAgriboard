@@ -38,11 +38,14 @@ router.get('/getMenubyRol/:rolId',validateToken,  (req, res) => {
             }
         } 
     */
+
     try {
 
         let { rolId } = req.params;
         let menus = [];
         let menuChildren = [];
+
+        console.log(rolId)
 
 
         const  mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -54,22 +57,29 @@ router.get('/getMenubyRol/:rolId',validateToken,  (req, res) => {
 
             try {
 
-                var queryString = "select  m.id,m.name,m.icon,m.url from menu m , menu_rol mr ";
-                queryString += " where mr.id_rol  = " + rolId;
-                queryString += " and m.id = mr.id_menu ";
+                var queryString = "SELECT `⁠ id ⁠`, `⁠ name ⁠`, `⁠ url ⁠`, `⁠ icon ⁠` From `⁠ menu ⁠` m, menu_rol mr ";
+                queryString += " WHERE id_rol  = " + rolId;
+                queryString += " AND `⁠ id ⁠`  = id_menu ";
+
+                console.log(rolId)
 
                 const rows = await query(queryString);
+
+                console.log(rows);
                 
                 if(rows.length > 0) {
 
 
                     for (const row of rows) {
 
+                        console.log(row);
+
+
                         menuChildren = [];
 
-                        var menuQueryString = "select  *  from children_menu cm ";
-                        menuQueryString += " where cm.id_menu  = " + row.id;
-                        menuQueryString += " order by id asc";
+                        var menuQueryString = "SELECT * FROM `⁠ children_menu ⁠` cm  ";
+                        menuQueryString += " WHERE `⁠ id_menu ⁠`  = " + row.id;
+                        menuQueryString += " ORDER BY `⁠ id ⁠` ASC ";
                         
                         const childRows = await query(menuQueryString);
 
