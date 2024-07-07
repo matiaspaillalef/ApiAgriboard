@@ -181,6 +181,22 @@
                             "url": {
                               "type": "string",
                               "example": "/dashboard/enviroment/company"
+                            },
+                            "children": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "example": "Usuarios"
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "example": "/dashboard/enviroment/company/users"
+                                  }
+                                }
+                              }
                             }
                           }
                         }
