@@ -1,6 +1,5 @@
 import { Router } from 'express'
 const router = Router()
-//import Usuario from '../models/usuario.model.js'
 import validateToken from '../middleware/validateToken.js'
 import mysql from 'mysql';
 import bcrypt from 'bcrypt';
@@ -69,7 +68,7 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
 
                     }
                     else {
-                        if (results.length > 0) {
+                        if (results && results.length > 0) {
 
                             results.forEach(element => {
                                 const jsonResult = {
@@ -178,7 +177,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                     }
                     else {
 
-                        if (results.length > 0) {
+                        if (results && results.length > 0) {
 
                             const jsonResult = {
                                 "code": "ERROR",
@@ -280,7 +279,6 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
     try {
 
         let { id, name, lastName, userEmail, menuRol, userPassword, menuState } = req.body;
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -294,13 +292,12 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                 }
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "UPDATE usuarios";
                 queryString += " SET nombre='" + name + "', apellido='" + lastName + "', mail='" + userEmail + "', rol=" + menuRol + ", password='" + userPassword + "', estado=" + menuState;
                 queryString += " WHERE id=" + id;
-                console.log(queryString);
+
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
@@ -310,17 +307,18 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                             "code": "ERROR",
                             "mensaje": err.sqlMessage
                         }
+
                         res.json(jsonResult);
 
-                    }
-                    else {
-                        console.log(results);
-                        if (results.affectedRows != 0) {
+                    } else {
+
+                        if (results  && results.affectedRows != 0) {
 
                             const jsonResult = {
                                 "code": "OK",
                                 "usuarios": "usuario actualizado correctamente."
                             }
+
                             res.json(jsonResult);
 
                         } else {
@@ -329,19 +327,19 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                                 "code": "ERROR",
                                 "mensaje": "no se pudo actualizar el usuario seleccionado."
                             }
-                            res.json(jsonResult);
 
+                            res.json(jsonResult);
                         }
                     }
                 });
 
                 mysqlConn.end();
-
             }
         });
 
 
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
     }
@@ -371,7 +369,6 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
     try {
 
         let { id } = req.body;
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -383,10 +380,10 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "delete from usuarios where id = " + id;
 
@@ -399,17 +396,18 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                             "code": "ERROR",
                             "mensaje": err.sqlMessage
                         }
+
                         res.json(jsonResult);
 
-                    }
-                    else {
+                    } else {
 
-                        if (results.affectedRows == 1) {
+                        if (results  && results.affectedRows == 1) {
 
                             const jsonResult = {
                                 "code": "OK",
                                 "usuarios": "usuario eliminado correctamente."
                             }
+
                             res.json(jsonResult);
 
                         } else {
@@ -418,6 +416,7 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                                 "code": "ERROR",
                                 "mensaje": "no se pudo eliminar el usuario seleccionado."
                             }
+
                             res.json(jsonResult);
 
                         }
@@ -425,12 +424,12 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                 });
 
                 mysqlConn.end();
-
             }
         });
 
 
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
     }
@@ -459,7 +458,6 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
     try {
 
         var roles = [];
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -471,10 +469,10 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "select  * from roles";
 
@@ -489,43 +487,47 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
                         }
                         res.json(jsonResult);
 
-                    }
-                    else {
+                    } else {
 
-                        if (results.length > 0) {
+                        if (results  && results.length > 0) {
 
                             results.forEach(element => {
+                                
                                 const jsonResult = {
                                     "id_rol": element.id_rol,
                                     "descripcion": element.descripcion,
                                 };
+
                                 roles.push(jsonResult);
+
                             });
 
                             const jsonResult = {
                                 "code": "OK",
                                 "roles": roles
                             }
+
                             res.json(jsonResult);
-                        }
-                        else {
+
+                        } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "no se encontraron datos disponibles."
                             }
-                            res.json(jsonResult);
-                        }
 
+                            res.json(jsonResult);
+
+                        }
                     }
                 });
 
                 mysqlConn.end();
-
             }
         });
 
-
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
     }
@@ -554,7 +556,6 @@ router.get('/configuracion/usuarios/getEstados', validateToken, (req, res) => {
     try {
 
         var estados = [];
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -566,63 +567,66 @@ router.get('/configuracion/usuarios/getEstados', validateToken, (req, res) => {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "select  * from estado";
-
-
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
+
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": err.sqlMessage
                         }
+
                         res.json(jsonResult);
 
-                    }
-                    else {
+                    } else {
 
-                        if (results.length > 0) {
+                        if (results  && results.length > 0) {
 
                             results.forEach(element => {
                                 const jsonResult = {
                                     "id_rol": element.id_rol,
                                     "descripcion": element.descripcion,
                                 };
+
                                 estados.push(jsonResult);
+
                             });
 
                             const jsonResult = {
                                 "code": "OK",
                                 "estados": estados
                             }
+
                             res.json(jsonResult);
-                        }
-                        else {
+
+                        } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "no se encontraron datos disponibles."
                             }
-                            res.json(jsonResult);
-                        }
 
+                            res.json(jsonResult);
+
+                        }
                     }
                 });
 
                 mysqlConn.end();
-
             }
         });
 
-
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
     }
@@ -664,64 +668,81 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
         } 
     */
     try {
-        var companies = [];
 
+        var companies = [];
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 };
+
                 res.json(jsonResult);
+
             } else {
+
                 var queryString = "SELECT id, name_company, rut, giro, state, city, address, phone, web, compensation_box, ";
                 queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ";
                 queryString += "FROM companies";
 
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         };
+
                         res.json(jsonResult);
+
                     } else {
-                        if (results.length > 0) {
+
+                        if (results  && results.length > 0) {
+
                             results.forEach(element => {
                                 const jsonResult = {
-                                    "id": element.id,
-                                    "name_company": element.name_company,
-                                    "rut": element.rut,
-                                    "giro": element.giro,
-                                    "state": element.state,
-                                    "city": element.city,
-                                    "address": element.address,
-                                    "phone": element.phone,
-                                    "web": element.web,
-                                    "compensation_box": element.compensation_box,
-                                    "legal_representative_name": element.legal_representative_name,
-                                    "legal_representative_rut": element.legal_representative_rut,
-                                    "legal_representative_phone": element.legal_representative_phone,
-                                    "legal_representative_email": element.legal_representative_email,
-                                    "status": element.status
+                                        "id": element.id,
+                                        "name_company": element.name_company,
+                                        "rut": element.rut,
+                                        "giro": element.giro,
+                                        "state": element.state,
+                                        "city": element.city,
+                                        "address": element.address,
+                                        "phone": element.phone,
+                                        "web": element.web,
+                                        "compensation_box": element.compensation_box,
+                                        "legal_representative_name": element.legal_representative_name,
+                                        "legal_representative_rut": element.legal_representative_rut,
+                                        "legal_representative_phone": element.legal_representative_phone,
+                                        "legal_representative_email": element.legal_representative_email,
+                                        "status": element.status
                                 };
+
                                 companies.push(jsonResult);
+
                             });
 
                             const jsonResult = {
                                 "code": "OK",
                                 "companies": companies
                             };
+
                             res.json(jsonResult);
+
                         } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "No se encontraron empresas."
                             };
+
                             res.json(jsonResult);
                         }
                     }
@@ -772,58 +793,83 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
         } 
     */
     try {
+
         let { name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
             if (err) {
+
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
+
             } else {
                 // Verificar que la empresa no exista
                 var queryString = "SELECT id FROM companies WHERE rut='" + rut + "'";
+
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
                     } else {
-                        if (results.length > 0) {
+
+                        if (results  && results.length > 0) {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "La empresa con RUT " + rut + " ya existe en el sistema."
                             }
+
                             res.json(jsonResult);
+
                         } else {
+
                             var queryString = "INSERT INTO companies (name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)";
                             queryString += " VALUES('" + name_company + "', '" + rut + "', '" + giro + "', '" + state + "', '" + city + "', '" + address + "', '" + phone + "', '" + web + "', '" + compensation_box + "', '" + legal_representative_name + "', '" + legal_representative_rut + "', '" + legal_representative_phone + "', '" + legal_representative_email + "', " + status + ")";
+
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
+
                                 if (error) {
+
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
                                         "code": "ERROR",
                                         "mensaje": error.sqlMessage
                                     }
+
                                     res.json(jsonResult);
-                                } else {
-                                    if (resultsInsert.insertId != 0) {
+
+                                } 
+                                else {
+
+                                    if (resultsInsert  && resultsInsert.insertId != 0) {
+
                                         const jsonResult = {
                                             "code": "OK",
                                             "mensaje": "Empresa creada correctamente."
                                         }
+
                                         res.json(jsonResult);
+
                                     } else {
+
                                         const jsonResult = {
                                             "code": "ERROR",
                                             "mensaje": "No se pudo crear la empresa."
                                         }
+
                                         res.json(jsonResult);
                                     }
                                 }
@@ -833,12 +879,12 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                 });
             }
         });
+
     } catch (e) {
         console.log(e);
         res.json({ error: e });
     }
 });
-
 
 router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) => {
     /*  
@@ -876,48 +922,58 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
         } 
     */
     try {
+
         let { id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
-
-        console.log(req.body);
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('Error al conectar con la base de datos: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
+
             } else {
+
                 var queryString = "UPDATE companies";
                 queryString += " SET name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box='" + compensation_box + "', legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status;
                 queryString += " WHERE id=" + id;
 
-                console.log(queryString);
-
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('Error al ejecutar la consulta: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
                     } else {
-                        console.log(results);
-                        if (results.affectedRows != 0) {
+
+                        if (results  && results.affectedRows != 0) {
+
                             const jsonResult = {
                                 "code": "OK",
                                 "mensaje": "Empresa actualizada correctamente."
                             }
+
                             res.json(jsonResult);
+
                         } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "No se pudo actualizar la empresa seleccionada."
                             }
+
                             res.json(jsonResult);
                         }
                     }
@@ -932,9 +988,6 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
         res.json({ error: e });
     }
 });
-
-
-
 
 router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) => {
     /*  
@@ -960,10 +1013,7 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
     try {
 
         let { id } = req.body;
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        console.log("id", id);
 
         mysqlConn.connect(function (err) {
 
@@ -974,10 +1024,10 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "delete from companies where id = " + id;
 
@@ -990,17 +1040,18 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
                             "code": "ERROR",
                             "mensaje": err.sqlMessage
                         }
+
                         res.json(jsonResult);
 
-                    }
-                    else {
+                    } else {
 
-                        if (results.affectedRows == 1) {
+                        if (results  && results.affectedRows == 1) {
 
                             const jsonResult = {
                                 "code": "OK",
                                 "companies": "empresa eliminada correctamente."
                             }
+
                             res.json(jsonResult);
 
                         } else {
@@ -1009,6 +1060,7 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
                                 "code": "ERROR",
                                 "mensaje": "no se pudo eliminar la empresa seleccionada."
                             }
+
                             res.json(jsonResult);
 
                         }
@@ -1020,13 +1072,10 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
             }
         });
 
-
     } catch (e) {
         console.log(e);
         res.json({ error: e })
     }
 });
-
-
 
 export default router

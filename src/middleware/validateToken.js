@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const validateToken = (req, res, next) => {
+
     try{
         const token = req.headers['x-api-key'];
        

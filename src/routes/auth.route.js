@@ -24,8 +24,6 @@ router.get('/getToken', async (req, res) => {
             expiresIn: 30000
         });
 
-        
-
         if(token != '') {
 
             jsonResult = {
@@ -33,14 +31,13 @@ router.get('/getToken', async (req, res) => {
                 "token": token
             };
 
-        }else {
+        } else {
 
             jsonResult = {
                 "code": "ERROR",
                 "token": "Ocurrio un error al generar el token."
             };
         }
-
 
         res.json(jsonResult);
 

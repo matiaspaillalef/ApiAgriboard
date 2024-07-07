@@ -114,6 +114,10 @@
                 "estado": {
                   "type": "number",
                   "example": 1
+                },
+                "idCompany": {
+                  "type": "number",
+                  "example": 1
                 }
               },
               "xml": {
@@ -122,6 +126,80 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/getMenubyRol/{rolId}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "rolId",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "menus": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "Configuración"
+                      },
+                      "url": {
+                        "type": "string",
+                        "example": "/dashboard/enviroment"
+                      },
+                      "icon": {
+                        "type": "string",
+                        "example": "Cog8ToothIcon"
+                      },
+                      "children": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "Empresa"
+                            },
+                            "url": {
+                              "type": "string",
+                              "example": "/dashboard/enviroment/company"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/configuracion/usuarios/getUsuarios": {

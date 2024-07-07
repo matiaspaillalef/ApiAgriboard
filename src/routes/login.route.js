@@ -1,8 +1,6 @@
 import {Router} from 'express'
 const router = Router()
-//import Usuario from '../models/usuario.model.js'
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import mysql from 'mysql';
 
 router.post('/login', (req, res) => {
@@ -24,15 +22,14 @@ router.post('/login', (req, res) => {
                 "apellido": "Donoso",
                 "mail": "Donoso.javier@gmail.com",
                 "rol": 1,
-                "estado": 1
+                "estado": 1,
+                "idCompany": 1
             }
         } 
     */
     try {
 
         let { usuario, password } = req.body;
-        var results;
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function(err) {
@@ -44,13 +41,16 @@ router.post('/login', (req, res) => {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
-                var queryString = "select id,nombre ,apellido,mail,rol,estado,password  from usuarios u where mail='" + usuario + "'";
-
+                var queryString = "select  u.id,u.nombre ,u.apellido,u.mail,u.rol,u.estado, u.password ,ue.id_company  from usuarios u , usuario_empresas ue";
+                    queryString += " where mail='" + usuario + "'";
+                    queryString += " and u.id = ue.id_user";
+                    queryString += " limit 1";
+                
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
@@ -60,12 +60,12 @@ router.post('/login', (req, res) => {
                             "code": "ERROR",
                             "mensaje": err.sqlMessage
                         }
+
                         res.json(jsonResult);
         
-                    }
-                    else {
+                    } else {
                         
-                        if (results) {
+                        if (results  && results.length > 0) {
 
                             //Javi coloque esto porque estaba agregando a la contraseña espacios enblanco y no los podia controlar
                             const storedPasswordHash = results[0].password.trim();
@@ -80,26 +80,30 @@ router.post('/login', (req, res) => {
                                     "apellido": results[0].apellido,
                                     "mail": results[0].mail,
                                     "rol": results[0].rol,
-                                    "estado": results[0].estado
+                                    "estado": results[0].estado,
+                                    "idCompany": results[0].id_company
                                 };
+
                                 res.json(jsonResult);
 
-
-                            }else {
+                            } else {
 
                                 const jsonResult = {
                                     "code": "ERROR",
                                     "mensaje": "Usuario o contraseña incorrecta."
                                 }
+
                                 res.json(jsonResult);
 
-                            }
-                        }
-                        else {
+                            } 
+
+                        } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "Usuario o contraseña incorrecta."
                             }
+
                             res.json(jsonResult);
                         }
                     }
@@ -109,13 +113,11 @@ router.post('/login', (req, res) => {
 
             }           
         });
-
-                
+    
     } catch (e) {
 		console.log(e);
         res.json({ error: e })
     }
 });
-
 
 export default router
