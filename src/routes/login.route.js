@@ -46,19 +46,16 @@ router.post('/login', (req, res) => {
 
             } else {
 
-                var queryString = "select  u.id,u.nombre ,u.apellido,u.mail,u.rol,u.estado, u.password ,ue.id_company  from usuarios u , usuario_empresas ue";
+                var queryString = "select  u.id,u.name,u.lastname,u.mail,u.id_rol,u.id_state, u.password ,u.id_company  from users u";
                     queryString += " where mail='" + usuario + "'";
-                    queryString += " and u.id = ue.id_user";
-                    queryString += " limit 1";
-                
+                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
-
+                    if (error) {
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
 
                         res.json(jsonResult);
@@ -76,11 +73,11 @@ router.post('/login', (req, res) => {
                                 const jsonResult = {
                                     "code": "OK",
                                     "userId": results[0].id,
-                                    "nombre": results[0].nombre,
-                                    "apellido": results[0].apellido,
+                                    "nombre": results[0].name,
+                                    "apellido": results[0].lastname,
                                     "mail": results[0].mail,
-                                    "rol": results[0].rol,
-                                    "estado": results[0].estado,
+                                    "rol": results[0].id_rol,
+                                    "estado": results[0].id_state,
                                     "idCompany": results[0].id_company
                                 };
 

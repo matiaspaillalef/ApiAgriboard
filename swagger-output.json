@@ -235,37 +235,49 @@
                   "type": "string",
                   "example": "OK"
                 },
-                "userId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "nombre": {
-                  "type": "string",
-                  "example": "Javier"
-                },
-                "apellido": {
-                  "type": "string",
-                  "example": "Donoso"
-                },
-                "mail": {
-                  "type": "string",
-                  "example": "Donoso.javier@gmail.com"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "demo123"
-                },
-                "rol": {
-                  "type": "number",
-                  "example": 1
-                },
-                "rol_descripcion": {
-                  "type": "string",
-                  "example": "superadmin"
-                },
-                "estado": {
-                  "type": "number",
-                  "example": 1
+                "usuarios": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "nombre": {
+                        "type": "string",
+                        "example": "Matias"
+                      },
+                      "apellido": {
+                        "type": "string",
+                        "example": "Paillalef"
+                      },
+                      "mail": {
+                        "type": "string",
+                        "example": "m.paillalef.c@gmail.com"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "$2a$12$g/81By6B6mSMpPsVo/Pameann1cD0om6TfAJTqaVaHsLrJryRlM.W"
+                      },
+                      "id_rol": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "rol_descripcion": {
+                        "type": "string",
+                        "example": "Superadmin"
+                      },
+                      "id_company": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_name": {
+                        "type": "string",
+                        "example": "Agrisosft"
+                      }
+                    }
+                  }
                 }
               },
               "xml": {
@@ -315,6 +327,10 @@
                   "example": "Mierda123"
                 },
                 "menuState": {
+                  "type": "number",
+                  "example": 1
+                },
+                "menuCompany": {
                   "type": "number",
                   "example": 1
                 }
@@ -388,6 +404,10 @@
                   "example": "Mierda123"
                 },
                 "menuState": {
+                  "type": "number",
+                  "example": 1
+                },
+                "menuCompany": {
                   "type": "number",
                   "example": 1
                 }

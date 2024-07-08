@@ -17,14 +17,19 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
-                "userId": 1,
-                "nombre": "Javier",
-                "apellido": "Donoso",
-                "mail": "Donoso.javier@gmail.com",
-                "password": "demo123",
-                "rol": 1,
-                "rol_descripcion": "superadmin",
-                "estado": 1
+                "usuarios": [
+                    {
+                    "userId": 1,
+                    "nombre": "Matias",
+                    "apellido": "Paillalef",
+                    "mail": "m.paillalef.c@gmail.com",
+                    "password": "$2a$12$g/81By6B6mSMpPsVo/Pameann1cD0om6TfAJTqaVaHsLrJryRlM.W",
+                    "id_rol": 1,
+                    "rol_descripcion": "Superadmin",
+                    "id_company": 1,
+                    "company_name": "Agrisosft"
+                    }
+                ]    
             }
         } 
     */
@@ -49,20 +54,21 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
             else {
 
                 //var queryString = "select id,nombre ,apellido,mail,id_rol, r.descripcion as rol , estado  from usuarios u, roles r , estado e";
-                var queryString = "SELECT id, nombre, apellido, mail, id_rol, r.descripcion AS rol, estado, password FROM usuarios u, roles r, estado e";
-                queryString += " where u.rol = r.id_rol";
-                queryString += " and u.estado = e.id_estado";
+                var queryString = "SELECT u.id, u.name, u.lastname, u.mail, r.id_rol, r.descripcion AS rol, u.id_state, u.password , u.id_company , c.name_company as company FROM users u, roles r, states e , companies c ";
+                queryString += " where u.id_rol = r.id_rol";
+                queryString += " and u.id_state = e.id_estado";
+                queryString += " and u.id_company  = c.id ";
 
 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
@@ -73,13 +79,15 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                             results.forEach(element => {
                                 const jsonResult = {
                                     "userId": element.id,
-                                    "nombre": element.nombre,
-                                    "apellido": element.apellido,
+                                    "nombre": element.name,
+                                    "apellido": element.lastname,
                                     "mail": element.mail,
                                     "password": element.password,
                                     "id_rol": element.id_rol,
                                     "rol_descripcion": element.rol,
-                                    "estado": element.estado,
+                                    "id_company": element.id_company,
+                                    "company_name": element.company,
+                                    "estado": element.id_state,
                                 };
                                 usuarios.push(jsonResult);
                             });
@@ -93,7 +101,7 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                         else {
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "Usuario o contraseña incorrecta."
+                                "mensaje": "No se encuentran usuarios disponibles.."
                             }
                             res.json(jsonResult);
                         }
@@ -130,6 +138,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                 menuRol: 1,
                 userPassword: "Mierda123",
                 menuState: 1,
+                menuCompany: 1,
             }
         }  
         #swagger.responses[200] = {
@@ -141,7 +150,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
     */
     try {
 
-        let { name, lastName, userEmail, menuRol, userPassword, menuState } = req.body;
+        let { name, lastName, userEmail, menuRol, userPassword, menuState ,menuCompany} = req.body;
         const saltRounds = 10;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -161,7 +170,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                 //valido que usuario no exista
 
-                var queryString = "select id,nombre ,apellido,mail,rol,estado,password  from usuarios u where mail='" + userEmail + "'";
+                var queryString = "select id,name ,lastname,mail,id_rol,id_state,id_company,password  from users u where mail='" + userEmail + "'";
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -170,7 +179,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
@@ -193,9 +202,9 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                             userPassword = userPassword.trim();
                             const hashedPassword = bcrypt.hashSync(userPassword, saltRounds);
 
-                            var queryString = "INSERT INTO usuarios";
-                            queryString += " (nombre, apellido, mail, rol, password, estado)";
-                            queryString += "VALUES('" + name + "' , '" + lastName + "', '" + userEmail + "'," + menuRol + ", '" + hashedPassword + "'," + menuState + ")";
+                            var queryString = "INSERT INTO users";
+                            queryString += " (name, lastname, mail, id_rol, password, id_state, id_company)";
+                            queryString += "VALUES('" + name + "' , '" + lastName + "', '" + userEmail + "'," + menuRol + ", '" + hashedPassword + "'," + menuState + "," + menuCompany  +")";
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
                                 console.log("error", error);
@@ -206,7 +215,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
                                         "code": "ERROR",
-                                        "mensaje": err.sqlMessage
+                                        "mensaje": error.sqlMessage
                                     }
                                     res.json(jsonResult);
 
@@ -225,7 +234,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                                         const jsonResult = {
                                             "code": "ERROR",
-                                            "mensaje": "no se pudo eliminar el usuario seleccionado."
+                                            "mensaje": "no se pudo crear el usuario seleccionado."
                                         }
                                         res.json(jsonResult);
 
@@ -267,6 +276,7 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                 menuRol: 1,
                 userPassword: "Mierda123",
                 menuState: 1,
+                menuCompany: 1,
             }
         }  
         #swagger.responses[200] = {
@@ -278,7 +288,8 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
     */
     try {
 
-        let { id, name, lastName, userEmail, menuRol, userPassword, menuState } = req.body;
+        
+        let { id, name, lastName, userEmail, menuRol, userPassword, menuState ,menuCompany} = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -294,25 +305,25 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
 
             } else {
 
-                var queryString = "UPDATE usuarios";
-                queryString += " SET nombre='" + name + "', apellido='" + lastName + "', mail='" + userEmail + "', rol=" + menuRol + ", password='" + userPassword + "', estado=" + menuState;
+                var queryString = "UPDATE users";
+                queryString += " SET name='" + name + "', lastname='" + lastName + "', mail='" + userEmail + "', id_rol=" + menuRol + ", password='" + userPassword + "', id_state=" + menuState + ", id_company=" + menuCompany;
                 queryString += " WHERE id=" + id;
-
+                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
 
                         res.json(jsonResult);
 
                     } else {
 
-                        if (results  && results.affectedRows != 0) {
+                        if (results && results.affectedRows != 0) {
 
                             const jsonResult = {
                                 "code": "OK",
@@ -385,7 +396,7 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
 
             } else {
 
-                var queryString = "delete from usuarios where id = " + id;
+                var queryString = "delete from users where id = " + id;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -394,14 +405,14 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
 
                         res.json(jsonResult);
 
                     } else {
 
-                        if (results  && results.affectedRows == 1) {
+                        if (results && results.affectedRows == 1) {
 
                             const jsonResult = {
                                 "code": "OK",
@@ -489,10 +500,10 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
 
                     } else {
 
-                        if (results  && results.length > 0) {
+                        if (results && results.length > 0) {
 
                             results.forEach(element => {
-                                
+
                                 const jsonResult = {
                                     "id_rol": element.id_rol,
                                     "descripcion": element.descripcion,
@@ -589,7 +600,7 @@ router.get('/configuracion/usuarios/getEstados', validateToken, (req, res) => {
 
                     } else {
 
-                        if (results  && results.length > 0) {
+                        if (results && results.length > 0) {
 
                             results.forEach(element => {
                                 const jsonResult = {
@@ -704,25 +715,25 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
 
                     } else {
 
-                        if (results  && results.length > 0) {
+                        if (results && results.length > 0) {
 
                             results.forEach(element => {
                                 const jsonResult = {
-                                        "id": element.id,
-                                        "name_company": element.name_company,
-                                        "rut": element.rut,
-                                        "giro": element.giro,
-                                        "state": element.state,
-                                        "city": element.city,
-                                        "address": element.address,
-                                        "phone": element.phone,
-                                        "web": element.web,
-                                        "compensation_box": element.compensation_box,
-                                        "legal_representative_name": element.legal_representative_name,
-                                        "legal_representative_rut": element.legal_representative_rut,
-                                        "legal_representative_phone": element.legal_representative_phone,
-                                        "legal_representative_email": element.legal_representative_email,
-                                        "status": element.status
+                                    "id": element.id,
+                                    "name_company": element.name_company,
+                                    "rut": element.rut,
+                                    "giro": element.giro,
+                                    "state": element.state,
+                                    "city": element.city,
+                                    "address": element.address,
+                                    "phone": element.phone,
+                                    "web": element.web,
+                                    "compensation_box": element.compensation_box,
+                                    "legal_representative_name": element.legal_representative_name,
+                                    "legal_representative_rut": element.legal_representative_rut,
+                                    "legal_representative_phone": element.legal_representative_phone,
+                                    "legal_representative_email": element.legal_representative_email,
+                                    "status": element.status
                                 };
 
                                 companies.push(jsonResult);
@@ -825,7 +836,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
 
                     } else {
 
-                        if (results  && results.length > 0) {
+                        if (results && results.length > 0) {
 
                             const jsonResult = {
                                 "code": "ERROR",
@@ -851,10 +862,10 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
 
                                     res.json(jsonResult);
 
-                                } 
+                                }
                                 else {
 
-                                    if (resultsInsert  && resultsInsert.insertId != 0) {
+                                    if (resultsInsert && resultsInsert.insertId != 0) {
 
                                         const jsonResult = {
                                             "code": "OK",
@@ -958,7 +969,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
 
                     } else {
 
-                        if (results  && results.affectedRows != 0) {
+                        if (results && results.affectedRows != 0) {
 
                             const jsonResult = {
                                 "code": "OK",
@@ -1045,7 +1056,7 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
 
                     } else {
 
-                        if (results  && results.affectedRows == 1) {
+                        if (results && results.affectedRows == 1) {
 
                             const jsonResult = {
                                 "code": "OK",
