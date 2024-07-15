@@ -659,6 +659,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                 "companies": [
                     {
                         "id": 1,
+                        "logo": "logo1.jpg",
                         "name_company": "Empresa 1",
                         "rut": "12345678-9",
                         "giro": "Comercio",
@@ -697,7 +698,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
 
             } else {
 
-                var queryString = "SELECT id, name_company, rut, giro, state, city, address, phone, web, compensation_box, ";
+                var queryString = "SELECT id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, ";
                 queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ";
                 queryString += "FROM companies";
 
@@ -720,6 +721,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                             results.forEach(element => {
                                 const jsonResult = {
                                     "id": element.id,
+                                    "logo": element.logo,
                                     "name_company": element.name_company,
                                     "rut": element.rut,
                                     "giro": element.giro,
@@ -780,6 +782,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
             in: 'body',
             schema: {
                 "id": 1,
+                "logo": "logo1.jpg",
                 "name_company": "Empresa 1",
                 "rut": "12345678-9",
                 "giro": "Comercio",
@@ -805,7 +808,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
     */
     try {
 
-        let { name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
+        let { logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -847,8 +850,8 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
 
                         } else {
 
-                            var queryString = "INSERT INTO companies (name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)";
-                            queryString += " VALUES('" + name_company + "', '" + rut + "', '" + giro + "', '" + state + "', '" + city + "', '" + address + "', '" + phone + "', '" + web + "', '" + compensation_box + "', '" + legal_representative_name + "', '" + legal_representative_rut + "', '" + legal_representative_phone + "', '" + legal_representative_email + "', " + status + ")";
+                            var queryString = "INSERT INTO companies (logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)";
+                            queryString += " VALUES('" + logo + "', '" + name_company + "', '" + rut + "', '" + giro + "', '" + state + "', '" + city + "', '" + address + "', '" + phone + "', '" + web + "', '" + compensation_box + "', '" + legal_representative_name + "', '" + legal_representative_rut + "', '" + legal_representative_phone + "', '" + legal_representative_email + "', " + status + ")";
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
 
@@ -909,6 +912,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
             in: 'body',
             schema: {
                 "id": 1,
+                "logo": "logo1.jpg",
                 "name_company": "Empresa 1",
                 "rut": "12345678-9",
                 "giro": "Comercio",
@@ -934,7 +938,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
     */
     try {
 
-        let { id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
+        let { id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -952,7 +956,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
             } else {
 
                 var queryString = "UPDATE companies";
-                queryString += " SET name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box='" + compensation_box + "', legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status;
+                queryString += " SET logo='" + logo + "', name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box='" + compensation_box + "', legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status;
                 queryString += " WHERE id=" + id;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
