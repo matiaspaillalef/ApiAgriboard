@@ -343,13 +343,19 @@ router.post('/management-people/positions/createPosition', validateToken, (req, 
 });
 
 //Management People - Contractors
-router.get('/management-people/contractors/getContractors', validateToken, (req, res) => {
+router.get('/management-people/contractors/getContractors/:companyID', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Contractors']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
+
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
         
         #swagger.responses[200] = {
             schema: {
@@ -369,7 +375,9 @@ router.get('/management-people/contractors/getContractors', validateToken, (req,
     */
     try {
 
+        let { companyID } = req.params;
         var contractors = [];
+        console.log("aqui" , companyID);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -387,24 +395,24 @@ router.get('/management-people/contractors/getContractors', validateToken, (req,
             }
             else {
 
-                var queryString = "SELECT id, rut, name, lastname, giro, phone, email, state, city, status FROM contractors";
+                var queryString = "SELECT * FROM contractors where id_company = " + companyID ;
 
-                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
-                        }
+                            "mensaje": error.sqlMessage
+                        };
+
                         res.json(jsonResult);
 
-                    }
-                    else {
-                        if (results.length > 0) {
+                    } else {
 
+                        if (results && results.length > 0) {
+                            console.log("1");
                             results.forEach(element => {
                                 const jsonResult = {
                                     "id": element.id,
@@ -420,12 +428,14 @@ router.get('/management-people/contractors/getContractors', validateToken, (req,
                                 };
                                 contractors.push(jsonResult);
                             });
-
+                            console.log("2");
                             const jsonResult = {
                                 "code": "OK",
                                 "contractors": contractors
                             }
+                            console.log(jsonResult);
                             res.json(jsonResult);
+
                         }
                         else {
                             const jsonResult = {
@@ -499,22 +509,36 @@ router.post('/management-people/contractors/updateContractor', validateToken, (r
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado"
+
+                        if (results && results.affectedRows != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "contratista actualizado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo actualizar contratista seleccionado."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
                     }
                 });
 
@@ -540,7 +564,7 @@ router.post('/management-people/contractors/deleteContractor', validateToken, (r
        #swagger.parameters['obj'] = {
             in: 'body',
             schema: {
-                id: 1,
+                id: 1
             }
         }  
         
@@ -570,30 +594,43 @@ router.post('/management-people/contractors/deleteContractor', validateToken, (r
                 }
                 res.json(jsonResult);
 
-            }
-            else {
+            } else {
 
                 var queryString = "DELETE FROM contractors WHERE id = " + id;
 
-                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro eliminado"
+
+                        if (results && results.affectedRows == 1) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "companies": "contratista eliminada correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "no se pudo eliminar al contratista seleccionado."
+                            }
+
+                            res.json(jsonResult);
+
                         }
-                        res.json(jsonResult);
                     }
                 });
 
@@ -620,20 +657,20 @@ router.post('/management-people/contractors/createContractor', validateToken, (r
             in: 'body',
             description: 'Create Contractor',
             required: true,
-            schema: {rut: "12345678-9", name: "Juan", lastname: "Perez", giro: "Agricultura", phone: "12345678", email: "contacto@mail.com", state: "Maule", city: "Talca", status: 1}
+            schema: {rut: "12345678-9", name: "Juan", lastname: "Perez", giro: "Agricultura", phone: "12345678", email: "contacto@mail.com", state: "Maule", city: "Talca", status: 1, idCompany: 1}
         }
 
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
-                "mensaje": "Registro creado"
+                "mensaje": "Contratista creado correctamente."
             }
         }
     */
 
     try {
 
-        const { rut, name, lastname, giro, phone, email, state, city, status } = req.body;
+        const { rut, name, lastname, giro, phone, email, state, city, status, idCompany } = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -651,33 +688,76 @@ router.post('/management-people/contractors/createContractor', validateToken, (r
             }
             else {
 
-                var queryString = "INSERT INTO contractors (rut, name, lastname, giro, phone, email, state, city, status) VALUES ('" + rut + "', '" + name + "', '" + lastname + "', '" + giro + "', '" + phone + "', '" + email + "', '" + state + "', '" + city + "', " + status + ")";
+                //valido que contratista no exista
 
-                console.log(queryString);
+                var queryString = "select * from contractors u where rut='" + rut + "' and id_company = " + idCompany;
+
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro creado"
+
+                        if (results && results.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "El contratista " + rut + " ya existe en el sistema."
+                            }
+
+                            res.json(jsonResult);
+
                         }
-                        res.json(jsonResult);
+                        else {
+
+                            var queryString = "INSERT INTO contractors (rut, name, lastname, giro, phone, email, state, city, status , id_company) VALUES ('" + rut + "', '" + name + "', '" + lastname + "', '" + giro + "', '" + phone + "', '" + email + "', '" + state + "', '" + city + "', " + status + "," + idCompany + ")";
+
+                            mysqlConn.query(queryString, function (error, resultsInsert, fields) {
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                                else {
+                                    
+                                    if (resultsInsert.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "usuarios": "Contratista creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "no se pudo crear el Contratista seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+                                }
+                            });
+                        }
                     }
                 });
-
-                mysqlConn.end();
-
-
+                
             }
         });
 

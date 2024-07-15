@@ -10,6 +10,7 @@ drop table if exists menu;
 drop table if exists children_menu;
 drop table if exists grand_son_menu;
 drop table if exists menu_rol;
+drop table if exists contractors;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -246,7 +247,7 @@ INSERT INTO agrisoft.grand_son_menu
 VALUES(14, 'Mensajes', '/dashboard/people-management/messages');
 
 
--- agrisoft.menu_rol definition
+-- CREATE TABLA MENU_ROL --
 
 CREATE TABLE `menu_rol` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -276,3 +277,28 @@ INSERT INTO agrisoft.menu_rol
 (id_menu, id_rol)
 VALUES(5, 1);
 
+
+
+-- CREATE TABLA CONTRACTORS --
+
+CREATE TABLE `contractors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rut` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `lastname` varchar(100) NOT NULL,
+  `giro` varchar(100) NOT NULL,
+  `phone` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `state` varchar(100) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `status` int(11) NOT NULL,
+  `id_company` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.contractors
+(rut, name, lastname, giro, phone, email, state, city, status, id_company)
+VALUES('16.304.017-4', 'contratista', 'de prueba', 'prueba', '123456789', 'prueba@prueba.cl', 'XV', 'Arica', 1, 1);
+INSERT INTO agrisoft.contractors
+(rut, name, lastname, giro, phone, email, state, city, status, id_company)
+VALUES('6.110.475-5', 'contratista 2', 'prueba 2', 'prueba 2', '123456789', 'prueba@prueba.cl', 'XIII', 'Santiago', 1, 1);

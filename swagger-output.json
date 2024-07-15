@@ -1150,13 +1150,20 @@
         ]
       }
     },
-    "/api/v1/management-people/contractors/getContractors": {
+    "/api/v1/management-people/contractors/getContractors/{companyID}": {
       "get": {
         "tags": [
           "Management People - Contractors"
         ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1407,6 +1414,10 @@
                 "status": {
                   "type": "number",
                   "example": 1
+                },
+                "idCompany": {
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -1424,7 +1435,7 @@
                 },
                 "mensaje": {
                   "type": "string",
-                  "example": "Registro creado"
+                  "example": "Contratista creado correctamente."
                 }
               },
               "xml": {
