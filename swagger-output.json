@@ -612,6 +612,10 @@
                         "type": "number",
                         "example": 1
                       },
+                      "logo": {
+                        "type": "string",
+                        "example": "logo1.jpg"
+                      },
                       "name_company": {
                         "type": "string",
                         "example": "Empresa 1"
@@ -701,6 +705,10 @@
                 "id": {
                   "type": "number",
                   "example": 1
+                },
+                "logo": {
+                  "type": "string",
+                  "example": "logo1.jpg"
                 },
                 "name_company": {
                   "type": "string",
@@ -806,6 +814,10 @@
                 "id": {
                   "type": "number",
                   "example": 1
+                },
+                "logo": {
+                  "type": "string",
+                  "example": "logo1.jpg"
                 },
                 "name_company": {
                   "type": "string",

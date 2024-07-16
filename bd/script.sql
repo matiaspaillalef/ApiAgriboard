@@ -57,6 +57,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `companies` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `logo` varchar(255) NULL,
   `name_company` varchar(255) NOT NULL,
   `rut` varchar(20) NOT NULL,
   `giro` varchar(255) NOT NULL,
@@ -74,6 +75,7 @@ CREATE TABLE `companies` (
   PRIMARY KEY (`id`),
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- INSERT  STATE --
 
@@ -103,12 +105,20 @@ VALUES('Cosecheros');
 -- INSERT  COMPANY --
 
 INSERT INTO agrisoft.companies
-(name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)
-VALUES('Agrisosft', '18.128.602-4', 'Desarrollo de software', 'XVI', 'Chillán', 'Av. Norte #555', '987654321', 'https://www.agrisoft.cl', '1', 'Javier Donoso', '17.485.937-K', '123456789', 'javier.donoso@gmail.com', 1);
-
+(id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, logo)
+VALUES(1, 'Agrisosft', '18.128.602-4', 'Desarrollo de software', 'XVI', 'Chillán', 'Av. Norte #555', '987654321', 'https://www.agrisoft.cl', '1', 'Javier Donoso', '17.485.937-K', '123456789', 'javier.donoso@gmail.com', 1, 'public/uploads/agrisoft_logo.png');
 INSERT INTO agrisoft.companies
-(name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)
-VALUES('Empresa Admin', '1-9', 'giro de prueba', 'X', 'Puerto Montt', 'direccion de prueba', '12345678', 'https://stackoverflow.com/', '1', 'javier donoso', '1-9', '12345678', 'prueba@prueba.cl', 1);
+(id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, logo)
+VALUES(2, 'Ecomain', '76.942.718-7', 'giro de prueba', 'X', 'Puerto Montt', 'direccion de prueba', '12345678', 'https://stackoverflow.com/', '1', 'javier donoso', '1-9', '12345678', 'prueba@prueba.cl', 1, 'public/uploads/ecomain_logo.jpeg');
+INSERT INTO agrisoft.companies
+(id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, logo)
+VALUES(3, 'Colun S.A.', '81.094.100-6', 'VENTA AL POR MAYOR DE HUEVOS, LECHE, ABARROTES, Y OTROS ALIMENTOS N.C.P', 'XIV', 'La Unión', 'La Unión S/N', '987654321', 'https://colun.cl', '1', 'Matias', '17.485.937-K', '9999999', 'm.paillalef.c@gmail.com', 1, 'public/uploads/op.jpg');
+INSERT INTO agrisoft.companies
+(id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, logo)
+VALUES(4, 'Soprole S.A.', '17.485.937-K', 'Restaurant', 'XV', 'Arica', '', '950171534', 'https://www.delify.cl', '1', 'matias', '17.485.937-K', '9999999', 'kinetictechnologiesspa@gmail.com', 0, 'public/uploads/logo_soprole.png');
+INSERT INTO agrisoft.companies
+(id, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, logo)
+VALUES(5, 'Los Tilos S.A.', '77.947743-9', 'Venta de lacteos al por mayor', 'XIV', 'La Unión', 'Av. Uno #444', '987654321', 'http://www.soprole.cl', '2', 'Matias', '17.485.937-K', '950171534', 'matias@brandis.cl', 1, 'public/uploads/lostilos.jpeg');
 
 
 -- INSERT  USERS --
@@ -175,7 +185,7 @@ INSERT INTO agrisoft.children_menu
 VALUES(2, 'Creación de usuarios', '/dashboard/enviroment/user-creation');
 INSERT INTO agrisoft.children_menu
 (id_menu, name, url)
-VALUES(3, 'Campo', '/dashboard/production/ground''');
+VALUES(3, 'Campo', '/dashboard/production/ground');
 INSERT INTO agrisoft.children_menu
 (id_menu, name, url)
 VALUES(3, 'Sectors / Cuarteles', '/dashboard/production/sectors-barracks');

@@ -807,83 +807,68 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
         } 
     */
     try {
-
         let { logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
             if (err) {
-
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-
                 res.json(jsonResult);
-
             } else {
                 // Verificar que la empresa no exista
                 var queryString = "SELECT id FROM companies WHERE rut='" + rut + "'";
 
                 mysqlConn.query(queryString, function (error, results, fields) {
-
                     if (error) {
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
-
                         res.json(jsonResult);
-
                     } else {
-
                         if (results && results.length > 0) {
-
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "La empresa con RUT " + rut + " ya existe en el sistema."
                             }
-
                             res.json(jsonResult);
-
                         } else {
+                            // Construir la consulta SQL para insertar la empresa
+                            var insertFields = "name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status";
+                            var insertValues = `'${name_company}', '${rut}', '${giro}', '${state}', '${city}', '${address}', '${phone}', '${web}', '${compensation_box}', '${legal_representative_name}', '${legal_representative_rut}', '${legal_representative_phone}', '${legal_representative_email}', ${status}`;
 
-                            var queryString = "INSERT INTO companies (logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status)";
-                            queryString += " VALUES('" + logo + "', '" + name_company + "', '" + rut + "', '" + giro + "', '" + state + "', '" + city + "', '" + address + "', '" + phone + "', '" + web + "', '" + compensation_box + "', '" + legal_representative_name + "', '" + legal_representative_rut + "', '" + legal_representative_phone + "', '" + legal_representative_email + "', " + status + ")";
+                            if (logo) {
+                                insertFields += ", logo";
+                                insertValues += `, '${logo}'`;
+                            }
+
+                            var queryString = `INSERT INTO companies (${insertFields}) VALUES (${insertValues})`;
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
-
                                 if (error) {
-
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
                                         "code": "ERROR",
                                         "mensaje": error.sqlMessage
                                     }
-
                                     res.json(jsonResult);
-
-                                }
-                                else {
-
+                                } else {
                                     if (resultsInsert && resultsInsert.insertId != 0) {
-
                                         const jsonResult = {
                                             "code": "OK",
                                             "mensaje": "Empresa creada correctamente."
                                         }
-
                                         res.json(jsonResult);
-
                                     } else {
-
                                         const jsonResult = {
                                             "code": "ERROR",
                                             "mensaje": "No se pudo crear la empresa."
                                         }
-
                                         res.json(jsonResult);
                                     }
                                 }
@@ -899,6 +884,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
         res.json({ error: e });
     }
 });
+
 
 router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) => {
     /*  
