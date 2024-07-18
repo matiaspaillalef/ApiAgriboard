@@ -7,13 +7,19 @@ import bcrypt from 'bcrypt';
 
 //Management People - Positions
 
-router.get('/management-people/positions/getPositions', validateToken, (req, res) => {
+router.get('/management-people/positions/getPositions/:companyID', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Positions']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
+
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        } 
         
         #swagger.responses[200] = {
             schema: {
@@ -27,6 +33,8 @@ router.get('/management-people/positions/getPositions', validateToken, (req, res
     try {
 
         var positions = [];
+        let { companyID } = req.params;
+        console.log("aqui", companyID);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -44,17 +52,17 @@ router.get('/management-people/positions/getPositions', validateToken, (req, res
             }
             else {
 
-                var queryString = "SELECT id, name, status FROM positions";
+                var queryString = "SELECT * FROM positions where id_company = " + companyID;
 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
 
                         res.json(jsonResult);
@@ -124,7 +132,7 @@ router.post('/management-people/positions/updatePosition', validateToken, (req, 
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
-                "mensaje": "Registro actualizado"
+                "mensaje": "Registro actualizado correctamente."
             }
         } 
     */
@@ -152,25 +160,37 @@ router.post('/management-people/positions/updatePosition', validateToken, (req, 
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
 
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
 
                         res.json(jsonResult);
 
                     } else {
 
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado"
-                        }
+                        if (results && results.affectedRows != 0) {
 
-                        res.json(jsonResult);
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro actualizado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo actualizar el registro."
+                            }
+
+                            res.json(jsonResult);
+                        }
 
                     }
                 });
@@ -235,22 +255,37 @@ router.post('/management-people/positions/deletePosition', validateToken, (req, 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro eliminado"
+
+                        if (results && results.affectedRows == 1) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "companies": "Registro eliminado."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo eliminar el registro ."
+                            }
+
+                            res.json(jsonResult);
+
                         }
-                        res.json(jsonResult);
                     }
                 });
 
@@ -277,7 +312,7 @@ router.post('/management-people/positions/createPosition', validateToken, (req, 
             in: 'body',
             description: 'Create Position',
             required: true,
-            schema: {name: "Harvesters", status: 1}
+            schema: {name: "Harvesters", status: 1 , idCompany: 1}
         }
         
         #swagger.responses[200] = {
@@ -289,7 +324,7 @@ router.post('/management-people/positions/createPosition', validateToken, (req, 
     */
     try {
 
-        const { name, status } = req.body;
+        const { name, status, idCompany } = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -307,27 +342,40 @@ router.post('/management-people/positions/createPosition', validateToken, (req, 
             }
             else {
 
-                var queryString = "INSERT INTO positions (name, status) VALUES ('" + name + "', " + status + ")";
+                var queryString = "INSERT INTO positions (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro creado"
+
+                        if (results.insertId != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "usuarios": "Registro creado correctamente."
+                            }
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "no se pudo crear el Registro."
+                            }
+                            res.json(jsonResult);
+
                         }
-                        res.json(jsonResult);
                     }
                 });
 
@@ -377,7 +425,7 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
 
         let { companyID } = req.params;
         var contractors = [];
-        console.log("aqui" , companyID);
+        console.log("aqui", companyID);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -395,7 +443,7 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
             }
             else {
 
-                var queryString = "SELECT * FROM contractors where id_company = " + companyID ;
+                var queryString = "SELECT * FROM contractors where id_company = " + companyID;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -734,7 +782,7 @@ router.post('/management-people/contractors/createContractor', validateToken, (r
 
                                 }
                                 else {
-                                    
+
                                     if (resultsInsert.insertId != 0) {
 
                                         const jsonResult = {
@@ -757,7 +805,7 @@ router.post('/management-people/contractors/createContractor', validateToken, (r
                         }
                     }
                 });
-                
+
             }
         });
 
@@ -771,13 +819,19 @@ router.post('/management-people/contractors/createContractor', validateToken, (r
 
 //Alert , la palabra groups, est una palabra reservada de MYSQL, por lo que se debe usar comillas invertidas para que no de error
 
-router.get('/management-people/groups/getGroups', validateToken, (req, res) => {
+router.get('/management-people/groups/getGroups/:companyID', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Groups']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
+
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
         
         #swagger.responses[200] = {
             schema: {
@@ -789,51 +843,69 @@ router.get('/management-people/groups/getGroups', validateToken, (req, res) => {
         } 
     */
     try {
+
         var groups = [];
+        let { companyID } = req.params;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
+
             } else {
-                var queryString = "SELECT id, name, status FROM `groups`";
+
+                var queryString = "SELECT * FROM groups where id_company = " + companyID ;
                 console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
+
                     } else {
+
                         if (results && results.length > 0) {
+
                             results.forEach(element => {
                                 const jsonResult = {
                                     "id": element.id,
                                     "name": element.name,
                                     "status": element.status,
                                 };
+
                                 groups.push(jsonResult);
+
                             });
 
                             const jsonResult = {
                                 "code": "OK",
                                 "groups": groups
                             }
+
                             res.json(jsonResult);
+
                         } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "No se encontraron registros"
                             }
+
                             res.json(jsonResult);
                         }
                     }
@@ -890,27 +962,44 @@ router.post('/management-people/groups/updateGroup', validateToken, (req, res) =
             }
             else {
 
-                var queryString = "UPDATE `groups` SET name = '" + name + "', status = " + status + " WHERE id = " + id;
+                var queryString = "UPDATE groups SET name = '" + name + "', status = " + status + " WHERE id = " + id;
 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado"
+
+                        if (results && results.affectedRows != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro actualizado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo actualizar el  registro ."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
+
+
                     }
                 });
 
@@ -969,9 +1058,9 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
             }
             else {
 
-                var queryString = "DELETE FROM `groups` WHERE id = " + id;
+                var queryString = "DELETE FROM groups WHERE id = " + id;
 
-                console.log(queryString);
+                
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
@@ -979,17 +1068,32 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro eliminado"
+      
+                        if (results && results.affectedRows != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro eliminado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo elmiminar el  registro ."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
+
                     }
                 });
 
@@ -1016,7 +1120,7 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
             in: 'body',
             description: 'Create Group',
             required: true,
-            schema: {name: "Grupo 1", status: 1}
+            schema: {name: "Grupo 1", status: 1 , idCompany: 1}
         }
         
         #swagger.responses[200] = {
@@ -1028,7 +1132,7 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
     */
     try {
 
-        const { name, status } = req.body;
+        const { name, status , idCompany} = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1046,7 +1150,7 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
             }
             else {
 
-                var queryString = "INSERT INTO `groups` (name, status) VALUES ('" + name + "', " + status + ")";
+                var queryString = "INSERT INTO groups (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
 
                 console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -1056,17 +1160,33 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": err.sqlMessage
+                            "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
 
                     }
                     else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro creado"
+
+                        if (results && results.insertId != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el  registro ."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
+
+
                     }
                 });
 

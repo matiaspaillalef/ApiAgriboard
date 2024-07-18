@@ -956,13 +956,20 @@
         ]
       }
     },
-    "/api/v1/management-people/positions/getPositions": {
+    "/api/v1/management-people/positions/getPositions/{companyID}": {
       "get": {
         "tags": [
           "Management People - Positions"
         ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1042,7 +1049,7 @@
                 },
                 "mensaje": {
                   "type": "string",
-                  "example": "Registro actualizado"
+                  "example": "Registro actualizado correctamente."
                 }
               },
               "xml": {
@@ -1127,6 +1134,10 @@
                   "example": "Harvesters"
                 },
                 "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "idCompany": {
                   "type": "number",
                   "example": 1
                 }
@@ -1463,13 +1474,20 @@
         ]
       }
     },
-    "/api/v1/management-people/groups/getGroups": {
+    "/api/v1/management-people/groups/getGroups/{companyID}": {
       "get": {
         "tags": [
           "Management People - Groups"
         ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1634,6 +1652,10 @@
                   "example": "Grupo 1"
                 },
                 "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "idCompany": {
                   "type": "number",
                   "example": 1
                 }

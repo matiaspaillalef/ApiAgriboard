@@ -11,6 +11,9 @@ drop table if exists children_menu;
 drop table if exists grand_son_menu;
 drop table if exists menu_rol;
 drop table if exists contractors;
+drop table if exists positions;
+drop table if exists groups;
+
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -312,3 +315,51 @@ VALUES('16.304.017-4', 'contratista', 'de prueba', 'prueba', '123456789', 'prueb
 INSERT INTO agrisoft.contractors
 (rut, name, lastname, giro, phone, email, state, city, status, id_company)
 VALUES('6.110.475-5', 'contratista 2', 'prueba 2', 'prueba 2', '123456789', 'prueba@prueba.cl', 'XIII', 'Santiago', 1, 1);
+
+
+-- CREATE TABLA POSITION --
+
+CREATE TABLE `positions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` int(11) NOT NULL,
+  `id_company` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `positions_companies_FK` (`id_company`),
+  CONSTRAINT `positions_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.positions
+(name, status, id_company)
+VALUES('Cosechero', 1, 1);
+INSERT INTO agrisoft.positions
+(name, status, id_company)
+VALUES('Revisores', 1, 1);
+INSERT INTO agrisoft.positions
+(name, status, id_company)
+VALUES('Recolectores', 0, 1);
+
+-- CREATE TABLA GROUPS --
+
+CREATE TABLE `groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` int(11) NOT NULL,
+  `id_company` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `groups_companies_FK` (`id_company`),
+  CONSTRAINT `groups_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.`groups`
+(name, status, id_company)
+VALUES('Grupo nocturno', 1, 1);
+INSERT INTO agrisoft.`groups`
+(name, status, id_company)
+VALUES('Grupo tarde', 1, 1);
+INSERT INTO agrisoft.`groups`
+(name, status, id_company)
+VALUES('Grupo mañana', 0, 1);
+
+
