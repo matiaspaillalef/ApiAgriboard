@@ -13,6 +13,8 @@ drop table if exists menu_rol;
 drop table if exists contractors;
 drop table if exists positions;
 drop table if exists groups;
+drop table if exists squads;
+
 
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -362,4 +364,17 @@ INSERT INTO agrisoft.`groups`
 (name, status, id_company)
 VALUES('Grupo mañana', 0, 1);
 
+-- CREATE TABLA SQUADS --
 
+CREATE TABLE `squads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `id_group` int(11) NOT NULL,
+  `status` int(11) NOT NULL,
+  `id_company` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `squads_groups_FK` (`id_group`),
+  KEY `squads_companies_FK` (`id_company`),
+  CONSTRAINT `squads_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`),
+  CONSTRAINT `squads_groups_FK` FOREIGN KEY (`id_group`) REFERENCES `groups` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -114,6 +114,96 @@ router.get('/management-people/positions/getPositions/:companyID', validateToken
     }
 });
 
+router.post('/management-people/positions/createPosition', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Positions']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Create Position',
+            required: true,
+            schema: {name: "Harvesters", status: 1 , idCompany: 1}
+        }
+        
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado"
+            }
+        } 
+    */
+    try {
+
+        const { name, status, idCompany } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            }
+            else {
+
+                var queryString = "INSERT INTO positions (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
+
+                console.log(queryString);
+                mysqlConn.query(queryString, function (error, results, fields) {
+
+                    if (error) {
+
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    }
+                    else {
+
+                        if (results.insertId != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "usuarios": "Registro creado correctamente."
+                            }
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "no se pudo crear el Registro."
+                            }
+                            res.json(jsonResult);
+
+                        }
+                    }
+                });
+
+                mysqlConn.end();
+
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e })
+    }
+});
+
 router.post('/management-people/positions/updatePosition', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Positions']
@@ -300,95 +390,7 @@ router.post('/management-people/positions/deletePosition', validateToken, (req, 
     }
 });
 
-router.post('/management-people/positions/createPosition', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Positions']
 
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            description: 'Create Position',
-            required: true,
-            schema: {name: "Harvesters", status: 1 , idCompany: 1}
-        }
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro creado"
-            }
-        } 
-    */
-    try {
-
-        const { name, status, idCompany } = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                res.json(jsonResult);
-
-            }
-            else {
-
-                var queryString = "INSERT INTO positions (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
-
-                console.log(queryString);
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
-                    }
-                    else {
-
-                        if (results.insertId != 0) {
-
-                            const jsonResult = {
-                                "code": "OK",
-                                "usuarios": "Registro creado correctamente."
-                            }
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "no se pudo crear el Registro."
-                            }
-                            res.json(jsonResult);
-
-                        }
-                    }
-                });
-
-                mysqlConn.end();
-
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
-    }
-});
 
 //Management People - Contractors
 router.get('/management-people/contractors/getContractors/:companyID', validateToken, (req, res) => {
@@ -508,6 +510,128 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
 }
 
 );
+
+router.post('/management-people/contractors/createContractor', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Contractors']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Create Contractor',
+            required: true,
+            schema: {rut: "12345678-9", name: "Juan", lastname: "Perez", giro: "Agricultura", phone: "12345678", email: "contacto@mail.com", state: "Maule", city: "Talca", status: 1, idCompany: 1}
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Contratista creado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        const { rut, name, lastname, giro, phone, email, state, city, status, idCompany } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            }
+            else {
+
+                //valido que contratista no exista
+
+                var queryString = "select * from contractors u where rut='" + rut + "' and id_company = " + idCompany;
+
+                mysqlConn.query(queryString, function (error, results, fields) {
+
+
+                    if (error) {
+
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    }
+                    else {
+
+                        if (results && results.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "El contratista " + rut + " ya existe en el sistema."
+                            }
+
+                            res.json(jsonResult);
+
+                        }
+                        else {
+
+                            var queryString = "INSERT INTO contractors (rut, name, lastname, giro, phone, email, state, city, status , id_company) VALUES ('" + rut + "', '" + name + "', '" + lastname + "', '" + giro + "', '" + phone + "', '" + email + "', '" + state + "', '" + city + "', " + status + "," + idCompany + ")";
+
+                            mysqlConn.query(queryString, function (error, resultsInsert, fields) {
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                                else {
+
+                                    if (resultsInsert.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "usuarios": "Contratista creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "no se pudo crear el Contratista seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e })
+    }
+});
 
 router.post('/management-people/contractors/updateContractor', validateToken, (req, res) => {
     /*  
@@ -693,127 +817,7 @@ router.post('/management-people/contractors/deleteContractor', validateToken, (r
     }
 });
 
-router.post('/management-people/contractors/createContractor', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Contractors']
 
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            description: 'Create Contractor',
-            required: true,
-            schema: {rut: "12345678-9", name: "Juan", lastname: "Perez", giro: "Agricultura", phone: "12345678", email: "contacto@mail.com", state: "Maule", city: "Talca", status: 1, idCompany: 1}
-        }
-
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Contratista creado correctamente."
-            }
-        }
-    */
-
-    try {
-
-        const { rut, name, lastname, giro, phone, email, state, city, status, idCompany } = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                res.json(jsonResult);
-
-            }
-            else {
-
-                //valido que contratista no exista
-
-                var queryString = "select * from contractors u where rut='" + rut + "' and id_company = " + idCompany;
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
-                    }
-                    else {
-
-                        if (results && results.length > 0) {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "El contratista " + rut + " ya existe en el sistema."
-                            }
-
-                            res.json(jsonResult);
-
-                        }
-                        else {
-
-                            var queryString = "INSERT INTO contractors (rut, name, lastname, giro, phone, email, state, city, status , id_company) VALUES ('" + rut + "', '" + name + "', '" + lastname + "', '" + giro + "', '" + phone + "', '" + email + "', '" + state + "', '" + city + "', " + status + "," + idCompany + ")";
-
-                            mysqlConn.query(queryString, function (error, resultsInsert, fields) {
-
-                                if (error) {
-
-                                    console.error('error ejecutando query: ' + error.sqlMessage);
-                                    const jsonResult = {
-                                        "code": "ERROR",
-                                        "mensaje": error.sqlMessage
-                                    }
-                                    res.json(jsonResult);
-
-                                }
-                                else {
-
-                                    if (resultsInsert.insertId != 0) {
-
-                                        const jsonResult = {
-                                            "code": "OK",
-                                            "usuarios": "Contratista creado correctamente."
-                                        }
-                                        res.json(jsonResult);
-
-                                    } else {
-
-                                        const jsonResult = {
-                                            "code": "ERROR",
-                                            "mensaje": "no se pudo crear el Contratista seleccionado."
-                                        }
-                                        res.json(jsonResult);
-
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
-    }
-});
 
 //Management People - Groups
 
@@ -914,6 +918,99 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
                 });
             }
         });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e })
+    }
+});
+
+router.post('/management-people/groups/createGroup', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Groups']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Create Group',
+            required: true,
+            schema: {name: "Grupo 1", status: 1 , idCompany: 1}
+        }
+        
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado"
+            }
+        } 
+    */
+    try {
+
+        const { name, status , idCompany} = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            }
+            else {
+
+                var queryString = "INSERT INTO groups (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
+
+                console.log(queryString);
+                mysqlConn.query(queryString, function (error, results, fields) {
+
+                    if (err) {
+
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    }
+                    else {
+
+                        if (results && results.insertId != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el  registro ."
+                            }
+
+                            res.json(jsonResult);
+                        }
+
+
+                    }
+                });
+
+                mysqlConn.end();
+
+            }
+        });
+
     } catch (e) {
         console.log(e);
         res.json({ error: e })
@@ -1108,98 +1205,355 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
     }
 });
 
-router.post('/management-people/groups/createGroup', validateToken, (req, res) => {
+
+//Management People - Squads
+router.get('/management-people/squads/getSquads/:companyID', validateToken, (req, res) => {
     /*  
-        #swagger.tags = ['Management People - Groups']
+        #swagger.tags = ['Management People - Squads']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
-        
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            description: 'Create Group',
+
+        #swagger.parameters['companyID'] = {
+            in: 'path',
             required: true,
-            schema: {name: "Grupo 1", status: 1 , idCompany: 1}
-        }
+            type: "integer",
+        } 
+        
         
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
-                "mensaje": "Registro creado"
+                "id": 1,
+                "name": "cuadrilla 1",
+                "group": 1,
+                "status": 1
             }
         } 
     */
     try {
+        let squads = [];
+        let { companyID } = req.params;
 
-        const { name, status , idCompany} = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        let mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
 
             if (err) {
 
-                console.error('error connecting: ' + err.sqlMessage);
+                console.error('Error al conectar: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-                res.json(jsonResult);
+
+                return res.json(jsonResult);
 
             }
-            else {
 
-                var queryString = "INSERT INTO groups (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
+            let queryString = "SELECT * FROM squads where id_company = " + companyID ;
 
-                console.log(queryString);
-                mysqlConn.query(queryString, function (error, results, fields) {
+            mysqlConn.query(queryString, function (error, results, fields) {
+                
+                if (error) {
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    }
+                    return res.json(jsonResult);
+                }
 
-                    if (err) {
+                if (results && results.length > 0) {
 
-                        console.error('error ejecutando query: ' + error.sqlMessage);
+                    results.forEach(element => {
+
                         const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
+                            "id": element.id,
+                            "name": element.name,
+                            "group": element.id_group,
+                            "workers": [1, 2, 3, 4, 6], // Convertir la cadena JSON a un array "workers": "[1, 2, 3, 4, 6]
+                            "status": element.status,
+                        };
 
+                        squads.push(jsonResult);
+
+                    });
+
+                    const jsonResult = {
+                        "code": "OK",
+                        "squads": squads
                     }
-                    else {
 
-                        if (results && results.insertId != 0) {
+                    res.json(jsonResult);
 
-                            const jsonResult = {
-                                "code": "OK",
-                                "mensaje": "Registro creado correctamente."
-                            }
+                } else {
 
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo crear el  registro ."
-                            }
-
-                            res.json(jsonResult);
-                        }
-
-
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": "No se encontraron registros"
                     }
-                });
+                    
+                    res.json(jsonResult);
+                }
 
+                // Terminar la conexión después de manejar los resultados
                 mysqlConn.end();
-
-            }
+            });
         });
-
     } catch (e) {
-        console.log(e);
-        res.json({ error: e })
+        console.error(e);
+        res.json({ error: e.message });
     }
 });
+
+router.post('/management-people/squads/createSquad', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Management People - Squads']
+ 
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+ 
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            schema: {
+                name: "cuadrilla 1",
+                group: 1,
+                status: 1,
+                idCompany: 1
+            }
+        }
+ 
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado"
+            }
+        }
+    */
+
+    try {
+        const { name, group, status ,idCompany} = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error al conectar: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                return res.json(jsonResult);
+            }
+
+            var queryString = "INSERT INTO squads (name, id_group, status, id_company) VALUES ('" + name + "', " + group + ", "  + status + "," + idCompany + ")";
+
+
+            mysqlConn.query(queryString, function (error, results, fields) {
+                
+                if (error) {
+
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    }
+
+                    return res.json(jsonResult);
+                }
+
+                const jsonResult = {
+                    "code": "OK",
+                    "mensaje": "Registro creado"
+                }
+
+                res.json(jsonResult);
+
+                // Terminar la conexión después de manejar los resultados
+                mysqlConn.end();
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        res.json({ error: e.message });
+    }
+}
+
+);
+
+router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Management People - Squads']
+  
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+  
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            schema: {
+                id: 1,
+                name: "cuadrilla 1",
+                group: 1,
+                status: 1
+            }
+        }
+  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro actualizado"
+            }
+        }
+    */
+
+    try {
+        const { id, name, group, status, workers } = req.body;
+
+        console.log(req.body);
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error al conectar: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                return res.json(jsonResult);
+            }
+            
+            var queryString = "UPDATE squads SET name = '" + name + "', id_group = " + group + ", status = " + status + " WHERE id = " + id;
+            console.log(queryString);
+
+            // Convertir el array de workers a una cadena JSON
+            //const workersJson = JSON.stringify(workers);
+
+            mysqlConn.query(queryString, function (error, results, fields) {
+
+                if (error) {
+
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    }
+
+                    return res.json(jsonResult);
+
+                }
+                else {
+
+                    if (results && results.affectedRows != 0) {
+
+                        const jsonResult = {
+                            "code": "OK",
+                            "mensaje": "Registro actualizado correctamente."
+                        }
+
+                        res.json(jsonResult);
+
+                    } else {
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": "No se pudo actualizar el  registro ."
+                        }
+
+                        res.json(jsonResult);
+                    }
+
+                }
+                // Terminar la conexión después de manejar los resultados
+                mysqlConn.end();
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        res.json({ error: e.message });
+    }
+});
+
+
+router.post('/management-people/squads/deleteSquad', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Management People - Squads']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            schema: {
+                id: 1,
+            }
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado"
+            }
+        }
+    */
+
+    try {
+        let { id } = req.body;
+
+        console.log(id);
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error al conectar: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                return res.json(jsonResult);
+            }
+
+            let queryString = "DELETE FROM squads WHERE id = ?";
+            console.log(queryString);
+
+            mysqlConn.query(queryString, [id], function (error, results, fields) {
+                if (error) {
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    }
+                    return res.json(jsonResult);
+                }
+
+                const jsonResult = {
+                    "code": "OK",
+                    "mensaje": "Registro eliminado"
+                }
+                res.json(jsonResult);
+
+                // Terminar la conexión después de manejar los resultados
+                mysqlConn.end();
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        res.json({ error: e.message });
+    }
+}
+
+);
+
+
+
 
 // Management People - Shifts
 
@@ -1951,311 +2305,6 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
         res.json({ error: e.message });
     }
 });
-
-
-//Management People - Squads
-router.get('/management-people/squads/getSquads', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Squads']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "id": 1,
-                "name": "cuadrilla 1",
-                "group": 1,
-                "status": 1
-            }
-        } 
-    */
-    try {
-        let squads = [];
-
-        let mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                return res.json(jsonResult);
-            }
-
-            let queryString = "SELECT id, name, `group`, workers, status FROM squads";
-            console.log(queryString);
-
-            mysqlConn.query(queryString, function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                if (results && results.length > 0) {
-                    results.forEach(element => {
-                        const jsonResult = {
-                            "id": element.id,
-                            "name": element.name,
-                            "group": element.group,
-                            "workers": JSON.parse(element.workers), // Convertir la cadena JSON a un array "workers": "[1, 2, 3, 4, 6]
-                            "status": element.status,
-                        };
-                        squads.push(jsonResult);
-                    });
-
-                    const jsonResult = {
-                        "code": "OK",
-                        "squads": squads
-                    }
-                    res.json(jsonResult);
-
-                } else {
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": "No se encontraron registros"
-                    }
-                    res.json(jsonResult);
-                }
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
-        });
-    } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
-    }
-});
-
-router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
-    /*
-        #swagger.tags = ['Management People - Squads']
-  
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-  
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                id: 1,
-                name: "cuadrilla 1",
-                group: 1,
-                status: 1,
-                workers: [1, 2, 3, 4, 6]
-            }
-        }
-  
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro actualizado"
-            }
-        }
-    */
-
-    try {
-        const { id, name, group, status, workers } = req.body;
-
-        console.log(req.body);
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                return res.json(jsonResult);
-            }
-
-            let queryString = "UPDATE squads SET name = ?, `group` = ?, status = ?, workers = ? WHERE id = ?";
-            console.log(queryString);
-
-            // Convertir el array de workers a una cadena JSON
-            const workersJson = JSON.stringify(workers);
-
-            mysqlConn.query(queryString, [name, group, status, workersJson, id], function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                const jsonResult = {
-                    "code": "OK",
-                    "mensaje": "Registro actualizado"
-                }
-                res.json(jsonResult);
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
-        });
-    } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
-    }
-});
-
-
-router.post('/management-people/squads/deleteSquad', validateToken, (req, res) => {
-
-    /*
-        #swagger.tags = ['Management People - Squads']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                id: 1,
-            }
-        }
-
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro eliminado"
-            }
-        }
-    */
-
-    try {
-        let { id } = req.body;
-
-        console.log(id);
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                return res.json(jsonResult);
-            }
-
-            let queryString = "DELETE FROM squads WHERE id = ?";
-            console.log(queryString);
-
-            mysqlConn.query(queryString, [id], function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                const jsonResult = {
-                    "code": "OK",
-                    "mensaje": "Registro eliminado"
-                }
-                res.json(jsonResult);
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
-        });
-    } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
-    }
-}
-
-);
-
-router.post('/management-people/squads/createSquad', validateToken, (req, res) => {
-
-    /*
-        #swagger.tags = ['Management People - Squads']
- 
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
- 
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                name: "cuadrilla 1",
-                group: 1,
-                status: 1
-            }
-        }
- 
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro creado"
-            }
-        }
-    */
-
-    try {
-        const { name, group, status } = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                return res.json(jsonResult);
-            }
-
-            let queryString = "INSERT INTO squads (name, `group`, status) VALUES (?, ?, ?)";
-            console.log(queryString);
-
-            mysqlConn.query(queryString, [name, group, status], function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                const jsonResult = {
-                    "code": "OK",
-                    "mensaje": "Registro creado"
-                }
-                res.json(jsonResult);
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
-        });
-    } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
-    }
-}
-
-);
-
 
 export default router
 
