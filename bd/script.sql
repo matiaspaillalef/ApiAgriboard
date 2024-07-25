@@ -378,3 +378,50 @@ CREATE TABLE `squads` (
   CONSTRAINT `squads_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`),
   CONSTRAINT `squads_groups_FK` FOREIGN KEY (`id_group`) REFERENCES `groups` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- agrisoft.ground definition
+
+CREATE TABLE `ground` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `zone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `company_id` int DEFAULT NULL,
+  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ground_companies_FK` (`company_id`),
+  CONSTRAINT `ground_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+INSERT INTO agrisoft.ground
+(name, state, city, address, latitude, longitude, `zone`, company_id, status)
+VALUES
+('Hacienda Los Pinos', 'XII', 'Talca', 'Calle Los Pinos #123', NULL, NULL, 'Centro', 4, '1'),
+('Tierras del Sol', 'X', 'Calama', 'Av. del Desierto #567', NULL, NULL, 'Norte', 3, '1'),
+('Valle Verde', 'VI', 'Rancagua', 'Camino a Los Robles #321', NULL, NULL, 'Sur', 5, '1'),
+('Pampa Hermosa', 'III', 'Concepción', 'Ruta 160 Km 10', NULL, NULL, 'Sur', 1, '1'),
+('Cerro Alto', 'VIII', 'Constitución', 'Av. Cerro Alto #987', NULL, NULL, 'Centro', 2, '1'),
+('Las Acacias', 'IX', 'Osorno', 'Calle Las Acacias #456', NULL, NULL, 'Sur', 4, '1'),
+('Lomas Verdes', 'XIV', 'Copiapó', 'Camino Lomas Verdes #789', NULL, NULL, 'Norte', 3, '1'),
+('Bosque Azul', 'IV', 'La Serena', 'Av. Bosque Azul #234', NULL, NULL, 'Centro', 5, '1'),
+('Arenas Blancas', 'I', 'Arica', 'Playa Arenas Blancas', NULL, NULL, 'Norte', 1, '1'),
+('Cumbres Verdes', 'V', 'Valdivia', 'Cerro Cumbres Verdes', NULL, NULL, 'Sur', 2, '1'),
+('Los Almendros', 'XIII', 'Antofagasta', 'Calle Los Almendros #567', NULL, NULL, 'Norte', 4, '1'),
+('Monte Azul', 'XI', 'Iquique', 'Cerro Monte Azul', NULL, NULL, 'Norte', 5, '1'),
+('Mirador del Lago', 'VIII', 'Valdivia', 'Camino al Mirador', NULL, NULL, 'Sur', 3, '1'),
+('Santa Teresa', 'II', 'Santiago', 'Av. Santa Teresa #789', NULL, NULL, 'Centro', 1, '1'),
+('Los Olivos', 'XII', 'Talca', 'Av. Los Olivos #456', NULL, NULL, 'Centro', 2, '1'),
+('El Vergel', 'VI', 'Rancagua', 'Km 3 Carretera El Vergel', NULL, NULL, 'Sur', 4, '1'),
+('San Rafael', 'IX', 'Osorno', 'Av. San Rafael #234', NULL, NULL, 'Sur', 5, '1'),
+('Punta Norte', 'III', 'Concepción', 'Punta Norte #678', NULL, NULL, 'Centro', 1, '1'),
+('Los Robles', 'IV', 'La Serena', 'Av. Los Robles #901', NULL, NULL, 'Centro', 3, '1'),
+('El Arrayán', 'XI', 'Iquique', 'Camino El Arrayán', NULL, NULL, 'Norte', 2, '1'),
+('Berries Diguillin', 'XVI', 'Ránqui', 'Av 1 #4444', NULL, NULL, 'Norte', 1, '1'),
+('Las Palmas', 'V', 'Valdivia', 'Calle Las Palmas #543', NULL, NULL, 'Sur', 1, '1');

@@ -15,6 +15,7 @@ import configurationRouter from './routes/configuration.route.js'
 import managementPeopleRouter from './routes/management-people.route.js'
 import loginRouter from './routes/login.route.js'
 import menuRouter from './routes/menu.route.js'
+import productionRouter from './routes/production.route.js'
 
 
 
@@ -32,6 +33,7 @@ app.use('/api/v1', loginRouter);
 app.use('/api/v1', menuRouter);
 app.use('/api/v1', configurationRouter);
 app.use('/api/v1', managementPeopleRouter);
+app.use('/api/v1', productionRouter);
 
 
 
