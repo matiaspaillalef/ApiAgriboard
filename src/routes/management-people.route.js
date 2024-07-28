@@ -867,7 +867,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
 
             } else {
 
-                var queryString = "SELECT * FROM groups where id_company = " + companyID ;
+                var queryString = "SELECT * FROM groups where id_company = " + companyID;
                 console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -948,7 +948,7 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
     */
     try {
 
-        const { name, status , idCompany} = req.body;
+        const { name, status, idCompany } = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1157,7 +1157,7 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
 
                 var queryString = "DELETE FROM groups WHERE id = " + id;
 
-                
+
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
@@ -1171,7 +1171,7 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
 
                     }
                     else {
-      
+
                         if (results && results.affectedRows != 0) {
 
                             const jsonResult = {
@@ -1252,10 +1252,10 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
 
             }
 
-            let queryString = "SELECT * FROM squads where id_company = " + companyID ;
+            let queryString = "SELECT * FROM squads where id_company = " + companyID;
 
             mysqlConn.query(queryString, function (error, results, fields) {
-                
+
                 if (error) {
                     console.error('Error ejecutando query: ' + error.sqlMessage);
                     const jsonResult = {
@@ -1294,7 +1294,7 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
                         "code": "ERROR",
                         "mensaje": "No se encontraron registros"
                     }
-                    
+
                     res.json(jsonResult);
                 }
 
@@ -1336,7 +1336,7 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
     */
 
     try {
-        const { name, group, status ,idCompany} = req.body;
+        const { name, group, status, idCompany } = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1350,11 +1350,11 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
                 return res.json(jsonResult);
             }
 
-            var queryString = "INSERT INTO squads (name, id_group, status, id_company) VALUES ('" + name + "', " + group + ", "  + status + "," + idCompany + ")";
+            var queryString = "INSERT INTO squads (name, id_group, status, id_company) VALUES ('" + name + "', " + group + ", " + status + "," + idCompany + ")";
 
 
             mysqlConn.query(queryString, function (error, results, fields) {
-                
+
                 if (error) {
 
                     console.error('Error ejecutando query: ' + error.sqlMessage);
@@ -1427,7 +1427,7 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
                 }
                 return res.json(jsonResult);
             }
-            
+
             var queryString = "UPDATE squads SET name = '" + name + "', id_group = " + group + ", status = " + status + " WHERE id = " + id;
             console.log(queryString);
 
@@ -1557,13 +1557,20 @@ router.post('/management-people/squads/deleteSquad', validateToken, (req, res) =
 
 // Management People - Shifts
 
-router.get('/management-people/shifts/getShifts', validateToken, (req, res) => {
+router.get('/management-people/shifts/getShifts/:companyID', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Shifts']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
+
+        
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
         
         #swagger.responses[200] = {
             schema: {
@@ -1613,31 +1620,43 @@ router.get('/management-people/shifts/getShifts', validateToken, (req, res) => {
     */
     try {
         var shifts = [];
+        let { companyID } = req.params;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('Error de conexión: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-                res.json(jsonResult);
-            } else {
-                var queryString = "SELECT id, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status FROM shifts";
-                console.log(queryString);
 
+                res.json(jsonResult);
+
+            } else {
+
+                var queryString = "SELECT id, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status FROM shifts where id_company = " + companyID;
+                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('Error ejecutando query: ' + error.sqlMessage);
+
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
                     } else {
+
                         if (results && results.length > 0) {
+
                             results.forEach(element => {
                                 const shift = {
                                     "id": element.id,
@@ -1665,20 +1684,140 @@ router.get('/management-people/shifts/getShifts', validateToken, (req, res) => {
                                 "code": "OK",
                                 "shifts": shifts
                             }
+
                             res.json(jsonResult);
+
                         } else {
+
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "No se encontraron registros"
                             }
+
                             res.json(jsonResult);
                         }
                     }
                     // Terminar la conexión después de manejar los resultados
+
                     mysqlConn.end();
                 });
             }
         });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e })
+    }
+});
+
+router.post('/management-people/shifts/createShift', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Shifts']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Crear Turno',
+            required: true,
+            schema: {
+                name: "Mañana", 
+                monday_opening_time: "08:00:00",
+                monday_closing_time: "12:00:00",
+                tuesday_opening_time: "08:00:00",
+                tuesday_closing_time: "12:00:00",
+                wednesday_opening_time: "08:00:00",
+                wednesday_closing_time: "12:00:00",
+                thursday_opening_time: "08:00:00",
+                thursday_closing_time: "12:00:00",
+                friday_opening_time: "08:00:00",
+                friday_closing_time: "12:00:00",
+                saturday_opening_time: "08:00:00",
+                saturday_closing_time: "12:00:00",
+                sunday_opening_time: "08:00:00",
+                sunday_closing_time: "12:00:00",
+                status: 1,
+                idCompany: 1
+            }
+        }
+        
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado"
+            }
+        } 
+    */
+    try {
+        const { name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, idCompany } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('Error de conexión: ' + err.sqlMessage);
+
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+
+                res.json(jsonResult);
+
+            } else {
+
+                var queryString = `
+                    INSERT INTO shifts (name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, id_company)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+                var queryValues = [name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, idCompany];
+
+                mysqlConn.query(queryString, queryValues, function (error, results, fields) {
+
+                if (error) {
+
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+
+                    }
+
+                    res.json(jsonResult);
+
+                } else {
+
+                    if (results && results.insertId != 0) {
+
+                        const jsonResult = {
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        }
+
+                        res.json(jsonResult);
+
+                    } else {
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el  registro ."
+                        }
+
+                        res.json(jsonResult);
+                    }
+                }
+                    // Terminar la conexión después de manejar los resultados
+
+                });
+
+                mysqlConn.end();
+            }
+        });
+
     } catch (e) {
         console.log(e);
         res.json({ error: e })
@@ -1731,14 +1870,19 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('Error de conexión: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
+
             } else {
+
                 var queryString = `
                     UPDATE shifts 
                     SET 
@@ -1756,19 +1900,38 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
                 var queryValues = [name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, id];
 
                 mysqlConn.query(queryString, queryValues, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('Error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
                     } else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado"
+
+                        if (results && results.affectedRows != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro actualizado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo actualizar el  registro ."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
+
                     }
                     // Terminar la conexión después de manejar los resultados
                     mysqlConn.end();
@@ -1813,32 +1976,57 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('Error de conexión: ' + err.sqlMessage);
+
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
+
             } else {
+
                 var queryString = "DELETE FROM shifts WHERE id = " + id;
                 console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
+
                     if (error) {
+
                         console.error('Error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
                     } else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro eliminado"
+
+                        if (results && results.affectedRows != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro eliminado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo elmiminar el  registro ."
+                            }
+
+                            res.json(jsonResult);
                         }
-                        res.json(jsonResult);
                     }
+
                     // Terminar la conexión después de manejar los resultados
                     mysqlConn.end();
                 });
@@ -1851,91 +2039,7 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
     }
 });
 
-router.post('/management-people/shifts/createShift', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Shifts']
 
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            description: 'Crear Turno',
-            required: true,
-            schema: {
-                name: "Mañana", 
-                monday_opening_time: "08:00:00",
-                monday_closing_time: "12:00:00",
-                tuesday_opening_time: "08:00:00",
-                tuesday_closing_time: "12:00:00",
-                wednesday_opening_time: "08:00:00",
-                wednesday_closing_time: "12:00:00",
-                thursday_opening_time: "08:00:00",
-                thursday_closing_time: "12:00:00",
-                friday_opening_time: "08:00:00",
-                friday_closing_time: "12:00:00",
-                saturday_opening_time: "08:00:00",
-                saturday_closing_time: "12:00:00",
-                sunday_opening_time: "08:00:00",
-                sunday_closing_time: "12:00:00",
-                status: 1
-            }
-        }
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro creado"
-            }
-        } 
-    */
-    try {
-        const { name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status } = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                res.json(jsonResult);
-            } else {
-                var queryString = `
-                    INSERT INTO shifts (name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-                var queryValues = [name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status];
-
-                mysqlConn.query(queryString, queryValues, function (error, results, fields) {
-                    if (error) {
-                        console.error('Error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-                    } else {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro creado"
-                        }
-                        res.json(jsonResult);
-                    }
-                    // Terminar la conexión después de manejar los resultados
-                    mysqlConn.end();
-                });
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
-    }
-});
 
 
 //Management People - Workers

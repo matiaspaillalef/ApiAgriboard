@@ -1834,19 +1834,6 @@
                 "status": {
                   "type": "number",
                   "example": 1
-                },
-                "workers": {
-                  "type": "array",
-                  "example": [
-                    1,
-                    2,
-                    3,
-                    4,
-                    6
-                  ],
-                  "items": {
-                    "type": "number"
-                  }
                 }
               }
             }
@@ -1929,13 +1916,20 @@
         ]
       }
     },
-    "/api/v1/management-people/shifts/getShifts": {
+    "/api/v1/management-people/shifts/getShifts/{companyID}": {
       "get": {
         "tags": [
           "Management People - Shifts"
         ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2021,6 +2015,121 @@
                       }
                     }
                   }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/management-people/shifts/createShift": {
+      "post": {
+        "tags": [
+          "Management People - Shifts"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Crear Turno",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Mañana"
+                },
+                "monday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "monday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "tuesday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "tuesday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "wednesday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "wednesday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "thursday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "thursday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "friday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "friday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "saturday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "saturday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "sunday_opening_time": {
+                  "type": "string",
+                  "example": "08:00:00"
+                },
+                "sunday_closing_time": {
+                  "type": "string",
+                  "example": "12:00:00"
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "idCompany": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado"
                 }
               },
               "xml": {
@@ -2185,117 +2294,6 @@
                 "mensaje": {
                   "type": "string",
                   "example": "Registro eliminado"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/management-people/shifts/createShift": {
-      "post": {
-        "tags": [
-          "Management People - Shifts"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "description": "Crear Turno",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "example": "Mañana"
-                },
-                "monday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "monday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "tuesday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "tuesday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "wednesday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "wednesday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "thursday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "thursday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "friday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "friday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "saturday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "saturday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "sunday_opening_time": {
-                  "type": "string",
-                  "example": "08:00:00"
-                },
-                "sunday_closing_time": {
-                  "type": "string",
-                  "example": "12:00:00"
-                },
-                "status": {
-                  "type": "number",
-                  "example": 1
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "mensaje": {
-                  "type": "string",
-                  "example": "Registro creado"
                 }
               },
               "xml": {
@@ -2654,6 +2652,232 @@
                 "mensaje": {
                   "type": "string",
                   "example": "Registro creado"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getGround/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Grounds"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "grounds": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Campo 1"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "XVI"
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Santiago"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "Av. Providencia 123"
+                      },
+                      "latitude": {
+                        "type": "number",
+                        "example": -33.433
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "example": -70.633
+                      },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateGround": {
+      "post": {
+        "tags": [
+          "Production - Grounds"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del campo",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Ground"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Campo actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteGround": {
+      "post": {
+        "tags": [
+          "Production - Grounds"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del campo",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Campo eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createGround": {
+      "post": {
+        "tags": [
+          "Production - Grounds"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del campo",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Ground"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Campo creado correctamente."
                 }
               },
               "xml": {

@@ -14,6 +14,8 @@ drop table if exists contractors;
 drop table if exists positions;
 drop table if exists groups;
 drop table if exists squads;
+drop table if exists shifts;
+
 
 
 
@@ -377,7 +379,54 @@ CREATE TABLE `squads` (
   KEY `squads_companies_FK` (`id_company`),
   CONSTRAINT `squads_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`),
   CONSTRAINT `squads_groups_FK` FOREIGN KEY (`id_group`) REFERENCES `groups` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.squads
+(name, id_group, status, id_company)
+VALUES('Cuadrilla Nocturna', 1, 1, 1);
+INSERT INTO agrisoft.squads
+(name, id_group, status, id_company)
+VALUES('Cuadrilla Tardes', 2, 0, 1);
+INSERT INTO agrisoft.squads
+(name, id_group, status, id_company)
+VALUES('Cuadrilla Mañana', 3, 1, 1);
+
+
+-- CREATE TABLA SHIFTS --
+
+CREATE TABLE `shifts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `monday_opening_time` time DEFAULT NULL,
+  `monday_closing_time` time DEFAULT NULL,
+  `tuesday_opening_time` time DEFAULT NULL,
+  `tuesday_closing_time` time DEFAULT NULL,
+  `wednesday_opening_time` time DEFAULT NULL,
+  `wednesday_closing_time` time DEFAULT NULL,
+  `thursday_opening_time` time DEFAULT NULL,
+  `thursday_closing_time` time DEFAULT NULL,
+  `friday_opening_time` time DEFAULT NULL,
+  `friday_closing_time` time DEFAULT NULL,
+  `saturday_opening_time` time DEFAULT NULL,
+  `saturday_closing_time` time DEFAULT NULL,
+  `sunday_opening_time` time DEFAULT NULL,
+  `sunday_closing_time` time DEFAULT NULL,
+  `id_company` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shifts_companies_FK` (`id_company`),
+  CONSTRAINT `shifts_companies_FK` FOREIGN KEY (`id_company`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.shifts
+(status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
+VALUES(1, 'Turno Mañana', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', 1);
+INSERT INTO agrisoft.shifts
+(status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
+VALUES(1, 'Turno Tarde', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', 1);
+INSERT INTO agrisoft.shifts
+(status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
+VALUES(0, 'Turno Noche', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '01:01:00', 1);
 
 
 -- agrisoft.ground definition
