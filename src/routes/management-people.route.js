@@ -391,7 +391,6 @@ router.post('/management-people/positions/deletePosition', validateToken, (req, 
 });
 
 
-
 //Management People - Contractors
 router.get('/management-people/contractors/getContractors/:companyID', validateToken, (req, res) => {
     /*  
@@ -818,7 +817,6 @@ router.post('/management-people/contractors/deleteContractor', validateToken, (r
 });
 
 
-
 //Management People - Groups
 
 //Alert , la palabra groups, est una palabra reservada de MYSQL, por lo que se debe usar comillas invertidas para que no de error
@@ -867,7 +865,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
 
             } else {
 
-                var queryString = "SELECT * FROM groups where id_company = " + companyID;
+                var queryString = "SELECT * FROM `groups` g where id_company = " + companyID;
                 console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -880,6 +878,8 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
                             "mensaje": error.sqlMessage
                         }
                         res.json(jsonResult);
+
+                        console.log(jsonResult);
 
                     } else {
 
@@ -1479,7 +1479,6 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
     }
 });
 
-
 router.post('/management-people/squads/deleteSquad', validateToken, (req, res) => {
 
     /*
@@ -1551,7 +1550,6 @@ router.post('/management-people/squads/deleteSquad', validateToken, (req, res) =
 }
 
 );
-
 
 
 
@@ -2040,9 +2038,34 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 });
 
 
-
-
 //Management People - Workers
+router.get('/management-people/workers/getWorkers/:companyID', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Management People - Workers']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        } 
+        
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "workers": [
+                    {
+                        "id": 1,
+                        "rut": "12345678-9",
+                        "name": "Juan",
+                        "lastname": "Perez",
+                        "lastname2": "Perez",
+                        "born_date": "1990-01-01",
+
+
 router.get('/management-people/workers/getWorkers', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Workers']
@@ -2094,6 +2117,9 @@ router.get('/management-people/workers/getWorkers', validateToken, (req, res) =>
         }
     */
     try {
+
+        let { companyID } = req.params;
+
         var workers = [];
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -2106,7 +2132,7 @@ router.get('/management-people/workers/getWorkers', validateToken, (req, res) =>
                 });
             }
 
-            const queryString = "SELECT id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status FROM workers";
+            const queryString = "SELECT id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status FROM workers WHERE company_id = " + companyID;
             console.log(queryString);
 
             mysqlConn.query(queryString, (error, results) => {
@@ -2231,7 +2257,7 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
                     status = ?
                 WHERE id = ?`;
 
-            const queryValues = [rut, name, lastname, lastname, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, id];
+            const queryValues = [rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, id];
             console.log(queryString);
 
             mysqlConn.query(queryString, queryValues, (error, results) => {

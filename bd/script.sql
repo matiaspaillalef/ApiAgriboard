@@ -445,7 +445,7 @@ CREATE TABLE `ground` (
   PRIMARY KEY (`id`),
   KEY `ground_companies_FK` (`company_id`),
   CONSTRAINT `ground_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 
@@ -474,3 +474,137 @@ VALUES
 ('El Arrayán', 'XI', 'Iquique', 'Camino El Arrayán', NULL, NULL, 'Norte', 2, '1'),
 ('Berries Diguillin', 'XVI', 'Ránqui', 'Av 1 #4444', NULL, NULL, 'Norte', 1, '1'),
 ('Las Palmas', 'V', 'Valdivia', 'Calle Las Palmas #543', NULL, NULL, 'Sur', 1, '1');
+
+
+-- agrisoft.sector definition
+
+CREATE TABLE `sector` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ground` int NOT NULL,
+  `company_id` int NOT NULL,
+  `varieties` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sector_ground_FK` (`ground`),
+  KEY `sector_companies_FK` (`company_id`),
+  CONSTRAINT `sector_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  CONSTRAINT `sector_ground_FK` FOREIGN KEY (`ground`) REFERENCES `ground` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO sector (id, name, status, ground, company_id, varieties) 
+VALUES
+('Dukes', '1', 1, 1, NULL),
+('Sector B', '1', 1, 1, NULL),
+('Sector C', '0', 25, 2, NULL),
+('Sector D', '1', 1, 1, NULL),
+('Sector E', '0', 1, 1, NULL),
+('Sector F', '1', 1, 1, NULL),
+('Sector G', '1', 1, 1, NULL),
+('Sector H', '0', 1, 1, NULL),
+('Sector I', '1', 1, 1, NULL),
+('Sector J', '1', 17, 3, NULL),
+('Sector K', '0', 1, 1, NULL),
+('Sector L', '1', 1, 1, NULL),
+('Sector M', '0', 11, 4, NULL),
+('Sector N', '1', 32, 1, NULL),
+('Sector O', '1', 22, 5, NULL),
+('Sector P', '0', 32, 1, NULL),
+('Sector Q', '1', 32, 1, NULL),
+('Sector R', '0', 32, 1, NULL);
+
+
+-- agrisoft.varieties definition
+
+CREATE TABLE `varieties` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `company_id` int NOT NULL,
+  `status` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `varieties_companies_FK` (`company_id`),
+  CONSTRAINT `varieties_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO varieties (name, company_id, status) 
+VALUES
+('Duke', 1, 1),
+('Patriot', 2, 1),
+('Legacy', 3, 1),
+('Bluecrop', 4, 0),
+('Bluejay', 5, 1),
+('Toro', 1, 0),
+('Elliott', 2, 1),
+('Aurora', 3, 0),
+('Jersey', 4, 1);
+('North Blue', 5, 0),
+('North Country', 1, 1),
+('Top Hat', 2, 1),
+('Bluegold', 3, 0),
+('Northland', 4, 1),
+('Patriot', 5, 0),
+('Duke', 1, 1),
+('Legacy', 2, 1),
+('Bluecrop', 3, 0),
+('Bluejay', 4, 1),
+('Toro', 5, 0),
+('Elliott', 1, 1),
+('Aurora', 2, 1),
+('Jersey', 3, 0),
+('North Blue', 4, 1),
+('North Country', 5, 0),
+('Top Hat', 1, 1),
+('Bluegold', 2, 0);
+
+CREATE TABLE `workers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rut` varchar(12) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `lastname` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `lastname2` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `born_date` date DEFAULT NULL,
+  `gender` enum('Masculino','Femenino','Otro') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `state_civil` enum('Soltero','Casado','Divorciado','Viudo') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `state` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `city` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone_company` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `date_admission` date DEFAULT NULL,
+  `status` tinyint(1) DEFAULT '1',
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `workers_companies_FK` (`company_id`),
+  CONSTRAINT `workers_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, company_id) 
+VALUES
+INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, company_id) 
+VALUES
+('21.123.456-7', 'Sofia', 'Gonzalez', 'Torres', '1990-09-12', 'Femenino', 'Soltero', 'III', 'La Serena', 'Avenida del Mar 123', '912345678', '912345678', '2021-05-15', 1, 2),
+('22.234.567-8', 'Lucas', 'Hernandez', 'Guerra', '1983-04-25', 'Masculino', 'Casado', 'II', 'Valdivia', 'Calle Colón 234', '923456789', '923456789', '2020-03-22', 1, 2),
+('23.345.678-9', 'Camila', 'Morales', 'Vega', '1995-07-18', 'Femenino', 'Soltero', 'XIV', 'Antofagasta', 'Calle Belgrano 345', '934567890', '934567890', '2022-11-03', 0, 3),
+('24.456.789-0', 'Javier', 'Ruiz', 'Salazar', '1978-12-09', 'Masculino', 'Viudo', 'VI', 'Punta Arenas', 'Avenida España 456', '945678901', '945678901', '2019-07-16', 1, 3),
+('25.567.890-1', 'Valentina', 'Fuentes', 'Bravo', '1991-01-14', 'Femenino', 'Divorciado', 'IX', 'Temuco', 'Calle O’Higgins 567', '956789012', '956789012', '2020-08-25', 1, 3),
+('26.678.901-2', 'Alejandro', 'Alvarez', 'Martinez', '1986-03-29', 'Masculino', 'Casado', 'IV', 'Arica', 'Avenida 18 de Septiembre 678', '967890123', '967890123', '2018-12-10', 0, 4),
+('27.789.012-3', 'Isabella', 'Cordero', 'Soto', '1993-10-05', 'Femenino', 'Soltero', 'X', 'Coquimbo', 'Calle Los Paltos 789', '978901234', '978901234', '2021-02-18', 1, 4),
+('28.890.123-4', 'Fernando', 'Navarro', 'Fuentes', '1981-06-22', 'Masculino', 'Casado', 'VII', 'Rancagua', 'Avenida Central 890', '989012345', '989012345', '2017-09-09', 1, 4),
+('29.901.234-5', 'Gabriela', 'Diaz', 'Muñoz', '1990-11-03', 'Femenino', 'Viudo', 'VI', 'Los Andes', 'Calle Independencia 901', '990123456', '990123456', '2022-03-12', 0, 5),
+('30.012.345-6', 'Ricardo', 'Bravo', 'Torres', '1985-04-30', 'Masculino', 'Soltero', 'XIII', 'Santiago', 'Avenida Los Libertadores 012', '901234567', '901234567', '2020-05-25', 1, 5),
+('31.123.456-7', 'Margarita', 'Vega', 'Cordero', '1992-07-08', 'Femenino', 'Casado', 'V', 'Viña del Mar', 'Calle Las Heras 123', '912345679', '912345679', '2019-01-18', 1, 1),
+('32.234.567-8', 'Carlos', 'Castro', 'Molina', '1977-02-14', 'Masculino', 'Divorciado', 'VIII', 'Temuco', 'Calle Alemania 234', '923456780', '923456780', '2020-06-14', 1, 1),
+('33.345.678-9', 'Patricia', 'Ramirez', 'Gonzalez', '1989-10-29', 'Femenino', 'Soltero', 'II', 'Puerto Montt', 'Avenida San Francisco 345', '934567891', '934567891', '2021-03-11', 0, 2),
+('34.456.789-0', 'Alejandro', 'Pérez', 'Mora', '1994-05-20', 'Masculino', 'Casado', 'VII', 'Talca', 'Calle 6 Oriente 456', '945678902', '945678902', '2022-07-24', 0, 2),
+('35.567.890-1', 'Nicole', 'Silva', 'Herrera', '1988-12-12', 'Femenino', 'Viudo', 'IX', 'Los Ángeles', 'Avenida 4 Norte 567', '956789013', '956789013', '2020-09-16', 1, 3),
+('36.678.901-2', 'Eduardo', 'Moreno', 'Jimenez', '1984-03-05', 'Masculino', 'Casado', 'XII', 'La Serena', 'Calle Las Torres 678', '967890124', '967890124', '2021-10-30', 1, 3),
+('37.789.012-3', 'Florencia', 'Martínez', 'Paredes', '1991-11-25', 'Femenino', 'Divorciado', 'IV', 'Antofagasta', 'Calle Rancagua 789', '978901235', '978901235', '2022-06-22', 1, 3),
+('38.890.123-4', 'Raúl', 'Muñoz', 'Olivares', '1980-07-15', 'Masculino', 'Casado', 'VI', 'Rancagua', 'Avenida O’Higgins 890', '989012346', '989012346', '2021-04-08', 0, 4),
+('39.901.234-5', 'Martina', 'Soto', 'Gómez', '1995-01-19', 'Femenino', 'Soltero', 'XIII', 'Santiago', 'Calle Los Bosques 901', '990123457', '990123457', '2023-02-14', 1, 4),
+('40.012.345-6', 'Héctor', 'Ortega', 'Pérez', '1983-09-21', 'Masculino', 'Viudo', 'VIII', 'La Serena', 'Calle Talca 012', '901234568', '901234568', '2020-11-16', 0, 5),
+('41.123.456-7', 'Juana', 'Cifuentes', 'Bravo', '1992-02-10', 'Femenino', 'Casado', 'VII', 'Talca', 'Calle Libertador 123', '912345680', '912345680', '2022-01-29', 1, 5),
+('42.234.567-8', 'Felipe', 'Vásquez', 'Muñoz', '1987-08-07', 'Masculino', 'Divorciado', 'X', 'Coquimbo', 'Avenida del Mar 234', '923456781', '923456781', '2021-12-13', 1, 5),
+('43.345.678-9', 'Carmen', 'Pérez', 'Vergara', '1980-10-04', 'Femenino', 'Soltero', 'IV', 'Puerto Montt', 'Calle Bernardo O’Higgins 345', '934567892', '934567892', '2022-07-07', 0, 1),
+('44.456.789-0', 'Antonio', 'Rivas', 'Lozano', '1994-06-20', 'Masculino', 'Casado', 'XII', 'Iquique', 'Avenida Prat 456', '945678903', '945678903', '2023-05-30', 1, 1),
+('45.567.890-1', 'Alejandra', 'Valenzuela', 'Cordero', '1990-04-18', 'Femenino', 'Viudo', 'VII', 'Rancagua', 'Calle 1 Norte 567', '956789014', '956789014','2023-05-30', 1, 1);
