@@ -1016,7 +1016,6 @@ router.post('/configuracion/production/updateVariety', validateToken, (req, res)
 
 });
 
-
 router.post('/configuracion/production/deleteVariety', validateToken, (req, res) => {
 
     /*
@@ -1208,6 +1207,289 @@ router.post('/configuracion/production/createVariety', validateToken, (req, res)
         res.json({ error: e })
     }
 
+});
+
+
+//PRODUCCIÓN - SPECIES
+
+router.get('/configuracion/production/getSpecies/:companyID', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Production - Species']
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "species": [
+                    {
+                    "id": 1,
+                    "name": "Especie 1",
+                    "company_id": 1,
+                    "status": 1,
+                    "varieties": {}
+                    }
+                ]    
+            }
+        } 
+    */
+    try {
+        let { companyID } = req.params;
+
+        var species = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "SELECT * FROM species s WHERE company_id = ?";
+            console.log(queryString);
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.length > 0) {
+                    console.log('result', results);
+
+                    results.forEach(element => {
+                        species.push({
+                            "id": element.id,
+                            "name": element.name,
+                            "varieties": element.varieties ? JSON.parse(element.varieties) : null ,
+                            "status": element.status,
+                        });
+                    });
+
+                    //console.log('species', species);
+
+                    return res.json({
+                        "code": "OK",
+                        "species": species
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+
+router.post('/configuracion/production/updateSpecies', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Species']
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la especie',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Species" }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Especie actualizada correctamente."
+            }
+        } 
+    */
+    try {
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "UPDATE species SET name = ?, varieties = ?, company_id = ?, status = ? WHERE id = ?";
+            console.log(queryString);
+            mysqlConn.query(queryString, [obj.name, JSON.stringify(obj.varieties), obj.company_id, obj.status, obj.id], function (error) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+            });
+
+            mysqlConn.end();
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+router.post('/configuracion/production/deleteSpecies', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Species']
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID de la especie',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        } 
+    */
+    try {
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "DELETE FROM species WHERE id = ?";
+            mysqlConn.query(queryString, [id], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.affectedRows != 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+}
+    
+    );
+
+router.post('/configuracion/production/createSpecies', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Species']
+        #swagger.security = [{
+                "apiKeyAuth": []
+          }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la especie',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Species" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Especie creada correctamente."
+            }
+        }
+    */
+    try {
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "INSERT INTO species (name, varieties, company_id, status) VALUES (?, ?, ?, ?)";
+            console.log(queryString);
+            mysqlConn.query(queryString, [obj.name, JSON.stringify(obj.varieties), obj.company_id, obj.status], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId != 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
 });
 
 export default router
