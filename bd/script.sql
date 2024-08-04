@@ -182,50 +182,41 @@ CREATE TABLE `children_menu` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(2, 'Empresa', '/dashboard/enviroment/company');
+(id, id_menu, name, url)
+VALUES(1, 2, 'Empresas', '/dashboard/enviroment/company');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(2, 'Creación de roles', '/dashboard/enviroment/role-creation');
+(id, id_menu, name, url)
+VALUES(2, 2, 'Roles', '/dashboard/enviroment/role-creation');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(2, 'Creación de usuarios', '/dashboard/enviroment/user-creation');
+(id, id_menu, name, url)
+VALUES(3, 2, 'Usuarios', '/dashboard/enviroment/user-creation');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Campo', '/dashboard/production/ground');
+(id, id_menu, name, url)
+VALUES(4, 3, 'Parametrización de campo', '#');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Sectors / Cuarteles', '/dashboard/production/sectors-barracks');
+(id, id_menu, name, url)
+VALUES(5, 3, 'Parametrización de producción', '#');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Atributos de sector', '/dashboard/production/sector attributes');
+(id, id_menu, name, url)
+VALUES(6, 3, 'Operaciones', '#');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Especies', '/dashboard/production/species');
+(id, id_menu, name, url)
+VALUES(7, 5, 'Informe de producción', '/dashboard/reports/production-report');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Variedades', '/dashboard/production/varieties');
+(id, id_menu, name, url)
+VALUES(8, 5, 'Informe de asistencia', '/dashboard/reports/attendance-report');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Ciclos', '/dashboard/production/cycles');
+(id, id_menu, name, url)
+VALUES(9, 5, 'Resumen producción diaria', '/dashboard/reports/daily-production-summary');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Lotes', '/dashboard/production/lots');
+(id, id_menu, name, url)
+VALUES(10, 5, 'Producción trabajadores mensual', '/dashboard/reports/monthly-workers-production');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Plantaciones', '/dashboard/production/plantations');
+(id, id_menu, name, url)
+VALUES(14, 4, 'Parametrización de personal', '#');
 INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Cosechas', '/dashboard/production/harvests');
-INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(3, 'Inventario', '/dashboard/production/inventory');
-INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(4, 'Parametrización de personal', '#');
-INSERT INTO agrisoft.children_menu
-(id_menu, name, url)
-VALUES(4, 'Carga de asistencia', '/dashboard/people-management/attendance');
+(id, id_menu, name, url)
+VALUES(15, 4, 'Carga de asistencia', '/dashboard/people-management/attendance');
 
 
 -- CREATE TABLA GRAND_SON_MENU --
@@ -242,26 +233,77 @@ CREATE TABLE `grand_son_menu` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Contratistas', '/dashboard/people-management/contractors');
+(id, id_children_menu, name, url)
+VALUES(1, 14, 'Contratistas', '/dashboard/people-management/contractors');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Cargos', '/dashboard/people-management/positions');
+(id, id_children_menu, name, url)
+VALUES(2, 14, 'Cargos', '/dashboard/people-management/positions');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Grupos', '/dashboard/people-management/groups');
+(id, id_children_menu, name, url)
+VALUES(3, 14, 'Grupos', '/dashboard/people-management/groups');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Cuadrillas', '/dashboard/people-management/squads');
+(id, id_children_menu, name, url)
+VALUES(4, 14, 'Cuadrillas', '/dashboard/people-management/squads');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Turnos', '/dashboard/people-management/shifts');
+(id, id_children_menu, name, url)
+VALUES(5, 14, 'Turnos', '/dashboard/people-management/shifts');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Trabajadores', '/dashboard/people-management/workers');
+(id, id_children_menu, name, url)
+VALUES(6, 14, 'Trabajadores', '/dashboard/people-management/workers');
 INSERT INTO agrisoft.grand_son_menu
-(id_children_menu, name, url)
-VALUES(14, 'Mensajes', '/dashboard/people-management/messages');
+(id, id_children_menu, name, url)
+VALUES(7, 14, 'Mensajes', '/dashboard/people-management/messages');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(8, 4, 'Campo', '/dashboard/production/parameterization-ground/ground');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(9, 4, 'Sectors / Cuarteles', '/dashboard/production/parameterization-ground/sectors-barracks');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(10, 4, 'Atributos sector', '/dashboard/production/parameterization-ground/sector-attributes');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(11, 4, 'Especies', '/dashboard/production/parameterization-ground/species');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(12, 4, 'Variedades', '/dashboard/production/parameterization-ground/varieties');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(13, 5, 'Formato cosecha', '/dashboard/production/parameterization-production/harvest-format');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(14, 5, 'Calidad', '/dashboard/production/parameterization-production/quality');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(15, 5, 'Tipo de recolección', '/dashboard/production/parameterization-production/type-collection');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(16, 5, 'Temporada', '/dashboard/production/parameterization-production/season');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(17, 5, 'Tratos', '/dashboard/production/parameterization-production/deals');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(18, 5, 'Balanza', '/dashboard/production/parameterization-production/scale');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(19, 5, 'Exportadoras', '/dashboard/production/parameterization-production/exporters');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(20, 6, 'Regularización de producción', '/dashboard/production/operations/regularization-production');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(21, 6, 'Carga producción manual', '/dashboard/production/operations/manual-upload');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(22, 6, 'Cierre de temporada', '/dashboard/production/operations/season-closing');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(23, 6, 'Registro balanza', '/dashboard/production/operations/scale-register');
+INSERT INTO agrisoft.grand_son_menu
+(id, id_children_menu, name, url)
+VALUES(24, 6, 'Guía de Despacho', '/dashboard/production/operations/dispatch-guide');
 
 
 -- CREATE TABLA MENU_ROL --
