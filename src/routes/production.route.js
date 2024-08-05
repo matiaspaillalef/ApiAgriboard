@@ -1492,4 +1492,308 @@ router.post('/configuracion/production/createSpecies', validateToken, (req, res)
     }
 });
 
+
+router.get('/configuracion/production/getSeasons/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Seasons']
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "seasons": [
+                    {
+                    "id": 1,
+                    "name": "Temporada 1",
+                    "period": "Anual",
+                    "date_from": "2021-01-01 00:00:00",
+                    "date_until": "2021-12-31 00:00:00",
+                    "shifts": [1, 2, 3],
+                    "company_id": 1,
+                    "status": 1
+                    }
+                ]    
+            }
+        } 
+    */
+
+        try {
+            let { companyID } = req.params;
+
+            console.log(companyID);
+    
+            var seasons = [];
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                var queryString = "SELECT * FROM season s WHERE company_id = ?";
+                console.log('query',queryString);
+    
+                mysqlConn.query(queryString, [companyID], function (error, results) {
+                    if (error) {
+                        console.error('error ejecutando query: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+    
+                    if (results && results.length > 0) {
+                        console.log('result', results);
+    
+                        results.forEach(element => {
+                            seasons.push({
+                                "id": element.id,
+                                "name": element.name,
+                                "period": element.period,
+                                "date_from": element.date_from,
+                                "date_until": element.date_until,
+                                "shifts": element.shifts ? JSON.parse(element.shifts) : null,
+                                "company_id": element.company_id,
+                                "status": element.status
+                            });
+                        });
+    
+                        console.log('seasons', seasons);
+    
+                        return res.json({
+                            "code": "OK",
+                            "seasons": seasons
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se encuentran registros."
+                        });
+                    }
+                });
+    
+                mysqlConn.end();
+            });
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+
+});
+
+router.post('/configuracion/production/updateSeason', validateToken, (req, res) => {
+    
+        /*
+            #swagger.tags = ['Production - Seasons']
+            #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+            #swagger.parameters['obj'] = {
+                in: 'body',
+                description: 'Datos de la temporada',
+                required: true,
+                type: "object",
+                schema: { $ref: "#/definitions/Season" }
+            }  
+            #swagger.responses[200] = {
+                schema: {
+                    "code": "OK",
+                    "mensaje": "Temporada actualizada correctamente."
+                }
+            } 
+        */
+    
+        try {
+            let obj = req.body;
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                var queryString = "UPDATE season SET name = ?, period = ?, date_from = ?, date_until = ?, shifts = ?, company_id = ?, status = ? WHERE id = ?";
+                console.log(queryString);
+                mysqlConn.query(queryString, [obj.name, obj.period, obj.date_from, obj.date_until, JSON.stringify(obj.shifts), obj.company_id, obj.status, obj.id], function (error) {
+                    if (error) {
+                        console.error('error ejecutando query: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+    
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro actualizado correctamente."
+                    });
+                });
+    
+                mysqlConn.end();
+            });
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
+
+router.post('/configuracion/production/deleteSeason', validateToken, (req, res) => {
+    
+        /*
+            #swagger.tags = ['Production - Seasons']
+            #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+            #swagger.parameters['id'] = {
+                in: 'body',
+                description: 'ID de la temporada',
+                required: true,
+                type: "integer",
+            }  
+            #swagger.responses[200] = {
+                schema: {
+                    "code": "OK",
+                    "mensaje": "Registro eliminado correctamente."
+                }
+            } 
+        */
+    
+        try {
+            let { id } = req.body;
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                var queryString = "DELETE FROM season WHERE id = ?";
+                mysqlConn.query(queryString, [id], function (error, results) {
+                    if (error) {
+                        console.error('error ejecutando query: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+    
+                    if (results && results.affectedRows != 0) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro eliminado correctamente."
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo eliminar el registro."
+                        });
+                    }
+                });
+    
+                mysqlConn.end();
+            });
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
+
+    router.post('/configuracion/production/createSeason', validateToken, (req, res) => {
+        /*
+            #swagger.tags = ['Production - Seasons']
+            #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+            #swagger.parameters['obj'] = {
+                in: 'body',
+                description: 'Datos de la temporada',
+                required: true,
+                type: "object",
+                schema: { $ref: "#/definitions/Season" }
+            }
+            #swagger.responses[200] = {
+                schema: {
+                    "code": "OK",
+                    "mensaje": "Temporada creada correctamente."
+                }
+            }
+        */
+        
+        try {
+            let obj = req.body;
+    
+            // Convertir las fechas ISO 8601 a formato DATETIME de MySQL
+            let date_from = new Date(obj.date_from).toISOString().slice(0, 19).replace('T', ' ');
+            let date_until = new Date(obj.date_until).toISOString().slice(0, 19).replace('T', ' ');
+    
+            // Preparar el valor de shifts como una cadena JSON
+            let shifts = JSON.stringify(obj.shifts);
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('Error al conectar: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                var queryString = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+                mysqlConn.query(queryString, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (error, results) {
+                    if (error) {
+                        console.error('Error al ejecutar la consulta: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+    
+                    if (results && results.insertId) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
+                });
+    
+                mysqlConn.end();
+            });
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
+    
+    
+
 export default router
