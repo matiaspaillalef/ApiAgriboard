@@ -650,3 +650,26 @@ VALUES
 ('43.345.678-9', 'Carmen', 'Pérez', 'Vergara', '1980-10-04', 'Femenino', 'Soltero', 'IV', 'Puerto Montt', 'Calle Bernardo O’Higgins 345', '934567892', '934567892', '2022-07-07', 0, 1),
 ('44.456.789-0', 'Antonio', 'Rivas', 'Lozano', '1994-06-20', 'Masculino', 'Casado', 'XII', 'Iquique', 'Avenida Prat 456', '945678903', '945678903', '2023-05-30', 1, 1),
 ('45.567.890-1', 'Alejandra', 'Valenzuela', 'Cordero', '1990-04-18', 'Femenino', 'Viudo', 'VII', 'Rancagua', 'Calle 1 Norte 567', '956789014', '956789014','2023-05-30', 1, 1);
+
+
+-- agrisoft.season definition
+
+CREATE TABLE `season` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `period` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `date_from` datetime NOT NULL,
+  `date_until` datetime NOT NULL,
+  `shifts` json DEFAULT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.season
+(name, period, date_from, date_until, shifts, status, company_id)
+VALUES
+('2021-2022', 'Bimestral', '2021-11-24 00:00:00', '2022-03-31 00:00:00', '[1, 2]', 2, 1),
+('2022-2023', 'Bimestral', '2022-11-24 00:00:00', '2024-08-04 00:00:00', '[1, 2]', 1, 1),
+('2023-2024', 'Anual', '2023-11-24 00:00:00', '2024-02-28 00:00:00', '[1]', 0, 1);
