@@ -2715,4 +2715,724 @@ router.post('/configuracion/production/createScale', validateToken, (req, res) =
 
 });
 
+//PRODUCCIÓN - SCALE REGISTER
+
+router.get('/configuracion/production/getScaleRegister/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Scale Register']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "registers": [
+                    {
+                    "id": 1,
+                    "scale": "1",
+                    "quality": "1",
+                    "date": "2021-01-01 00:00:00",
+                    "boxes": 100,
+                    "kg_boxes": 20,
+                    "specie": "1",
+                    "variety": "1",
+                    "season": 1,
+                    "company_id": 1,
+                    }
+                ]    
+            }
+        } 
+    */
+
+    try {
+
+        let { companyID } = req.params;
+
+        console.log(companyID);
+
+        var registers = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM scale_register sr WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        registers.push({
+                            "id": element.id,
+                            "scale": element.scale,
+                            "quality": element.quality,
+                            "date": element.date,
+                            "boxes": element.boxes,
+                            "kg_boxes": element.kg_boxes,
+                            "specie": element.specie,
+                            "variety": element.variety,
+                            "season": element.season,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "registers": registers
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+}
+);
+
+router.post('/configuracion/production/updateScaleRegister', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Scale Register']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del registro de balanza',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/ScaleRegister" }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro de balanza actualizado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let obj = req.body;
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE scale_register SET scale = ?, quality = ?, date = ?, boxes = ?, kg_boxes = ?, specie = ?, variety = ?, season = ?, company_id = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.scale, obj.quality, date, obj.boxes, obj.kg_boxes, obj.specie, obj.variety, obj.season, obj.company_id, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+}
+);
+
+router.post('/configuracion/production/deleteScaleRegister', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Scale Register']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID del registro de balanza',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "DELETE FROM scale_register WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.affectedRows != 0) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+}
+);
+
+router.post('/configuracion/production/createScaleRegister', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Scale Register']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del registro de balanza',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/ScaleRegister" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro de balanza creado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+        console.log(obj);
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "INSERT INTO scale_register (scale, quality, date, boxes, kg_boxes, specie, variety, season, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            mysqlConn.query(queryString, [obj.scale, obj.quality, date, obj.boxes, obj.kg_boxes, obj.specie, obj.variety, obj.season, obj.company_id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.insertId) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+
+                }
+
+            }
+            );
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+//PRODUCCIÓN - HARVEST FORMAT
+
+router.get('/configuracion/production/getHarvestFormat/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Harvest Format']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "formats": [
+                    {
+                    "id": 1,
+                    "name": "Formato 1",
+                    "tara_base": 1,
+                    "specie": 1,
+                    "min_weight": 1,
+                    "max_weight": 1,
+                    "average_weight": 1,
+                    "quantity_trays": 1,
+                    "collection": 1,
+                    "status": 1,
+                    "company_id": 1
+                    }
+                ]    
+            }
+        } 
+    */
+
+    try {
+
+        let { companyID } = req.params;
+
+        console.log(companyID);
+
+        var formats = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM harvest_format hf WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        formats.push({
+                            "id": element.id,
+                            "name": element.name,
+                            "tara_base": element.tara_base,
+                            "specie": element.specie,
+                            "min_weight": element.min_weight,
+                            "max_weight": element.max_weight,
+                            "average_weight": element.average_weight,
+                            "quantity_trays": element.quantity_trays,
+                            "collection": element.collection,
+                            "status": element.status,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "formats": formats
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/updateHarvestFormat', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Harvest Format']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del formato de cosecha',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/HarvestFormat" }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Formato de cosecha actualizado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE harvest_format SET name = ?, tara_base = ?, specie = ?, min_weight = ?, max_weight = ?, average_weight = ?, quantity_trays = ?, collection = ?, status = ?, company_id = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.average_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+router.post('/configuracion/production/deleteHarvestFormat', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Harvest Format']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID del formato de cosecha',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "DELETE FROM harvest_format WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.affectedRows != 0) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/createHarvestFormat', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Harvest Format']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del formato de cosecha',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/HarvestFormat" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Formato de cosecha creado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "INSERT INTO harvest_format (name, tara_base, specie, min_weight, max_weight, average_weight, quantity_trays, collection, status, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.average_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.insertId) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
 export default router
