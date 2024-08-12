@@ -462,13 +462,10 @@ CREATE TABLE `shifts` (
 
 INSERT INTO agrisoft.shifts
 (status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
-VALUES(1, 'Turno Mañana', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', 1);
-INSERT INTO agrisoft.shifts
-(status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
-VALUES(1, 'Turno Tarde', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', 1);
-INSERT INTO agrisoft.shifts
-(status, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, id_company)
-VALUES(0, 'Turno Noche', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '01:01:00', 1);
+VALUES
+(1, 'Turno Mañana', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', '08:00:00', '12:00:00', 1),
+(1, 'Turno Tarde', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', '14:00:00', '18:00:00', 1),
+(0, 'Turno Noche', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '00:00:00', '20:00:00', '01:01:00', 1);
 
 
 -- agrisoft.ground definition
@@ -621,8 +618,7 @@ CREATE TABLE `workers` (
   CONSTRAINT `workers_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, company_id) 
-VALUES
+
 INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, company_id) 
 VALUES
 ('21.123.456-7', 'Sofia', 'Gonzalez', 'Torres', '1990-09-12', 'Femenino', 'Soltero', 'III', 'La Serena', 'Avenida del Mar 123', '912345678', '912345678', '2021-05-15', 1, 2),
