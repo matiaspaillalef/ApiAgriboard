@@ -3526,7 +3526,7 @@
       }
     },
     "/api/v1/configuracion/production/getSeasons/{companyID}": {
-      "post": {
+      "get": {
         "tags": [
           "Production - Seasons"
         ],
@@ -3595,6 +3595,1356 @@
                       }
                     }
                   }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateSeason": {
+      "post": {
+        "tags": [
+          "Production - Seasons"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la temporada",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Season"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Temporada actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteSeason": {
+      "post": {
+        "tags": [
+          "Production - Seasons"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la temporada",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createSeason": {
+      "post": {
+        "tags": [
+          "Production - Seasons"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la temporada",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Season"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Temporada creada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getCollectionType/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Collection Type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "collections": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Manual"
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateCollectionType": {
+      "post": {
+        "tags": [
+          "Production - Collection Type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del tipo de recolección",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CollectionType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Tipo de recolección actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteCollectionType": {
+      "post": {
+        "tags": [
+          "Production - Collection Type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del tipo de recolección",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createCollectionType": {
+      "post": {
+        "tags": [
+          "Production - Collection Type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del tipo de recolección",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CollectionType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Tipo de recolección creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getQuality/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Quality"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "qualities": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Calidad 1"
+                      },
+                      "abbreviation": {
+                        "type": "string",
+                        "example": "C1"
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateQuality": {
+      "post": {
+        "tags": [
+          "Production - Quality"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la calidad",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Quality"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Calidad actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteQuality": {
+      "post": {
+        "tags": [
+          "Production - Quality"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la calidad",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createQuality": {
+      "post": {
+        "tags": [
+          "Production - Quality"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la calidad",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Quality"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Calidad creada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getScale/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Scale"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "scales": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Balanza 1"
+                      },
+                      "location": {
+                        "type": "string",
+                        "example": "Ubicación 1"
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateScale": {
+      "post": {
+        "tags": [
+          "Production - Scale"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la balanza",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Scale"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Balanza actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteScale": {
+      "post": {
+        "tags": [
+          "Production - Scale"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la balanza",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createScale": {
+      "post": {
+        "tags": [
+          "Production - Scale"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la balanza",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Scale"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Balanza creada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getScaleRegister/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Scale Register"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "registers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "scale": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "quality": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg_boxes": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "specie": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "variety": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "season": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateScaleRegister": {
+      "post": {
+        "tags": [
+          "Production - Scale Register"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del registro de balanza",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScaleRegister"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro de balanza actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteScaleRegister": {
+      "post": {
+        "tags": [
+          "Production - Scale Register"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del registro de balanza",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createScaleRegister": {
+      "post": {
+        "tags": [
+          "Production - Scale Register"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del registro de balanza",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScaleRegister"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro de balanza creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getHarvestFormat/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Harvest Format"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "formats": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Formato 1"
+                      },
+                      "tara_base": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "min_weight": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "max_weight": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "average_weight": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "quantity_trays": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "collection": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateHarvestFormat": {
+      "post": {
+        "tags": [
+          "Production - Harvest Format"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del formato de cosecha",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarvestFormat"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Formato de cosecha actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteHarvestFormat": {
+      "post": {
+        "tags": [
+          "Production - Harvest Format"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del formato de cosecha",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createHarvestFormat": {
+      "post": {
+        "tags": [
+          "Production - Harvest Format"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del formato de cosecha",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarvestFormat"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Formato de cosecha creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getDeals/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Deals"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateDeal": {
+      "post": {
+        "tags": [
+          "Production - Deals"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del negocio",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Negocio actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1configuracion/production/deleteDeal": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/configuracion/production/createDeal": {
+      "post": {
+        "tags": [
+          "Production - Deals"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del negocio",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Negocio creado correctamente."
                 }
               },
               "xml": {

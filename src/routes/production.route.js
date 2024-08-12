@@ -3434,5 +3434,327 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
 
 });
 
+//PRODUCCIÓN - DEALS
+router.get('/configuracion/production/getDeals/:companyID', validateToken, (req, res) => {
+
+
+    /*
+        #swagger.tags = ['Production - Deals']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "deals": [
+                    {
+                    "id": 1,
+                    "name": "Negocio 1",
+                    "harvest_format": 1,
+                    "quality": 1,
+                    "price": 100,
+                    "status": 1
+                    "company_id": 1,
+                    }
+                ]    
+            }
+        } 
+    */
+
+    try {
+
+        let { companyID } = req.params;
+
+        console.log(companyID);
+
+        var deals = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM deals d WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        deals.push({
+                            "id": element.id,
+                            "name": element.name,
+                            "harvest_format": element.harvest_format,
+                            "quality": element.quality,
+                            "price": element.price,
+                            "status": element.status,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "deals": deals
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/updateDeal', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Deals']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del negocio',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Deal" }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Negocio actualizado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE deals SET name = ?, harvest_format = ?, quality = ?, price = ?, status = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.name, obj.harvest_format, obj.quality, obj.price, obj.status, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    }
+    catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/deleteDeal', validateToken, (req, res) => {
+    try {
+        let { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                "code": "ERROR",
+                "mensaje": "ID no proporcionado."
+            });
+        }
+
+        const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error al conectar a la base de datos:', err.message);
+                return res.status(500).json({
+                    "code": "ERROR",
+                    "mensaje": "Error al conectar con la base de datos."
+                });
+            }
+
+            const queryString = "DELETE FROM deals WHERE id = ?";
+            mysqlConn.query(queryString, [id], function (error, results) {
+                mysqlConn.end();  // Cierra la conexión después de ejecutar la consulta
+
+                if (error) {
+                    console.error('Error al ejecutar la consulta:', error.message);
+                    return res.status(500).json({
+                        "code": "ERROR",
+                        "mensaje": "Error al ejecutar la consulta."
+                    });
+                }
+
+                if (results.affectedRows > 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+                } else {
+                    return res.status(404).json({
+                        "code": "ERROR",
+                        "mensaje": "No se encontró el registro con el ID proporcionado."
+                    });
+                }
+            });
+        });
+
+    } catch (e) {
+        console.error('Error en el servidor:', e.message);
+        res.status(500).json({ error: "Error interno del servidor: " + e.message });
+    }
+});
+
+
+router.post('/configuracion/production/createDeal', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Deals']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del negocio',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Deal" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Negocio creado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "INSERT INTO deals (name, harvest_format, quality, price, status, company_id) VALUES (?, ?, ?, ?, ?, ?)";
+
+            mysqlConn.query(queryString, [obj.name, obj.harvest_format, obj.quality, obj.price, obj.status, obj.company_id], function
+
+
+                (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.insertId) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+
+                }
+
+            }
+            );
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
 
 export default router
