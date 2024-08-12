@@ -673,3 +673,173 @@ VALUES
 ('2021-2022', 'Bimestral', '2021-11-24 00:00:00', '2022-03-31 00:00:00', '[1, 2]', 2, 1),
 ('2022-2023', 'Bimestral', '2022-11-24 00:00:00', '2024-08-04 00:00:00', '[1, 2]', 1, 1),
 ('2023-2024', 'Anual', '2023-11-24 00:00:00', '2024-02-28 00:00:00', '[1]', 0, 1);
+
+
+
+-- agrisoft.quality definition
+
+CREATE TABLE `quality` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `abbreviation` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `quality_companies_FK` (`company_id`),
+  CONSTRAINT `quality_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.quality
+(name, abbreviation, status, company_id)
+VALUES
+('GRANEL AVELLANA', 'GRANEL', 1, 1),
+('EXPORTACIÓN-MAÑANA', 'EXP M.', 1, 1),
+('BULK-MAÑANA', 'BULK M.', 1, 2),
+('IQF - MAÑANA', 'IQF M.', 1, 2);
+('EXPORTACIÓN-TARDE', 'EXP T.', 1, 3),
+('BULK-TARDE', 'BULK', 1, 4),
+('IQF TARDE', 'IQF T.', 1, 5),
+('GERARDO CASANUEVA', 'CONT 1', 1, 1);
+
+
+-- agrisoft.`scale` definition
+
+CREATE TABLE `scale` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `location` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `scale_companies_FK` (`company_id`),
+  CONSTRAINT `scale_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.`scale`
+(name, location, status, company_id)
+VALUES
+('balanza', 'Chillan', 1, 1),
+('balanza 2', 'Concepción', 1, 1),
+('balanza', 'Talca', 1, 2),
+('balanza', 'Linares', 1, 3),
+('balanza 3', 'Concepción', 0, 1);
+
+
+
+-- agrisoft.scale_register definition
+
+CREATE TABLE `scale_register` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `scale` int NOT NULL,
+  `quality` int NOT NULL,
+  `date` timestamp NULL DEFAULT NULL,
+  `boxes` int DEFAULT NULL,
+  `kg_boxes` double DEFAULT NULL,
+  `specie` int NOT NULL,
+  `variety` int NOT NULL,
+  `season` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `scale_register_scale_FK` (`scale`),
+  KEY `scale_register_quality_FK` (`quality`),
+  KEY `scale_register_species_FK` (`specie`),
+  KEY `scale_register_varieties_FK` (`variety`),
+  KEY `scale_register_season_FK` (`season`),
+  CONSTRAINT `scale_register_quality_FK` FOREIGN KEY (`quality`) REFERENCES `quality` (`id`),
+  CONSTRAINT `scale_register_scale_FK` FOREIGN KEY (`scale`) REFERENCES `scale` (`id`),
+  CONSTRAINT `scale_register_season_FK` FOREIGN KEY (`season`) REFERENCES `season` (`id`),
+  CONSTRAINT `scale_register_species_FK` FOREIGN KEY (`specie`) REFERENCES `species` (`id`),
+  CONSTRAINT `scale_register_varieties_FK` FOREIGN KEY (`variety`) REFERENCES `varieties` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.scale_register
+(`scale`, quality, `date`, boxes, kg_boxes, specie, variety, season, company_id)
+VALUES
+(1, 1, '2024-08-06 10:00:00', 10, 13.3, 1, 1, 1, 1),
+(1, 1, '2024-08-06 00:00:00', 10, 13.3, 1, 11, 1, 1),
+(2, 8, '2024-08-08 00:00:00', 33, 25.5, 2, 16, 2, 1);
+
+
+-- agrisoft.type_collection definition
+
+CREATE TABLE `type_collection` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `type_collection_companies_FK` (`company_id`),
+  CONSTRAINT `type_collection_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.type_collection
+(name, status, company_id)
+VALUES
+('Manual', 1, 1),
+('Manual', 0, 1),
+('Granular', 1, 2),
+('Manual', 1, 2),
+('Manual', 0, 3),
+('Granular', 1, 4);
+
+
+
+-- agrisoft.harvest_format definition
+
+CREATE TABLE `harvest_format` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `tara_base` double(18,4) DEFAULT NULL,
+  `min_weight` double(18,4) DEFAULT NULL,
+  `max_weight` double(18,4) DEFAULT NULL,
+  `quantity_trays` double(18,4) DEFAULT NULL,
+  `average_weight` double(18,4) DEFAULT NULL,
+  `collection` int NOT NULL,
+  `specie` int NOT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `harvest_format_type_collection_FK` (`collection`),
+  KEY `harvest_format_companies_FK` (`company_id`),
+  KEY `harvest_format_species_FK` (`specie`),
+  CONSTRAINT `harvest_format_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  CONSTRAINT `harvest_format_species_FK` FOREIGN KEY (`specie`) REFERENCES `species` (`id`),
+  CONSTRAINT `harvest_format_type_collection_FK` FOREIGN KEY (`collection`) REFERENCES `type_collection` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.harvest_format
+(name, tara_base, min_weight, max_weight, quantity_trays, average_weight, collection, specie, status, company_id)
+VALUES
+('tarro 1', 0.5, 12.0, 30.0, 20.0, 30.0, 1, 1, 1, 1),
+('tarro 2', 0.5, 12.0, 30.0, 20.0, 30.0, 1, 2, 1, 1),
+('tarro 3', 0.5, 44.0, 60.0, 4.0, 20.0, 1, 2, 0, 1);
+
+
+-- agrisoft.deals definition
+
+CREATE TABLE `deals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `harvest_format` int NOT NULL,
+  `quality` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `price` int NOT NULL,
+  `status` int NOT NULL,
+  `company_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `deals_harvest_format_FK` (`harvest_format`),
+  KEY `deals_quality_FK` (`quality`),
+  KEY `deals_companies_FK` (`company_id`),
+  CONSTRAINT `deals_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  CONSTRAINT `deals_harvest_format_FK` FOREIGN KEY (`harvest_format`) REFERENCES `harvest_format` (`id`),
+  CONSTRAINT `deals_quality_FK` FOREIGN KEY (`quality`) REFERENCES `quality` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO agrisoft.deals
+(harvest_format, quality, name, price, status, company_id)
+VALUES
+(2, 1, 'Trato tomates 2', 10000000, 1, 1),
+(1, 1, 'Trato tomates', 10000000, 1, 1);
