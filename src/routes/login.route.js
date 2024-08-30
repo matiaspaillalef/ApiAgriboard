@@ -50,7 +50,7 @@ router.post('/login', (req, res) => {
                 queryString += " where mail='" + usuario + "'";
                 queryString += " and u.id_company = c.id";
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {

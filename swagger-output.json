@@ -1812,54 +1812,8 @@
           "Management People - Squads"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "number",
-                  "example": 1
-                },
-                "name": {
-                  "type": "string",
-                  "example": "cuadrilla 1"
-                },
-                "group": {
-                  "type": "number",
-                  "example": 1
-                },
-                "status": {
-                  "type": "number",
-                  "example": 1
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "mensaje": {
-                  "type": "string",
-                  "example": "Registro actualizado"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
+        "parameters": [],
+        "responses": {},
         "security": [
           {
             "apiKeyAuth": []
@@ -2320,24 +2274,9 @@
             "name": "companyID",
             "in": "path",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
-        "responses": {},
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/management-people/workers/getWorkers": {
-      "get": {
-        "tags": [
-          "Management People - Workers"
-        ],
-        "description": "",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -4891,7 +4830,7 @@
         ]
       }
     },
-    "/api/v1configuracion/production/deleteDeal": {
+    "/api/v1/configuracion/production/deleteDeal": {
       "post": {
         "description": "",
         "parameters": [
@@ -4911,6 +4850,15 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -4958,6 +4906,710 @@
             "apiKeyAuth": []
           }
         ]
+      }
+    },
+    "/api/v1/configuracion/production/getExporters/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Exporters"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateExporter": {
+      "post": {
+        "tags": [
+          "Production - Exporters"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del exportador",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Exporter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Exportador actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteExporter": {
+      "post": {
+        "tags": [
+          "Production - Exporters"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del exportador",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createExporter": {
+      "post": {
+        "tags": [
+          "Production - Exporters"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del exportador",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Exporter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Exportador creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getManualHarvesting/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Manual Harvesting"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "manualHarvesting": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
+                      "ground": {
+                        "type": "string",
+                        "example": "Suelo 1"
+                      },
+                      "sector": {
+                        "type": "string",
+                        "example": "Sector 1"
+                      },
+                      "squad": {
+                        "type": "string",
+                        "example": "Escuadra 1"
+                      },
+                      "squad_leader": {
+                        "type": "string",
+                        "example": "Jefe 1"
+                      },
+                      "batch": {
+                        "type": "string",
+                        "example": "Lote 1"
+                      },
+                      "worker": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "worker_rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "harvest_date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "variety": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg_boxes": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "row": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "harvest_format": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/configuracion/production/updateManualHarvesting": {
+      "post": {
+        "tags": [
+          "Production - Manual Harvesting"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la cosecha manual",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ManualHarvesting"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Cosecha manual actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteManualHarvesting": {
+      "post": {
+        "tags": [
+          "Production - Manual Harvesting"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la cosecha manual",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createManualHarvesting": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "harvest_date": {
+                  "example": "any"
+                },
+                "zone": {
+                  "example": "any"
+                },
+                "ground": {
+                  "example": "any"
+                },
+                "sector": {
+                  "example": "any"
+                },
+                "squad": {
+                  "example": "any"
+                },
+                "squad_leader": {
+                  "example": "any"
+                },
+                "batch": {
+                  "example": "any"
+                },
+                "worker": {
+                  "example": "any"
+                },
+                "worker_rut": {
+                  "example": "any"
+                },
+                "specie": {
+                  "example": "any"
+                },
+                "variety": {
+                  "example": "any"
+                },
+                "boxes": {
+                  "example": "any"
+                },
+                "kg_boxes": {
+                  "example": "any"
+                },
+                "quality": {
+                  "example": "any"
+                },
+                "hilera": {
+                  "example": "any"
+                },
+                "harvest_format": {
+                  "example": "any"
+                },
+                "company_id": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/configuracion/production/getDispatchGuide/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Dispatch Guide"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "dispatchGuide": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "client": {
+                        "type": "string",
+                        "example": "Cliente 1"
+                      },
+                      "date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "season": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "correlative": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg": {
+                        "type": "number",
+                        "example": 20.5
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/configuracion/production/updateDispatchGuide": {
+      "post": {
+        "tags": [
+          "Production - Dispatch Guide"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la guía de despacho",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DispatchGuide"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Guía de despacho actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteDispatchGuide": {
+      "post": {
+        "tags": [
+          "Production - Dispatch Guide"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la guía de despacho",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createDispatchGuide": {
+      "post": {
+        "tags": [
+          "Production - Dispatch Guide"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la guía de despacho",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DispatchGuide"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Guía de despacho creada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/filterResults/{companyID}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "example": "any"
+                },
+                "to": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     }
   }

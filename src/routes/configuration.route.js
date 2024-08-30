@@ -60,7 +60,7 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                 queryString += " and u.id_company  = c.id ";
 
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -207,11 +207,10 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                             queryString += "VALUES('" + name + "' , '" + lastName + "', '" + userEmail + "'," + menuRol + ", '" + hashedPassword + "'," + menuState + "," + menuCompany  +")";
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
-                                console.log("error", error);
-                                console.log("resultsInsert", resultsInsert);
-                                console.log("fields", fields);
+                                //console.log("error", error);
+                                //console.log("resultsInsert", resultsInsert);
+                                //console.log("fields", fields);
                                 if (error) {
-
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
                                         "code": "ERROR",
@@ -308,7 +307,7 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                 var queryString = "UPDATE users";
                 queryString += " SET name='" + name + "', lastname='" + lastName + "', mail='" + userEmail + "', id_rol=" + menuRol + ", password='" + userPassword + "', id_state=" + menuState + ", id_company=" + menuCompany;
                 queryString += " WHERE id=" + id;
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {

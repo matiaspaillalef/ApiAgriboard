@@ -45,7 +45,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
 
         let { companyID } = req.params;
 
-        console.log(companyID);
         var grounds = [];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -66,8 +65,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
 
                 var queryString = "SELECT * FROM ground g where company_id = " + companyID;
 
-
-                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -82,8 +79,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
                     }
                     else {
                         if (results && results.length > 0) {
-
-                            console.log('result', results);
 
                             results.forEach(element => {
                                 const jsonResult = {
@@ -106,7 +101,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
                                 "grounds": grounds
                             }
 
-                            console.log('cuanto1', grounds);
 
                             res.json(jsonResult);
                         }
@@ -121,7 +115,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
                     }
                 });
 
-                console.log('cuantos', grounds);
 
                 mysqlConn.end();
 
@@ -184,7 +177,6 @@ router.post('/configuracion/production/updateGround', validateToken, (req, res) 
 
                 var queryString = "UPDATE ground SET name = '" + obj.name + "', state = '" + obj.state + "', city = '" + obj.city + "', address = '" + obj.address + "', latitude = " + (obj.latitude == null ? 'NULL' : '') + ", longitude = " + (obj.longitude == null ? 'NULL' : '') + ", zone = '" + obj.zone + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
-                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -247,8 +239,6 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
     try {
 
         let { id } = req.body;
-
-        console.log(id);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -363,7 +353,6 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
 
                 var queryString = "INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) VALUES ('" + obj.name + "', '" + obj.state + "', '" + obj.city + "', '" + obj.address + "', " + (obj.latitude == null ? 'NULL' : obj.latitude) + ", " + (obj.longitude == null ? 'NULL' : obj.longitude) + ", '" + obj.zone + "', " + obj.company_id + ", " + obj.status + ")";
 
-                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -446,7 +435,6 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
 
         let { companyID } = req.params;
 
-        console.log(companyID);
         var sectors = [];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -467,9 +455,6 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
 
                 var queryString = "SELECT * FROM sector s WHERE company_id = " + companyID;
 
-
-                console.log(queryString);
-
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -484,8 +469,6 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
                     }
                     else {
                         if (results && results.length > 0) {
-
-                            console.log('result', results);
 
                             results.forEach(element => {
                                 const jsonResult = {
@@ -503,8 +486,6 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
                                 "sectors": sectors
                             }
 
-                            console.log('cuanto1', sectors);
-
                             res.json(jsonResult);
                         }
                         else {
@@ -519,9 +500,6 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
                 }
 
                 );
-
-                console.log('cuantos', sectors);
-
 
                 mysqlConn.end();
 
@@ -584,7 +562,7 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
 
                 var queryString = "UPDATE sector SET name = '" + obj.name + "', ground = " + obj.ground + ", company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
-                console.log(queryString);
+                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -764,7 +742,7 @@ router.post('/configuracion/production/createSectorBarrack', validateToken, (req
 
                 var queryString = "INSERT INTO sector (name, ground, company_id, status) VALUES ('" + obj.name + "', " + obj.ground + ", " + obj.company_id + ", " + obj.status + ")";
 
-                console.log(queryString);
+                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -847,7 +825,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
 
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
         var varieties = [];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -869,7 +847,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
                 var queryString = "SELECT * FROM varieties v WHERE company_id = " + companyID;
 
 
-                console.log(queryString);
+                //console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -903,7 +881,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
                                 "varieties": varieties
                             }
 
-                            console.log('varieties', varieties);
+                            //console.log('varieties', varieties);
 
                             res.json(jsonResult);
                         }
@@ -980,7 +958,7 @@ router.post('/configuracion/production/updateVariety', validateToken, (req, res)
 
                 var queryString = "UPDATE varieties SET name = '" + obj.name + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
-                console.log(queryString);
+                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -1159,7 +1137,7 @@ router.post('/configuracion/production/createVariety', validateToken, (req, res)
 
                 var queryString = "INSERT INTO varieties (name, company_id, status) VALUES ('" + obj.name + "', " + obj.company_id + ", " + obj.status + ")";
 
-                console.log(queryString);
+                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -1255,7 +1233,7 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
             }
 
             var queryString = "SELECT * FROM species s WHERE company_id = ?";
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, [companyID], function (error, results) {
                 if (error) {
@@ -1336,7 +1314,7 @@ router.post('/configuracion/production/updateSpecies', validateToken, (req, res)
             }
 
             var queryString = "UPDATE species SET name = ?, varieties = ?, company_id = ?, status = ? WHERE id = ?";
-            console.log(queryString);
+            //console.log(queryString);
             mysqlConn.query(queryString, [obj.name, JSON.stringify(obj.varieties), obj.company_id, obj.status, obj.id], function (error) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
@@ -1461,7 +1439,7 @@ router.post('/configuracion/production/createSpecies', validateToken, (req, res)
             }
 
             var queryString = "INSERT INTO species (name, varieties, company_id, status) VALUES (?, ?, ?, ?)";
-            console.log(queryString);
+            //console.log(queryString);
             mysqlConn.query(queryString, [obj.name, JSON.stringify(obj.varieties), obj.company_id, obj.status], function (error, results) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
@@ -1529,7 +1507,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
     try {
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var seasons = [];
 
@@ -1632,7 +1610,7 @@ router.post('/configuracion/production/updateSeason', validateToken, (req, res) 
             }
 
             var queryString = "UPDATE season SET name = ?, period = ?, date_from = ?, date_until = ?, shifts = ?, company_id = ?, status = ? WHERE id = ?";
-            console.log(queryString);
+            //console.log(queryString);
             mysqlConn.query(queryString, [obj.name, obj.period, obj.date_from, obj.date_until, JSON.stringify(obj.shifts), obj.company_id, obj.status, obj.id], function (error) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
@@ -1828,7 +1806,7 @@ router.get('/configuracion/production/getCollectionType/:companyID', validateTok
     try {
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var collections = [];
 
@@ -2114,7 +2092,7 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
     try {
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var qualities = [];
 
@@ -2406,7 +2384,7 @@ router.get('/configuracion/production/getScale/:companyID', validateToken, (req,
 
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var scales = [];
 
@@ -2754,7 +2732,7 @@ router.get('/configuracion/production/getScaleRegister/:companyID', validateToke
 
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var registers = [];
 
@@ -3016,7 +2994,7 @@ router.post('/configuracion/production/createScaleRegister', validateToken, (req
 
         let obj = req.body;
 
-        console.log(obj);
+        //console.log(obj);
 
         // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
         let date = new Date(obj.date).toISOString().slice(0, 19).replace('T', ' ');
@@ -3119,7 +3097,7 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
 
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var formats = [];
 
@@ -3470,7 +3448,7 @@ router.get('/configuracion/production/getDeals/:companyID', validateToken, (req,
 
         let { companyID } = req.params;
 
-        console.log(companyID);
+        //console.log(companyID);
 
         var deals = [];
 
@@ -3669,7 +3647,6 @@ router.post('/configuracion/production/deleteDeal', validateToken, (req, res) =>
     }
 });
 
-
 router.post('/configuracion/production/createDeal', validateToken, (req, res) => {
 
     /*
@@ -3757,4 +3734,1153 @@ router.post('/configuracion/production/createDeal', validateToken, (req, res) =>
 
 });
 
+
+//PRODUCCIÓN - EXPORTERS
+router.get('/configuracion/production/getExporters/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Exporters']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "exporters": [
+                    {
+                    "id": 1,
+                    "name": "Exportador 1",
+                    "rut": "12345678-9",
+                    "giro": "Giro 1",
+                    "state": "Región 1",
+                    "city": "Ciudad 1",
+                    "address": "Dirección 1",
+                    "phone": "123456789",
+                    "web": "www.exportador1.cl",
+                    "legal_representative_name": "Representante 1",
+                    "legal_representative_rut": "12345678-9",
+                    "legal_representative_phone": "123456789",
+                    "legal_representative_email": "email@email.com"
+                    "status": 1,
+                    "company_id": 1
+                    }
+                ]    
+            }
+        } 
+    */
+
+    try {
+
+        let { companyID } = req.params;
+
+        //console.log(companyID);
+
+        var exporters = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM exporters e WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        exporters.push({
+                            "id": element.id,
+                            "rut": element.rut,
+                            "name": element.name,
+                            "giro": element.giro,
+                            "state": element.state,
+                            "city": element.city,
+                            "address": element.address,
+                            "phone": element.phone,
+                            "web": element.web,
+                            "legal_representative_rut": element.legal_representative_rut,
+                            "legal_representative_name": element.legal_representative_name,
+                            "legal_representative_phone": element.legal_representative_phone,
+                            "legal_representative_email": element.legal_representative_email,
+                            "status": element.status,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "exporters": exporters
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/updateExporter', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Exporters']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del exportador',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Exporter" }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Exportador actualizado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let obj = req.body;
+
+        //console.log(obj);
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE exporters SET name = ?, rut = ?, giro = ?, state = ?, city = ?, address = ?, phone = ?, web = ?, legal_representative_name = ?, legal_representative_rut = ?, legal_representative_phone = ?, legal_representative_email = ?, status = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.name, obj.rut, obj.giro, obj.state, obj.city, obj.address, obj.phone, obj.web, obj.legal_representative_name, obj.legal_representative_rut, obj.legal_representative_phone, obj.legal_representative_email, obj.status, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/deleteExporter', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Exporters']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID del exportador',
+            required: true,
+            type: "integer",
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        } 
+    */
+
+    try {
+
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "DELETE FROM exporters WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.affectedRows != 0) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/createExporter', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Exporters']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del exportador',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/Exporter" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Exportador creado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            //console.log(obj);
+
+            var queryString = "INSERT INTO exporters (name, rut, giro, state, city, address, phone, web, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status, company_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+            mysqlConn.query(queryString, [obj.name, obj.rut, obj.giro, obj.state, obj.city, obj.address, obj.phone, obj.web, obj.legal_representative_name, obj.legal_representative_rut, obj.legal_representative_phone, obj.legal_representative_email, obj.status, obj.company_id], function (error, results) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+//PRODUCCIÓN - CARGA MANUAL
+router.get('/configuracion/production/getManualHarvesting/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Manual Harvesting']
+        #swagger.security
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "manualHarvesting": [
+                    {
+                    "id": 1,
+                    "zone": "Zona 1",
+                    "ground": "Suelo 1",
+                    "sector": "Sector 1",
+                    "squad": "Escuadra 1",
+                    "squad_leader": "Jefe 1",
+                    "batch": "Lote 1",
+                    "worker": 1,
+                    "worker_rut": "12345678-9",
+                    "harvest_date": "2021-01-01 00:00:00",
+                    "specie": 1,
+                    "variety": 1,
+                    "boxes": 100,
+                    "kg_boxes": 20,
+                    "quality": 1,
+                    "row": 1,
+                    "harvest_format": 1,
+                    company_id: 1
+                    }
+                ]    
+            }
+        }
+    */
+
+
+
+    try {
+
+        let { companyID } = req.params;
+
+        //console.log(companyID);
+
+        var manualHarvesting = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM manual_harvesting mh WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        manualHarvesting.push({
+                            "id": element.id,
+                            "ground": element.ground,
+                            "sector": element.sector,
+                            "squad": element.squad,
+                            "squad_leader": element.squad_leader,
+                            "batch": element.batch,
+                            "zone": element.zone,
+                            "worker": element.worker,
+                            "worker_rut": element.worker_rut,
+                            "harvest_date": element.harvest_date,
+                            "quality": element.quality,
+                            "boxes": element.boxes,
+                            "kg_boxes": element.kg_boxes,
+                            "hilera": element.hilera,
+                            "specie": element.specie,
+                            "variety": element.variety,
+                            "harvest_format": element.harvest_format,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "manualHarvesting": manualHarvesting
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    }
+
+    catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/updateManualHarvesting', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Manual Harvesting']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la cosecha manual',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/ManualHarvesting" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Cosecha manual actualizada correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+        //(obj);
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE manual_harvesting SET zone = ?, ground = ?, sector = ?, squad = ?, squad_leader = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, hilera = ?, harvest_format = ?, company_id = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.zone, obj.ground, obj.sector, obj.squad, obj.squad_leader, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.company_id, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/deleteManualHarvesting', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Manual Harvesting']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID de la cosecha manual',
+            required: true,
+            type: "integer",
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "DELETE FROM manual_harvesting WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.affectedRows != 0) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/createManualHarvesting', validateToken, (req, res) => {
+
+    try {
+
+        let obj = req.body;
+
+        //console.log(obj);
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            // Asegúrate de que la cantidad de columnas coincida con la cantidad de valores
+            var queryString = `
+                INSERT INTO manual_harvesting 
+                (zone, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, company_id) 
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            `;
+
+            mysqlConn.query(queryString, [
+                obj.zone, obj.ground, obj.sector, obj.squad, obj.squad_leader, obj.batch,
+                obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes,
+                obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.company_id
+            ], function (error, results) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+// PRODUCTION - DISPATCH GUIDE
+
+router.get('/configuracion/production/getDispatchGuide/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Dispatch Guide']
+        #swagger.security
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "dispatchGuide": [
+                    {
+                    "id": 1,
+                    "client": "Cliente 1",
+                    "date": "2021-01-01 00:00:00",
+                    "season": 1,
+                    "correlative": 1,
+                    "boxes": 100,
+                    "kg": 20.5,
+                    "quality": 1,
+                    "company_id": 1
+                    }
+                ]
+            }
+
+        }
+    */
+
+    try {
+
+        let { companyID } = req.params;
+
+        //console.log(companyID);
+
+        var dispatchGuide = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "SELECT * FROM dispatch_guide dg WHERE company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                //console.log(results);
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        dispatchGuide.push({
+                            "id": element.id,
+                            "client": element.client,
+                            "date": element.date,
+                            "season": element.season,
+                            "correlative": element.correlative,
+                            "boxes": element.boxes,
+                            "kg": element.kg,
+                            "quality": element.quality,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "dispatchGuide": dispatchGuide
+                    });
+
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+router.post('/configuracion/production/updateDispatchGuide', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Dispatch Guide']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la guía de despacho',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/DispatchGuide" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Guía de despacho actualizada correctamente."
+            }
+        }
+    */
+
+
+    try {
+
+        let obj = req.body;
+
+        //console.log(obj);
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "UPDATE dispatch_guide SET client = ?, date = ?, season = ?, correlative = ?, boxes = ?, kg = ?, quality = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.client, date, obj.season, obj.correlative, obj.boxes, obj.kg, obj.quality, obj.id], function (error) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+}
+
+);
+
+router.post('/configuracion/production/deleteDispatchGuide', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Dispatch Guide']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID de la guía de despacho',
+            required: true,
+            type: "integer",
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        }
+    */
+
+    try {
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "DELETE FROM dispatch_guide WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.affectedRows != 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    }
+    catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+
+router.post('/configuracion/production/createDispatchGuide', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Dispatch Guide']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la guía de despacho',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/DispatchGuide" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Guía de despacho creada correctamente."
+            }
+        }
+    */
+
+    try {
+        let obj = req.body;
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            // Asegúrate de que la cantidad de columnas coincida con la cantidad de valores
+            var queryString = `
+                    INSERT INTO dispatch_guide 
+                    (client, date, season, correlative, boxes, kg, quality, company_id) 
+                    VALUES (?,?,?,?,?,?,?,?)
+                `;
+
+            mysqlConn.query(queryString, [
+                obj.client, date, obj.season, obj.correlative, obj.boxes, obj.kg, obj.quality, obj.company_id
+            ], function (error, results) {
+
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    }
+
+    catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+
+router.post('/configuracion/production/filterResults/:companyID', validateToken, (req, res) => {
+    const { companyID } = req.params;
+    const filters = req.body; // Los filtros enviados desde el frontend
+
+    let queryString = 'SELECT * FROM manual_harvesting WHERE company_id = ?';
+    const queryValues = [companyID];
+
+    if (filters.from) {
+        queryString += ` AND DATE(harvest_date) >= ?`;
+        queryValues.push(filters.from);
+    }
+
+    if (filters.to) {
+        queryString += ` AND DATE(harvest_date) <= ?`;
+        queryValues.push(filters.to);
+    }
+
+    console.log('queryaaa', filters);
+
+
+    for (const [key, value] of Object.entries(filters)) {
+        if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to') {
+
+            if (key === 'date_register') {
+                // Si el filtro es para la fecha, usa DATE() en la consulta
+                queryString += ` AND DATE(${mysql.escapeId(key)}) = ?`;
+            } else {
+                queryString += ` AND ${mysql.escapeId(key)} = ?`;
+            }
+            queryValues.push(value);
+        }
+    }
+
+    console.log('query', queryString);
+    console.log('queryV', queryValues);
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    mysqlConn.connect(err => {
+        if (err) {
+            console.error('Error connecting: ' + err.message);
+            return res.status(500).json({
+                code: "ERROR",
+                mensaje: err.message
+            });
+        }
+
+        mysqlConn.query(queryString, queryValues, (error, results) => {
+            mysqlConn.end(); // Cerrar la conexión
+
+            if (error) {
+                console.error('Error executing query: ' + error.message);
+                return res.status(500).json({
+                    code: "ERROR",
+                    mensaje: error.message
+                });
+            }
+
+            if (results.length > 0) {
+                return res.status(200).json({
+                    code: "OK",
+                    results
+                });
+            } else {
+                return res.status(404).json({
+                    code: "ERROR",
+                    mensaje: "No se encuentran registros."
+                });
+            }
+        });
+    });
+});
+
+
 export default router
+
+
+

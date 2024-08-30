@@ -34,7 +34,7 @@ router.get('/management-people/positions/getPositions/:companyID', validateToken
 
         var positions = [];
         let { companyID } = req.params;
-        console.log("aqui", companyID);
+        //console.log("aqui", companyID);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -54,7 +54,7 @@ router.get('/management-people/positions/getPositions/:companyID', validateToken
 
                 var queryString = "SELECT * FROM positions where id_company = " + companyID;
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -158,7 +158,7 @@ router.post('/management-people/positions/createPosition', validateToken, (req, 
 
                 var queryString = "INSERT INTO positions (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -342,7 +342,7 @@ router.post('/management-people/positions/deletePosition', validateToken, (req, 
 
                 var queryString = "DELETE FROM positions WHERE id = " + id;
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -426,7 +426,7 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
 
         let { companyID } = req.params;
         var contractors = [];
-        console.log("aqui", companyID);
+        //console.log("aqui", companyID);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -461,7 +461,7 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
                     } else {
 
                         if (results && results.length > 0) {
-                            console.log("1");
+                            //console.log("1");
                             results.forEach(element => {
                                 const jsonResult = {
                                     "id": element.id,
@@ -477,12 +477,12 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
                                 };
                                 contractors.push(jsonResult);
                             });
-                            console.log("2");
+                            //console.log("2");
                             const jsonResult = {
                                 "code": "OK",
                                 "contractors": contractors
                             }
-                            console.log(jsonResult);
+                            //console.log(jsonResult);
                             res.json(jsonResult);
 
                         }
@@ -677,7 +677,7 @@ router.post('/management-people/contractors/updateContractor', validateToken, (r
 
                 var queryString = "UPDATE contractors SET rut = '" + rut + "', name = '" + name + "', lastname = '" + lastname + "', giro = '" + giro + "', phone = '" + phone + "', email = '" + email + "', state = '" + state + "', city = '" + city + "', status = " + status + " WHERE id = " + id;
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -866,7 +866,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
             } else {
 
                 var queryString = "SELECT * FROM `groups` g where id_company = " + companyID;
-                console.log(queryString);
+                ////console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -879,7 +879,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
                         }
                         res.json(jsonResult);
 
-                        console.log(jsonResult);
+                        //console.log(jsonResult);
 
                     } else {
 
@@ -968,7 +968,7 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
 
                 var queryString = "INSERT INTO groups (name, status , id_company) VALUES ('" + name + "', " + status + "," + idCompany + ")";
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (err) {
@@ -1061,7 +1061,7 @@ router.post('/management-people/groups/updateGroup', validateToken, (req, res) =
 
                 var queryString = "UPDATE groups SET name = '" + name + "', status = " + status + " WHERE id = " + id;
 
-                console.log(queryString);
+                ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -1137,7 +1137,7 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
 
         let { id } = req.body;
 
-        console.log(id);
+        //console.log(id);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1273,7 +1273,7 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
                             "id": element.id,
                             "name": element.name,
                             "group": element.id_group,
-                            "workers": [1, 2, 3, 4, 6], // Convertir la cadena JSON a un array "workers": "[1, 2, 3, 4, 6]
+                            "workers": element.workers,
                             "status": element.status,
                         };
 
@@ -1350,8 +1350,7 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
                 return res.json(jsonResult);
             }
 
-            var queryString = "INSERT INTO squads (name, id_group, status, id_company) VALUES ('" + name + "', " + group + ", " + status + "," + idCompany + ")";
-
+            var queryString = "INSERT INTO squads (name, id_group, status, workers, id_company) VALUES ('" + name + "', " + group + ", " + status + ", '[]', " + idCompany + ")";
 
             mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -1387,35 +1386,14 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
 );
 
 router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
-    /*
-        #swagger.tags = ['Management People - Squads']
-  
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-  
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                id: 1,
-                name: "cuadrilla 1",
-                group: 1,
-                status: 1
-            }
-        }
-  
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro actualizado"
-            }
-        }
-    */
-
     try {
         const { id, name, group, status, workers } = req.body;
 
-        console.log(req.body);
+        // Convertir workers a una cadena JSON
+        const workersJson = JSON.stringify(workers);
+
+        console.log('req.body:', req.body)
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -1428,46 +1406,39 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
                 return res.json(jsonResult);
             }
 
-            var queryString = "UPDATE squads SET name = '" + name + "', id_group = " + group + ", status = " + status + " WHERE id = " + id;
-            console.log(queryString);
+            var queryString = `
+                UPDATE squads 
+                SET 
+                    name = ?, 
+                    id_group = ?, 
+                    status = ?, 
+                    workers = ? 
+                WHERE 
+                    id = ?
+            `;
 
-            // Convertir el array de workers a una cadena JSON
-            //const workersJson = JSON.stringify(workers);
-
-            mysqlConn.query(queryString, function (error, results, fields) {
-
+            mysqlConn.query(queryString, [name, group, status, workersJson, id], function (error, results, fields) {
                 if (error) {
-
                     console.error('Error ejecutando query: ' + error.sqlMessage);
                     const jsonResult = {
                         "code": "ERROR",
                         "mensaje": error.sqlMessage
                     }
-
                     return res.json(jsonResult);
-
-                }
-                else {
-
+                } else {
                     if (results && results.affectedRows != 0) {
-
                         const jsonResult = {
                             "code": "OK",
                             "mensaje": "Registro actualizado correctamente."
                         }
-
                         res.json(jsonResult);
-
                     } else {
-
                         const jsonResult = {
                             "code": "ERROR",
-                            "mensaje": "No se pudo actualizar el  registro ."
+                            "mensaje": "No se pudo actualizar el registro."
                         }
-
                         res.json(jsonResult);
                     }
-
                 }
                 // Terminar la conexión después de manejar los resultados
                 mysqlConn.end();
@@ -1478,6 +1449,9 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
         res.json({ error: e.message });
     }
 });
+
+
+
 
 router.post('/management-people/squads/deleteSquad', validateToken, (req, res) => {
 
@@ -1506,7 +1480,7 @@ router.post('/management-people/squads/deleteSquad', validateToken, (req, res) =
     try {
         let { id } = req.body;
 
-        console.log(id);
+        //console.log(id);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1521,7 +1495,7 @@ router.post('/management-people/squads/deleteSquad', validateToken, (req, res) =
             }
 
             let queryString = "DELETE FROM squads WHERE id = ?";
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, [id], function (error, results, fields) {
                 if (error) {
@@ -1637,7 +1611,7 @@ router.get('/management-people/shifts/getShifts/:companyID', validateToken, (req
             } else {
 
                 var queryString = "SELECT id, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status FROM shifts where id_company = " + companyID;
-                console.log(queryString);
+                //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
@@ -1969,7 +1943,7 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 
         let { id } = req.body;
 
-        console.log(id);
+        //console.log(id);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1989,7 +1963,7 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
             } else {
 
                 var queryString = "DELETE FROM shifts WHERE id = " + id;
-                console.log(queryString);
+                //console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -2047,33 +2021,6 @@ router.get('/management-people/workers/getWorkers/:companyID', validateToken, (r
                "apiKeyAuth": []
         }]
         
-        #swagger.parameters['companyID'] = {
-            in: 'path',
-            required: true,
-            type: "integer",
-        } 
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "workers": [
-                    {
-                        "id": 1,
-                        "rut": "12345678-9",
-                        "name": "Juan",
-                        "lastname": "Perez",
-                        "lastname2": "Perez",
-                        "born_date": "1990-01-01",
-
-
-router.get('/management-people/workers/getWorkers', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Workers']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -2093,25 +2040,21 @@ router.get('/management-people/workers/getWorkers', validateToken, (req, res) =>
                         "phone": "12345678",
                         "phone_company": "12345678",
                         "date_admission": "2021-01-01",
-                        "status": 1
+                        "status": 1,
+                        "position": 1,
+                        "contractor": 1,
+                        "squad": 1,
+                        "leader_squad": 1,
+                        "shift": 1,
+                        "wristband": "12345678",
+                        "observation": "Observación",
+                        "bank": "Banco",
+                        "account_type": "Cuenta Corriente",
+                        "account_number": "12345678",
+                        "afp": "AFP",
+                        "health": "Isapre",
                     },
-                    {
-                        "id": 2,
-                        "rut": "12345678-9",
-                        "name": "Juan",
-                        "lastname": "Perez",
-                        "lastname2": "Perez",
-                        "born_date": "1990-01-01",
-                        "gender": "Masculino",
-                        "state_civil": "Soltero",
-                        "state": "Maule",
-                        "city": "Talca",
-                        "address": "Calle 123",
-                        "phone": "12345678",
-                        "phone_company": "12345678",
-                        "date_admission": "2021-01-01",
-                        "status": 1
-                    }
+                    
                 ]
             }
         }
@@ -2132,8 +2075,8 @@ router.get('/management-people/workers/getWorkers', validateToken, (req, res) =>
                 });
             }
 
-            const queryString = "SELECT id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status FROM workers WHERE company_id = " + companyID;
-            console.log(queryString);
+            const queryString = "SELECT id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, position, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, contractor, status FROM workers WHERE company_id = " + companyID;
+            //console.log(queryString);
 
             mysqlConn.query(queryString, (error, results) => {
                 if (error) {
@@ -2161,6 +2104,19 @@ router.get('/management-people/workers/getWorkers', validateToken, (req, res) =>
                             "phone": element.phone,
                             "phone_company": element.phone_company,
                             "date_admission": element.date_admission,
+                            "position": element.position,
+                            "contractor": element.contractor,
+                            "squad": element.squad,
+                            "leader_squad": element.leader_squad,
+                            "shift": element.shift,
+                            "wristband": element.wristband,
+                            "observation": element.observation,
+                            "bank": element.bank,
+                            "account_type": element.account_type,
+                            "account_number": element.account_number,
+                            "afp": element.afp,
+                            "health": element.health,
+                            "contractor": element.contractor,
                             "status": element.status
                         });
                     });
@@ -2258,7 +2214,7 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
                 WHERE id = ?`;
 
             const queryValues = [rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, id];
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, queryValues, (error, results) => {
                 if (error) {
@@ -2312,7 +2268,7 @@ router.post('/management-people/workers/deleteWorker', validateToken, (req, res)
     try {
         let { id } = req.body;
 
-        console.log(id);
+        //console.log(id);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -2326,7 +2282,7 @@ router.post('/management-people/workers/deleteWorker', validateToken, (req, res)
             }
 
             const queryString = "DELETE FROM workers WHERE id = ?";
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, [id], (error, results) => {
                 if (error) {
@@ -2392,7 +2348,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
     try {
         const { rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status } = req.body;
 
-        console.log(req.body);
+        //console.log(req.body);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -2410,7 +2366,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
             const queryValues = [rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status];
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, queryValues, (error, results) => {
                 if (error) {
