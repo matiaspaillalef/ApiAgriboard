@@ -4197,6 +4197,15 @@ router.get('/configuracion/production/getManualHarvesting/:companyID', validateT
                             "specie": element.specie,
                             "variety": element.variety,
                             "harvest_format": element.harvest_format,
+                            "weigher_rut": element.weigher_rut,
+                            "sync": element.sync,
+                            "sync_date": element.sync_date,
+                            "season": element.season,
+                            "turns": element.turns,
+                            "date_register": element.date_register,
+                            "temp": element.temp,
+                            "wet": element.wet,
+                            "contractor": element.contractor,
                             "company_id": element.company_id
                         });
                     });
@@ -4824,9 +4833,6 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
         queryValues.push(filters.to);
     }
 
-    console.log('queryaaa', filters);
-
-
     for (const [key, value] of Object.entries(filters)) {
         if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to') {
 
@@ -4840,8 +4846,6 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
         }
     }
 
-    console.log('query', queryString);
-    console.log('queryV', queryValues);
     const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
     mysqlConn.connect(err => {

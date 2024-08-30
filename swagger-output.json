@@ -1812,8 +1812,59 @@
           "Management People - Squads"
         ],
         "description": "",
-        "parameters": [],
-        "responses": {},
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "name": {
+                  "type": "string",
+                  "example": "cuadrilla 1"
+                },
+                "group": {
+                  "type": "number",
+                  "example": 1
+                },
+                "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "workers": {
+                  "type": "array",
+                  "example": [],
+                  "items": {}
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
         "security": [
           {
             "apiKeyAuth": []
@@ -2294,7 +2345,7 @@
                     "properties": {
                       "id": {
                         "type": "number",
-                        "example": 2
+                        "example": 1
                       },
                       "rut": {
                         "type": "string",
@@ -2351,6 +2402,54 @@
                       "status": {
                         "type": "number",
                         "example": 1
+                      },
+                      "position": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "contractor": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "squad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "leader_squad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "shift": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "wristband": {
+                        "type": "string",
+                        "example": "12345678"
+                      },
+                      "observation": {
+                        "type": "string",
+                        "example": "Observación"
+                      },
+                      "bank": {
+                        "type": "string",
+                        "example": "Banco"
+                      },
+                      "account_type": {
+                        "type": "string",
+                        "example": "Cuenta Corriente"
+                      },
+                      "account_number": {
+                        "type": "string",
+                        "example": "12345678"
+                      },
+                      "afp": {
+                        "type": "string",
+                        "example": "AFP"
+                      },
+                      "health": {
+                        "type": "string",
+                        "example": "Isapre"
                       }
                     }
                   }
@@ -5610,6 +5709,235 @@
             "description": "Internal Server Error"
           }
         }
+      }
+    },
+    "/api/v1/filter/dashboard/dataKgDay/{companyID}/{groundID}": {
+      "get": {
+        "tags": [
+          "Dashboard - KG Day"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID de la empresa para filtrar los datos"
+          },
+          {
+            "name": "groundID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "kgDay": {
+                      "type": "number",
+                      "example": 1000
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "ERROR"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Error al obtener los datos"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/filter/dashboard/dataKgDayQlty/{companyID}/{groundID}/{qualityID}": {
+      "get": {
+        "tags": [
+          "Dashboard - IQF KG Day"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID de la empresa para filtrar los datos"
+          },
+          {
+            "name": "groundID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "qualityID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "kgDay": {
+                      "type": "number",
+                      "example": 1000
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "ERROR"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Error al obtener los datos"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/filter/dashboard/dataKgSeason/{companyID}/{groundID}": {
+      "post": {
+        "tags": [
+          "Dashboard - KG Season"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID de la empresa para filtrar los datos"
+          },
+          {
+            "name": "groundID",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID del terreno para filtrar los datos"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "kg_boxes": {
+                      "type": "number",
+                      "example": 1000
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "ERROR"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Error al obtener los datos"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     }
   }

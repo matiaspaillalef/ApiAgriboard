@@ -1386,6 +1386,34 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
 );
 
 router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Management People - Squads']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            schema: {
+                id: 1,
+                name: "cuadrilla 1",
+                group: 1,
+                status: 1,
+                workers: []
+            }
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro actualizado correctamente."
+            }
+
+        }
+    */
+
     try {
         const { id, name, group, status, workers } = req.body;
 
