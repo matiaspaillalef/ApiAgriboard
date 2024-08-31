@@ -596,6 +596,8 @@ VALUES
 ('Top Hat', 1, 1),
 ('Bluegold', 2, 0);
 
+-- agrisoft.workers definition
+
 CREATE TABLE `workers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `rut` varchar(12) COLLATE utf8mb4_general_ci NOT NULL,
@@ -612,40 +614,150 @@ CREATE TABLE `workers` (
   `phone_company` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `date_admission` date DEFAULT NULL,
   `status` tinyint(1) DEFAULT '1',
+  `position` int DEFAULT NULL,
+  `contractor` int DEFAULT NULL,
+  `squad` int DEFAULT NULL,
+  `leader_squad` int DEFAULT NULL,
+  `shift` int DEFAULT NULL,
+  `wristband` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `observation` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `bank` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `account_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `account_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `afp` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `health` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `company_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `workers_companies_FK` (`company_id`),
-  CONSTRAINT `workers_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+  KEY `workers_contractors_FK` (`contractor`),
+  KEY `workers_positions_FK` (`position`),
+  KEY `workers_shifts_FK` (`shift`),
+  KEY `workers_squads_FK` (`squad`),
+  CONSTRAINT `workers_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  CONSTRAINT `workers_contractors_FK` FOREIGN KEY (`contractor`) REFERENCES `contractors` (`id`),
+  CONSTRAINT `workers_positions_FK` FOREIGN KEY (`position`) REFERENCES `positions` (`id`),
+  CONSTRAINT `workers_shifts_FK` FOREIGN KEY (`shift`) REFERENCES `shifts` (`id`),
+  CONSTRAINT `workers_squads_FK` FOREIGN KEY (`squad`) REFERENCES `squads` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, company_id) 
-VALUES
-('21.123.456-7', 'Sofia', 'Gonzalez', 'Torres', '1990-09-12', 'Femenino', 'Soltero', 'III', 'La Serena', 'Avenida del Mar 123', '912345678', '912345678', '2021-05-15', 1, 2),
-('22.234.567-8', 'Lucas', 'Hernandez', 'Guerra', '1983-04-25', 'Masculino', 'Casado', 'II', 'Valdivia', 'Calle Colón 234', '923456789', '923456789', '2020-03-22', 1, 2),
-('23.345.678-9', 'Camila', 'Morales', 'Vega', '1995-07-18', 'Femenino', 'Soltero', 'XIV', 'Antofagasta', 'Calle Belgrano 345', '934567890', '934567890', '2022-11-03', 0, 3),
-('24.456.789-0', 'Javier', 'Ruiz', 'Salazar', '1978-12-09', 'Masculino', 'Viudo', 'VI', 'Punta Arenas', 'Avenida España 456', '945678901', '945678901', '2019-07-16', 1, 3),
-('25.567.890-1', 'Valentina', 'Fuentes', 'Bravo', '1991-01-14', 'Femenino', 'Divorciado', 'IX', 'Temuco', 'Calle O’Higgins 567', '956789012', '956789012', '2020-08-25', 1, 3),
-('26.678.901-2', 'Alejandro', 'Alvarez', 'Martinez', '1986-03-29', 'Masculino', 'Casado', 'IV', 'Arica', 'Avenida 18 de Septiembre 678', '967890123', '967890123', '2018-12-10', 0, 4),
-('27.789.012-3', 'Isabella', 'Cordero', 'Soto', '1993-10-05', 'Femenino', 'Soltero', 'X', 'Coquimbo', 'Calle Los Paltos 789', '978901234', '978901234', '2021-02-18', 1, 4),
-('28.890.123-4', 'Fernando', 'Navarro', 'Fuentes', '1981-06-22', 'Masculino', 'Casado', 'VII', 'Rancagua', 'Avenida Central 890', '989012345', '989012345', '2017-09-09', 1, 4),
-('29.901.234-5', 'Gabriela', 'Diaz', 'Muñoz', '1990-11-03', 'Femenino', 'Viudo', 'VI', 'Los Andes', 'Calle Independencia 901', '990123456', '990123456', '2022-03-12', 0, 5),
-('30.012.345-6', 'Ricardo', 'Bravo', 'Torres', '1985-04-30', 'Masculino', 'Soltero', 'XIII', 'Santiago', 'Avenida Los Libertadores 012', '901234567', '901234567', '2020-05-25', 1, 5),
-('31.123.456-7', 'Margarita', 'Vega', 'Cordero', '1992-07-08', 'Femenino', 'Casado', 'V', 'Viña del Mar', 'Calle Las Heras 123', '912345679', '912345679', '2019-01-18', 1, 1),
-('32.234.567-8', 'Carlos', 'Castro', 'Molina', '1977-02-14', 'Masculino', 'Divorciado', 'VIII', 'Temuco', 'Calle Alemania 234', '923456780', '923456780', '2020-06-14', 1, 1),
-('33.345.678-9', 'Patricia', 'Ramirez', 'Gonzalez', '1989-10-29', 'Femenino', 'Soltero', 'II', 'Puerto Montt', 'Avenida San Francisco 345', '934567891', '934567891', '2021-03-11', 0, 2),
-('34.456.789-0', 'Alejandro', 'Pérez', 'Mora', '1994-05-20', 'Masculino', 'Casado', 'VII', 'Talca', 'Calle 6 Oriente 456', '945678902', '945678902', '2022-07-24', 0, 2),
-('35.567.890-1', 'Nicole', 'Silva', 'Herrera', '1988-12-12', 'Femenino', 'Viudo', 'IX', 'Los Ángeles', 'Avenida 4 Norte 567', '956789013', '956789013', '2020-09-16', 1, 3),
-('36.678.901-2', 'Eduardo', 'Moreno', 'Jimenez', '1984-03-05', 'Masculino', 'Casado', 'XII', 'La Serena', 'Calle Las Torres 678', '967890124', '967890124', '2021-10-30', 1, 3),
-('37.789.012-3', 'Florencia', 'Martínez', 'Paredes', '1991-11-25', 'Femenino', 'Divorciado', 'IV', 'Antofagasta', 'Calle Rancagua 789', '978901235', '978901235', '2022-06-22', 1, 3),
-('38.890.123-4', 'Raúl', 'Muñoz', 'Olivares', '1980-07-15', 'Masculino', 'Casado', 'VI', 'Rancagua', 'Avenida O’Higgins 890', '989012346', '989012346', '2021-04-08', 0, 4),
-('39.901.234-5', 'Martina', 'Soto', 'Gómez', '1995-01-19', 'Femenino', 'Soltero', 'XIII', 'Santiago', 'Calle Los Bosques 901', '990123457', '990123457', '2023-02-14', 1, 4),
-('40.012.345-6', 'Héctor', 'Ortega', 'Pérez', '1983-09-21', 'Masculino', 'Viudo', 'VIII', 'La Serena', 'Calle Talca 012', '901234568', '901234568', '2020-11-16', 0, 5),
-('41.123.456-7', 'Juana', 'Cifuentes', 'Bravo', '1992-02-10', 'Femenino', 'Casado', 'VII', 'Talca', 'Calle Libertador 123', '912345680', '912345680', '2022-01-29', 1, 5),
-('42.234.567-8', 'Felipe', 'Vásquez', 'Muñoz', '1987-08-07', 'Masculino', 'Divorciado', 'X', 'Coquimbo', 'Avenida del Mar 234', '923456781', '923456781', '2021-12-13', 1, 5),
-('43.345.678-9', 'Carmen', 'Pérez', 'Vergara', '1980-10-04', 'Femenino', 'Soltero', 'IV', 'Puerto Montt', 'Calle Bernardo O’Higgins 345', '934567892', '934567892', '2022-07-07', 0, 1),
-('44.456.789-0', 'Antonio', 'Rivas', 'Lozano', '1994-06-20', 'Masculino', 'Casado', 'XII', 'Iquique', 'Avenida Prat 456', '945678903', '945678903', '2023-05-30', 1, 1),
-('45.567.890-1', 'Alejandra', 'Valenzuela', 'Cordero', '1990-04-18', 'Femenino', 'Viudo', 'VII', 'Rancagua', 'Calle 1 Norte 567', '956789014', '956789014','2023-05-30', 1, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(2, '8.765.432-1', 'Maria', 'Lopez', 'Rodriguez', '1985-05-15', 'Femenino', 'Casado', 'XIII', 'Santiago', 'Avenida 456', '876543210', '876543210', '2019-06-15', 1, 1, 1, 1, 1, 1, '1A2B3C4D', 'Ingreso trabajador 9:50 por lejanía', 'Banco de Chile', 'Cuenta Corriente', '000010687709', 'AFP Provida', 'Fonasa', 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(3, '11.261.733-7', 'Pedro', 'Martinez', 'Sanchez', '1992-03-22', 'Masculino', 'Divorciado', 'VIII', 'Concepción', 'Calle 789', '765432109', '765432109', '2020-08-20', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(4, '23456789-0', 'Ana', 'Garcia', 'Fernandez', '1988-11-30', 'Femenino', 'Viudo', 'V', 'Valparaiso', 'Calle 101', '654321098', '654321098', '2018-02-10', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(6, '17.485.937-K', 'Matias', 'Paillalef', 'Castro', NULL, 'Masculino', 'Casado', 'VII', 'Maule', 'Pasaje Alerce Andino #1877', '950171534', '9898989809', '2024-01-01', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(7, '18.128.602-4', 'Daniela', 'Marchant', 'Toledo', NULL, 'Femenino', 'Casado', 'I', 'Talca', 'Area 1', '950171534', '9898989809', '2024-07-19', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(8, '18.128.602-4', 'Daniela', 'Marchant', 'Toledo', '2024-07-12', 'Femenino', 'Casado', 'I', 'Talca', 'Area 1', '950171534', '9898989809', '2024-07-19', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(9, '17.485.937-K', 'Rodrigo', 'Chandía', 'Chandía', '2024-07-01', 'Masculino', 'Soltero', 'XV', 'Arica', 'ewweweew', '950171534', '9898989809', '2024-07-11', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(10, '11.111.111-1', 'Mateo', 'Paillalef', 'Marchat', '2024-07-01', 'Femenino', 'Divorciado', 'XV', 'Iquique', '11111', '9 5017 1534', '9898989809', '2024-07-02', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(31, '11.261.733-7', 'Mario', 'Paillalef', 'Echeverria', '1968-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(32, '11.261.733-7', 'Mario', 'Paillalef', 'Nuñez', '1969-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(33, '11.261.733-7', 'Mario', 'Paillalef', 'Fernandez', '1968-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(34, '11.261.733-7', 'Mario', 'Paillalef', 'Castro', '1942-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2021-12-31', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(35, '11.261.733-7', 'Mario', 'Paillalef', 'Echeverria', '1968-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(36, '11.261.733-7', 'Mario', 'Paillalef', 'Nuñez', '1969-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(37, '11.261.733-7', 'Mario', 'Paillalef', 'Fernandez', '1968-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2023-12-31', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(38, '11.261.733-7', 'Mario', 'Paillalef', 'Castro', '1942-01-24', 'Masculino', 'Casado', 'VII', 'Talca', 'Pasaje 19', '987654321', '98765432', '2021-12-31', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(39, '21.123.456-7', 'Sofia', 'Gonzalez', 'Torres', '1990-09-12', 'Femenino', 'Soltero', 'III', 'La Serena', 'Avenida del Mar 123', '912345678', '912345678', '2021-05-15', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(40, '22.234.567-8', 'Lucas', 'Hernandez', 'Guerra', '1983-04-25', 'Masculino', 'Casado', 'II', 'Valdivia', 'Calle Colón 234', '923456789', '923456789', '2020-03-22', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(41, '23.345.678-9', 'Camila', 'Morales', 'Vega', '1995-07-18', 'Femenino', 'Soltero', 'XIV', 'Antofagasta', 'Calle Belgrano 345', '934567890', '934567890', '2022-11-03', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(42, '24.456.789-0', 'Javier', 'Ruiz', 'Salazar', '1978-12-09', 'Masculino', 'Viudo', 'VI', 'Punta Arenas', 'Avenida España 456', '945678901', '945678901', '2019-07-16', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(43, '25.567.890-1', 'Valentina', 'Fuentes', 'Bravo', '1991-01-14', 'Femenino', 'Divorciado', 'IX', 'Temuco', 'Calle O’Higgins 567', '956789012', '956789012', '2020-08-25', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(44, '26.678.901-2', 'Alejandro', 'Alvarez', 'Martinez', '1986-03-29', 'Masculino', 'Soltero', 'IV', 'La Serena', 'Avenida 18 de Septiembre 678', '967890123', '967890123', '2018-12-10', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(45, '27.789.012-3', 'Isabella', 'Cordero', 'Soto', '1993-10-05', 'Femenino', 'Soltero', 'X', 'Coquimbo', 'Calle Los Paltos 789', '978901234', '978901234', '2021-02-18', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(46, '28.890.123-4', 'Fernando', 'Navarro', 'Fuentes', '1981-06-22', 'Masculino', 'Casado', 'VII', 'Rancagua', 'Avenida Central 890', '989012345', '989012345', '2017-09-09', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(47, '29.901.234-5', 'Gabriela', 'Diaz', 'Muñoz', '1990-11-03', 'Femenino', 'Viudo', 'VI', 'Los Andes', 'Calle Independencia 901', '990123456', '990123456', '2022-03-12', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(48, '30.012.345-6', 'Ricardo', 'Bravo', 'Torres', '1985-04-30', 'Masculino', 'Soltero', 'XIII', 'Santiago', 'Avenida Los Libertadores 012', '901234567', '901234567', '2020-05-25', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(49, '31.123.456-7', 'Margarita', 'Vega', 'Cordero', '1992-07-08', 'Femenino', 'Casado', 'V', 'Viña del Mar', 'Calle Las Heras 123', '912345679', '912345679', '2019-01-18', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(50, '32.234.567-8', 'Carlos', 'Castro', 'Molina', '1977-02-14', 'Masculino', 'Divorciado', 'VIII', 'Temuco', 'Calle Alemania 234', '923456780', '923456780', '2020-06-14', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(51, '33.345.678-9', 'Patricia', 'Ramirez', 'Gonzalez', '1989-10-29', 'Femenino', 'Soltero', 'II', 'Puerto Montt', 'Avenida San Francisco 345', '934567891', '934567891', '2021-03-11', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(52, '34.456.789-0', 'Alejandro', 'Pérez', 'Mora', '1994-05-20', 'Masculino', 'Casado', 'VII', 'Talca', 'Calle 6 Oriente 456', '945678902', '945678902', '2022-07-24', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(53, '35.567.890-1', 'Nicole', 'Silva', 'Herrera', '1988-12-12', 'Femenino', 'Viudo', 'IX', 'Los Ángeles', 'Avenida 4 Norte 567', '956789013', '956789013', '2020-09-16', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(54, '36.678.901-2', 'Eduardo', 'Moreno', 'Jimenez', '1984-03-05', 'Masculino', 'Casado', 'XII', 'La Serena', 'Calle Las Torres 678', '967890124', '967890124', '2021-10-30', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(55, '37.789.012-3', 'Florencia', 'Martínez', 'Paredes', '1991-11-25', 'Femenino', 'Divorciado', 'IV', 'Antofagasta', 'Calle Rancagua 789', '978901235', '978901235', '2022-06-22', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(57, '39.901.234-5', 'Martina', 'Soto', 'Gómez', '1995-01-19', 'Femenino', 'Soltero', 'XIII', 'Santiago', 'Calle Los Bosques 901', '990123457', '990123457', '2023-02-14', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(58, '40.012.345-6', 'Héctor', 'Ortega', 'Pérez', '1983-09-21', 'Masculino', 'Viudo', 'VIII', 'La Serena', 'Calle Talca 012', '901234568', '901234568', '2020-11-16', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(59, '41.123.456-7', 'Juana', 'Cifuentes', 'Bravo', '1992-02-10', 'Femenino', 'Casado', 'VII', 'Talca', 'Calle Libertador 123', '912345680', '912345680', '2022-01-29', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(60, '42.234.567-8', 'Felipe', 'Vásquez', 'Muñoz', '1987-08-07', 'Masculino', 'Divorciado', 'X', 'Coquimbo', 'Avenida del Mar 234', '923456781', '923456781', '2021-12-13', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(61, '43.345.678-9', 'Carmen', 'Pérez', 'Vergara', '1980-10-04', 'Femenino', 'Soltero', 'IV', 'Puerto Montt', 'Calle Bernardo O’Higgins 345', '934567892', '934567892', '2022-07-07', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO agrisoft.workers
+(id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, `position`, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, company_id)
+VALUES(62, '44.456.789-0', 'Antonio', 'Rivas', 'Lozano', '1994-06-20', 'Masculino', 'Casado', 'XII', 'Iquique', 'Avenida Prat 456', '945678903', '945678903', '2023-05-30', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
 
 
 -- agrisoft.season definition
@@ -839,3 +951,144 @@ INSERT INTO agrisoft.deals
 VALUES
 (2, 1, 'Trato tomates 2', 10000000, 1, 1),
 (1, 1, 'Trato tomates', 10000000, 1, 1);
+
+
+-- agrisoft.dispatch_guide definition
+
+CREATE TABLE `dispatch_guide` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `client` int NOT NULL,
+  `date` date NOT NULL,
+  `season` int NOT NULL,
+  `correlative` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `boxes` int DEFAULT NULL,
+  `kg` float DEFAULT NULL,
+  `quality` int DEFAULT NULL,
+  `company_id` int NOT NULL,
+  `ground` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `dispatch_guide_season_FK` (`season`),
+  KEY `dispatch_guide_exporters_FK` (`client`),
+  KEY `dispatch_guide_quality_FK` (`quality`),
+  KEY `dispatch_guide_ground_FK` (`ground`),
+  CONSTRAINT `dispatch_guide_exporters_FK` FOREIGN KEY (`client`) REFERENCES `exporters` (`id`),
+  CONSTRAINT `dispatch_guide_ground_FK` FOREIGN KEY (`ground`) REFERENCES `ground` (`id`),
+  CONSTRAINT `dispatch_guide_quality_FK` FOREIGN KEY (`quality`) REFERENCES `quality` (`id`),
+  CONSTRAINT `dispatch_guide_season_FK` FOREIGN KEY (`season`) REFERENCES `season` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(1, 1, '2024-01-15', 1, '2', 23, 22.5, 2, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(2, 1, '2024-01-15', 1, 'A20240115', 20, 150.5, 1, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(3, 1, '2024-01-20', 1, 'B20240120', 15, 100.0, 1, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(4, 1, '2024-02-05', 1, 'C20240205', 10, 80.0, 1, 2, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(5, 1, '2024-02-15', 1, 'D20240215', 25, 200.0, 1, 3, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(6, 1, '2024-03-01', 1, 'E20240301', 18, 130.0, 1, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(7, 1, '2024-03-10', 1, 'F20240310', 22, 160.0, 1, 3, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(8, 1, '2024-04-01', 1, 'G20240401', 12, 90.0, 1, 4, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(9, 1, '2024-04-15', 1, 'H20240415', 30, 250.0, 1, 4, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(10, 1, '2024-05-05', 1, 'I20240505', 16, 120.0, 1, 2, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(11, 1, '2024-05-20', 1, 'J20240520', 14, 110.0, 1, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(14, 2, '2024-08-08', 2, 'FD87460', 22, 330.0, 8, 1, 1);
+INSERT INTO agrisoft.dispatch_guide
+(id, client, `date`, season, correlative, boxes, kg, quality, company_id, ground)
+VALUES(15, 2, '2024-08-28', 3, '5683', 98, 1254.0, 2, 1, 1);
+
+
+-- agrisoft.manual_harvesting definition
+
+CREATE TABLE `manual_harvesting` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `zone` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `ground` int NOT NULL,
+  `sector` int NOT NULL,
+  `squad` int DEFAULT NULL,
+  `squad_leader` int DEFAULT NULL,
+  `batch` int DEFAULT NULL,
+  `worker` int NOT NULL,
+  `worker_rut` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `harvest_date` datetime DEFAULT NULL,
+  `specie` int NOT NULL,
+  `variety` int NOT NULL,
+  `boxes` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kg_boxes` decimal(10,2) DEFAULT NULL,
+  `quality` int DEFAULT NULL,
+  `hilera` int DEFAULT NULL,
+  `harvest_format` int DEFAULT NULL,
+  `weigher_rut` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sync` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sync_date` datetime DEFAULT NULL,
+  `season` int DEFAULT NULL,
+  `turns` int DEFAULT NULL,
+  `date_register` datetime DEFAULT NULL,
+  `temp` double(6,2) DEFAULT NULL,
+  `wet` double(6,2) DEFAULT NULL,
+  `company_id` int NOT NULL,
+  `contractor` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `manual_harvesting_companies_FK` (`company_id`),
+  KEY `manual_harvesting_ground_FK` (`ground`),
+  KEY `manual_harvesting_sector_FK` (`sector`),
+  KEY `manual_harvesting_squads_FK` (`squad`),
+  KEY `manual_harvesting_workers_FK` (`worker`),
+  KEY `manual_harvesting_species_FK` (`specie`),
+  KEY `manual_harvesting_varieties_FK` (`variety`),
+  KEY `manual_harvesting_quality_FK` (`quality`),
+  KEY `manual_harvesting_harvest_format_FK` (`harvest_format`),
+  KEY `manual_harvesting_contractors_FK` (`contractor`),
+  CONSTRAINT `manual_harvesting_companies_FK` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  CONSTRAINT `manual_harvesting_contractors_FK` FOREIGN KEY (`contractor`) REFERENCES `contractors` (`id`),
+  CONSTRAINT `manual_harvesting_ground_FK` FOREIGN KEY (`ground`) REFERENCES `ground` (`id`),
+  CONSTRAINT `manual_harvesting_harvest_format_FK` FOREIGN KEY (`harvest_format`) REFERENCES `harvest_format` (`id`),
+  CONSTRAINT `manual_harvesting_quality_FK` FOREIGN KEY (`quality`) REFERENCES `quality` (`id`),
+  CONSTRAINT `manual_harvesting_sector_FK` FOREIGN KEY (`sector`) REFERENCES `sector` (`id`),
+  CONSTRAINT `manual_harvesting_species_FK` FOREIGN KEY (`specie`) REFERENCES `species` (`id`),
+  CONSTRAINT `manual_harvesting_squads_FK` FOREIGN KEY (`squad`) REFERENCES `squads` (`id`),
+  CONSTRAINT `manual_harvesting_varieties_FK` FOREIGN KEY (`variety`) REFERENCES `varieties` (`id`),
+  CONSTRAINT `manual_harvesting_workers_FK` FOREIGN KEY (`worker`) REFERENCES `workers` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(1, 'Norte', 1, 1, 1, 3, 2, 2, '11.261.733-7', '2024-08-06 10:00:00', 1, 1, '10', 20.00, 1, 5, 1, '11.261.733-7', 'pesador3-9633', '2022-01-06 09:42:47', 1, 1, '2024-08-06 10:00:00', 17.0, 19.0, 1, 1);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(2, 'Norte', 10, 1, 1, 3, 2, 2, '11.261.733-7', '2024-08-06 14:00:00', 1, 1, '10', 315.00, 2, 5, 2, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, 2, 2);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(4, 'Sur', 1, 14, 1, NULL, 4, 3, '8.765.432-1', '2024-08-21 00:00:00', 1, 2, '33', 33.88, 1, 4, 1, NULL, NULL, NULL, 2, NULL, '2024-08-04 10:00:00', 20.0, 12.0, 1, NULL);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(5, 'Norte', 1, 1, 1, NULL, 1, 2, NULL, '2024-08-18 00:00:00', 1, 16, '1', 4.70, 2, 5, 1, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, 1, NULL);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(6, 'Norte', 1, 1, 1, 3, 2, 2, '11.261.733-7', '2024-08-06 14:00:00', 1, 2, '10', 86.00, 1, 5, 1, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, 1, NULL);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(7, 'Norte', 1, 1, 1, 3, 2, 2, '11.261.733-7', '2024-08-06 10:00:00', 1, 1, '10', 20.00, 1, 5, 1, '11.261.733-7', 'pesador3-9633', '2022-01-06 09:42:47', 2, 1, '2024-08-06 10:00:00', 12.0, 35.0, 1, 1);
+INSERT INTO agrisoft.manual_harvesting
+(id, `zone`, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, company_id, contractor)
+VALUES(8, 'Sur', 1, 14, 1, NULL, 4, 3, '8.765.432-1', '2024-08-21 00:00:00', 1, 2, '33', 33.88, 1, 4, 1, NULL, NULL, NULL, 2, NULL, '2024-08-07 10:00:00', 23.0, 44.0, 1, NULL);
