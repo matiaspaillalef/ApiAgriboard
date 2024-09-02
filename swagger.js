@@ -10,7 +10,7 @@ const doc = {
     },
     host: "52.23.209.121:" + process.env.PORT,
     basePath: "/",
-    schemes: ['http', 'https'],
+    schemes: ['http'],
     consumes: ['application/json'],
     produces: ['application/json'],
     securityDefinitions: {

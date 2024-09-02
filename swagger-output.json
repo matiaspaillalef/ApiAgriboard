@@ -9,8 +9,7 @@
   "host": "52.23.209.121:4000",
   "basePath": "/",
   "schemes": [
-    "http",
-    "https"
+    "http"
   ],
   "securityDefinitions": {
     "apiKeyAuth": {
