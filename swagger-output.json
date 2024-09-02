@@ -5,7 +5,8 @@
     "title": "Api Agrisoft",
     "description": ""
   },
-  "host": "localhost:4000",
+
+  "host": "52.23.209.121:4000",
   "basePath": "/",
   "schemes": [
     "http",
