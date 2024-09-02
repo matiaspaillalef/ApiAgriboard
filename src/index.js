@@ -21,7 +21,7 @@ import dashboardRouter from './routes/dashboard.route.js'
 
 
 const app = express()
-const port = process.env.PORT
+const port = process.env.PORT 
 
 app.use(cors());
 app.use(express.json());
@@ -46,4 +46,7 @@ console.log("*************************************************");
 console.log("*API AGRISOFT                                       *");
 console.log("*************************************************");
 
-app.listen(port, () => console.log('http://localhost:' + port));
+//app.listen(port, () => console.log('http://localhost:' + port));
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${port}`);
+});
