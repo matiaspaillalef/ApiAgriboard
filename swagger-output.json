@@ -5384,74 +5384,260 @@
     },
     "/api/v1/configuracion/production/createManualHarvesting": {
       "post": {
+        "tags": [
+          "Production - Manual Harvesting"
+        ],
         "description": "",
         "parameters": [
           {
-            "name": "body",
+            "name": "obj",
             "in": "body",
+            "description": "Datos de la cosecha manual",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "harvest_date": {
-                  "example": "any"
-                },
-                "zone": {
-                  "example": "any"
-                },
-                "ground": {
-                  "example": "any"
-                },
-                "sector": {
-                  "example": "any"
-                },
-                "squad": {
-                  "example": "any"
-                },
-                "squad_leader": {
-                  "example": "any"
-                },
-                "batch": {
-                  "example": "any"
-                },
-                "worker": {
-                  "example": "any"
-                },
-                "worker_rut": {
-                  "example": "any"
-                },
-                "specie": {
-                  "example": "any"
-                },
-                "variety": {
-                  "example": "any"
-                },
-                "boxes": {
-                  "example": "any"
-                },
-                "kg_boxes": {
-                  "example": "any"
-                },
-                "quality": {
-                  "example": "any"
-                },
-                "hilera": {
-                  "example": "any"
-                },
-                "harvest_format": {
-                  "example": "any"
-                },
-                "company_id": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/ManualHarvesting"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getRegularizationProduction/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Regularization Production"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "manualHarvesting": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
+                      "ground": {
+                        "type": "string",
+                        "example": "Suelo 1"
+                      },
+                      "sector": {
+                        "type": "string",
+                        "example": "Sector 1"
+                      },
+                      "squad": {
+                        "type": "string",
+                        "example": "Escuadra 1"
+                      },
+                      "squad_leader": {
+                        "type": "string",
+                        "example": "Jefe 1"
+                      },
+                      "batch": {
+                        "type": "string",
+                        "example": "Lote 1"
+                      },
+                      "worker": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "worker_rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "harvest_date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "variety": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg_boxes": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "row": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "harvest_format": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateRegularizationProduction": {
+      "post": {
+        "tags": [
+          "Production - Regularization Production"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos de la cosecha manual",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegularizationProduction"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Cosecha actualizada correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteRegularizationProduction": {
+      "post": {
+        "tags": [
+          "Production - Regularization Production"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID de la cosecha",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/configuracion/production/getDispatchGuide/{companyID}": {
@@ -5529,7 +5715,11 @@
             }
           }
         },
-        "security": []
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/configuracion/production/updateDispatchGuide": {
@@ -5674,33 +5864,122 @@
     },
     "/api/v1/configuracion/production/filterResults/{companyID}": {
       "post": {
+        "tags": [
+          "Production - Filter Results"
+        ],
         "description": "",
         "parameters": [
           {
             "name": "companyID",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer"
           },
           {
-            "name": "body",
+            "name": "filters",
             "in": "body",
+            "description": "Filtros para la búsqueda",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "from": {
-                  "example": "any"
-                },
-                "to": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/ProductionFilters"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
+                      "ground": {
+                        "type": "string",
+                        "example": "Suelo 1"
+                      },
+                      "sector": {
+                        "type": "string",
+                        "example": "Sector 1"
+                      },
+                      "squad": {
+                        "type": "string",
+                        "example": "Escuadra 1"
+                      },
+                      "squad_leader": {
+                        "type": "string",
+                        "example": "Jefe 1"
+                      },
+                      "batch": {
+                        "type": "string",
+                        "example": "Lote 1"
+                      },
+                      "worker": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "worker_rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "harvest_date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "variety": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg_boxes": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "row": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "harvest_format": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "404": {
             "description": "Not Found"
@@ -5708,7 +5987,12 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/filter/dashboard/dataKgDay/{companyID}/{groundID}": {

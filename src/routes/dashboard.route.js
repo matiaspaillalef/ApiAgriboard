@@ -54,8 +54,8 @@ router.get('/filter/dashboard/dataKgDay/:companyID/:groundID', validateToken, (r
 
         } else {
 
-            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM manual_harvesting WHERE company_id  = " + companyID + " AND ground = " + groundID;
-            //var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM manual_harvesting WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND season = (SELECT MAX(season) FROM manual_harvesting WHERE company_id = " + companyID + " AND ground = " + groundID + ")";
+            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID;
+            //var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND season = (SELECT MAX(season) FROM harvest WHERE company_id = " + companyID + " AND ground = " + groundID + ")";
 
             mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -132,7 +132,7 @@ router.get('/filter/dashboard/dataKgDayQlty/:companyID/:groundID/:qualityID', va
 
         } else {
 
-            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM manual_harvesting WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND quality = " + qualityID;
+            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND quality = " + qualityID;
 
             mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -217,12 +217,12 @@ router.post('/filter/dashboard/dataKgSeason/:companyID/:groundID', validateToken
 
         const queryString = `
             SELECT SUM(kg_boxes) AS kg_boxes
-            FROM manual_harvesting
+            FROM harvest
             WHERE company_id = ?
               AND ground = ?
               AND season = (
                 SELECT MAX(season)
-                FROM manual_harvesting
+                FROM harvest
                 WHERE company_id = ?
                   AND ground = ?
               )
@@ -315,13 +315,13 @@ router.post('/filter/dashboard/dataKgSeasonQlty/:companyID/:groundID/:qualityID'
 
         const queryString = `
             SELECT SUM(kg_boxes) AS kg_boxes
-            FROM manual_harvesting
+            FROM harvest
             WHERE company_id = ?
               AND ground = ?
               AND quality = ?
               AND season = (
                 SELECT MAX(season)
-                FROM manual_harvesting
+                FROM harvest
                 WHERE company_id = ?
                   AND ground = ?
                   AND quality = ?
@@ -411,10 +411,10 @@ router.post('/filter/dashboard/dataWorkersCount/:companyID/:groundID', validateT
         }
 
         const queryString = `
-            SELECT COUNT(DISTINCT worker) AS workersCount FROM manual_harvesting mh
+            SELECT COUNT(DISTINCT worker) AS workersCount FROM harvest mh
             WHERE company_id = ?
             AND ground = ?
-            AND season = (SELECT MAX(season) FROM manual_harvesting WHERE company_id = ? AND ground = ?)
+            AND season = (SELECT MAX(season) FROM harvest WHERE company_id = ? AND ground = ?)
         `;
 
         mysqlConn.query(queryString, [companyID, groundID, companyID, groundID], function (error, results) {
@@ -509,7 +509,7 @@ router.post('/filter/dashboard/dataWorkersWeek/:companyID/:groundID', validateTo
                        AND date_until >= CURDATE()
                        AND id = (
                          SELECT MAX(season)
-                         FROM manual_harvesting
+                         FROM harvest
                          WHERE company_id = ? 
                            AND ground = ?
                        )
@@ -610,7 +610,7 @@ router.post('/filter/dashboard/dataVaritiesDay/:companyID/:groundID', validateTo
             SUM(mh.kg_boxes) AS cantidad, 
             SUM(mh.boxes) AS cajas 
         FROM 
-            manual_harvesting mh
+            harvest mh
         JOIN 
             varieties v 
         ON 
@@ -813,7 +813,7 @@ router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID'
                 v.name AS variety, 
                 COUNT(*) AS cantidad
             FROM 
-                manual_harvesting mh
+                harvest mh
             JOIN 
                 varieties v 
             ON 
@@ -821,7 +821,7 @@ router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID'
             WHERE 
                 mh.season = (
                     SELECT MAX(season)
-                    FROM manual_harvesting
+                    FROM harvest
                     WHERE company_id = ?
                       AND ground = ?
                 )
@@ -924,13 +924,13 @@ router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundI
                 AVG(wet) AS humedad, 
                 AVG(temp) AS temperatura
             FROM 
-                manual_harvesting
+                harvest
             WHERE 
                 company_id = ?
                 AND ground = ?
                 AND season = (
                     SELECT MAX(season)
-                    FROM manual_harvesting
+                    FROM harvest
                     WHERE company_id = ? AND ground = ?
                 )
             GROUP BY 

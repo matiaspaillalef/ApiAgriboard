@@ -4162,7 +4162,7 @@ router.get('/configuracion/production/getManualHarvesting/:companyID', validateT
 
             }
 
-            var queryString = "SELECT * FROM manual_harvesting mh WHERE company_id = ?";
+            var queryString = "SELECT * FROM harvest mh WHERE source = 1 AND company_id = ?";
 
             mysqlConn.query(queryString, [companyID], function (error, results) {
 
@@ -4284,7 +4284,7 @@ router.post('/configuracion/production/updateManualHarvesting', validateToken, (
 
             }
 
-            var queryString = "UPDATE manual_harvesting SET zone = ?, ground = ?, sector = ?, squad = ?, squad_leader = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, hilera = ?, harvest_format = ?, company_id = ? WHERE id = ?";
+            var queryString = "UPDATE harvest SET zone = ?, ground = ?, sector = ?, squad = ?, squad_leader = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, hilera = ?, harvest_format = ?, company_id = ? WHERE id = ?";
 
             mysqlConn.query(queryString, [obj.zone, obj.ground, obj.sector, obj.squad, obj.squad_leader, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.company_id, obj.id], function (error) {
 
@@ -4355,7 +4355,7 @@ router.post('/configuracion/production/deleteManualHarvesting', validateToken, (
 
             }
 
-            var queryString = "DELETE FROM manual_harvesting WHERE id = ?";
+            var queryString = "DELETE FROM harvest WHERE id = ?";
 
             mysqlConn.query(queryString, [id], function (error, results) {
 
@@ -4400,14 +4400,34 @@ router.post('/configuracion/production/deleteManualHarvesting', validateToken, (
 
 router.post('/configuracion/production/createManualHarvesting', validateToken, (req, res) => {
 
+    /*
+        #swagger.tags = ['Production - Manual Harvesting']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la cosecha manual',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/ManualHarvesting" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado correctamente."
+            }
+        }
+    */
+
     try {
 
         let obj = req.body;
 
-        //console.log(obj);
-
-        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
-        let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+        // Convertir las fechas ISO 8601 a formato DATETIME de MySQL
+        let harvestDate = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+        let syncDate = new Date(obj.sync_date).toISOString().slice(0, 19).replace('T', ' ');
+        let dateRegister = new Date(obj.date_register).toISOString().slice(0, 19).replace('T', ' ');
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -4423,16 +4443,20 @@ router.post('/configuracion/production/createManualHarvesting', validateToken, (
 
             // Asegúrate de que la cantidad de columnas coincida con la cantidad de valores
             var queryString = `
-                INSERT INTO manual_harvesting 
-                (zone, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, company_id) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                INSERT INTO harvest 
+                (zone, ground, sector, squad, squad_leader, batch, worker, worker_rut, harvest_date, specie, variety, boxes, kg_boxes, quality, hilera, harvest_format, weigher_rut, sync, sync_date, season, turns, date_register, temp, wet, contractor, source, company_id)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             `;
 
             mysqlConn.query(queryString, [
                 obj.zone, obj.ground, obj.sector, obj.squad, obj.squad_leader, obj.batch,
-                obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes,
-                obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.company_id
+                obj.worker, obj.worker_rut, harvestDate, obj.specie, obj.variety, obj.boxes,
+                obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.weigher_rut,
+                obj.sync, syncDate, obj.season, obj.turns, dateRegister, obj.temp,
+                obj.wet, obj.contractor, obj.source, obj.company_id
             ], function (error, results) {
+
+                mysqlConn.end();  // Asegúrate de cerrar la conexión después de la consulta
 
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
@@ -4456,6 +4480,308 @@ router.post('/configuracion/production/createManualHarvesting', validateToken, (
 
             });
 
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
+// REGULARIZATION PRODUCTION
+router.get('/configuracion/production/getRegularizationProduction/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Regularization Production']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "manualHarvesting": [
+                    {
+                    "id": 1,
+                    "zone": "Zona 1",
+                    "ground": "Suelo 1",
+                    "sector": "Sector 1",
+                    "squad": "Escuadra 1",
+                    "squad_leader": "Jefe 1",
+                    "batch": "Lote 1",
+                    "worker": 1,
+                    "worker_rut": "12345678-9",
+                    "harvest_date": "2021-01-01 00:00:00",
+                    "specie": 1,
+                    "variety": 1,
+                    "boxes": 100,
+                    "kg_boxes": 20,
+                    "quality": 1,
+                    "row": 1,
+                    "harvest_format": 1,
+                    company_id: 1
+                    }
+                ]    
+            }
+        }
+    */
+
+
+
+    try {
+
+        let { companyID } = req.params;
+
+        //console.log(companyID);
+
+        var manualHarvesting = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "SELECT * FROM harvest mh WHERE source = 0 AND company_id = ?";
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.length > 0) {
+
+                    results.forEach(element => {
+                        manualHarvesting.push({
+                            "id": element.id,
+                            "ground": element.ground,
+                            "sector": element.sector,
+                            "squad": element.squad,
+                            "squad_leader": element.squad_leader,
+                            "batch": element.batch,
+                            "zone": element.zone,
+                            "worker": element.worker,
+                            "worker_rut": element.worker_rut,
+                            "harvest_date": element.harvest_date,
+                            "quality": element.quality,
+                            "boxes": element.boxes,
+                            "kg_boxes": element.kg_boxes,
+                            "hilera": element.hilera,
+                            "specie": element.specie,
+                            "variety": element.variety,
+                            "harvest_format": element.harvest_format,
+                            "weigher_rut": element.weigher_rut,
+                            "sync": element.sync,
+                            "sync_date": element.sync_date,
+                            "season": element.season,
+                            "turns": element.turns,
+                            "date_register": element.date_register,
+                            "temp": element.temp,
+                            "wet": element.wet,
+                            "contractor": element.contractor,
+                            "company_id": element.company_id
+                        });
+                    });
+
+                    return res.json({
+                        "code": "OK",
+                        "manualHarvesting": manualHarvesting
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+
+                }
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    }
+
+    catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/updateRegularizationProduction', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Regularization Production']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos de la cosecha manual',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/RegularizationProduction" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Cosecha actualizada correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let obj = req.body;
+
+        //(obj);
+
+        // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
+        let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "UPDATE harvest SET zone = ?, ground = ?, sector = ?, squad = ?, squad_leader = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, hilera = ?, harvest_format = ?, company_id = ? WHERE id = ?";
+
+            mysqlConn.query(queryString, [obj.zone, obj.ground, obj.sector, obj.squad, obj.squad_leader, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.hilera, obj.harvest_format, obj.company_id, obj.id], function (error) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+router.post('/configuracion/production/deleteRegularizationProduction', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Regularization Production']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID de la cosecha',
+            required: true,
+            type: "integer",
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        }
+    */
+
+    try {
+
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+
+            }
+
+            var queryString = "DELETE FROM harvest WHERE id = ?";
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+
+                if (error) {
+
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+
+                }
+
+                if (results && results.affectedRows != 0) {
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+
+                } else {
+
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+
+                }
+
+            });
+
             mysqlConn.end();
 
         });
@@ -4474,7 +4800,9 @@ router.get('/configuracion/production/getDispatchGuide/:companyID', validateToke
 
     /*
         #swagger.tags = ['Production - Dispatch Guide']
-        #swagger.security
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
         #swagger.parameters['companyID'] = {
             in: 'path',
             required: true,
@@ -4817,10 +5145,58 @@ router.post('/configuracion/production/createDispatchGuide', validateToken, (req
 
 
 router.post('/configuracion/production/filterResults/:companyID', validateToken, (req, res) => {
+
+    /*
+        #swagger.tags = ['Production - Filter Results']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+        #swagger.parameters['filters'] = {
+            in: 'body',
+            description: 'Filtros para la búsqueda',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/ProductionFilters" }
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "results": [
+                    {
+                        "id": 1,
+                        "zone": "Zona 1",
+                        "ground": "Suelo 1",
+                        "sector": "Sector 1",
+                        "squad": "Escuadra 1",
+                        "squad_leader": "Jefe 1",
+                        "batch": "Lote 1",
+                        "worker": 1,
+                        "worker_rut": "12345678-9",
+                        "harvest_date": "2021-01-01 00:00:00",
+                        "specie": 1,
+                        "variety": 1,
+                        "boxes": 100,
+                        "kg_boxes": 20,
+                        "quality": 1,
+                        "row": 1,
+                        "harvest_format": 1,
+                        company_id: 1
+                    }
+                ]
+            }
+        }
+    */
+
     const { companyID } = req.params;
     const filters = req.body; // Los filtros enviados desde el frontend
 
-    let queryString = 'SELECT * FROM manual_harvesting WHERE company_id = ?';
+    let queryString = 'SELECT * FROM harvest WHERE company_id = ?';
     const queryValues = [companyID];
 
     if (filters.from) {
@@ -4885,6 +5261,5 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
 
 
 export default router
-
 
 
