@@ -3436,7 +3436,7 @@ router.get('/configuracion/production/getDeals/:companyID', validateToken, (req,
                     "harvest_format": 1,
                     "quality": 1,
                     "price": 100,
-                    "status": 1
+                    "status": 1,
                     "company_id": 1,
                     }
                 ]    
@@ -3765,7 +3765,7 @@ router.get('/configuracion/production/getExporters/:companyID', validateToken, (
                     "legal_representative_name": "Representante 1",
                     "legal_representative_rut": "12345678-9",
                     "legal_representative_phone": "123456789",
-                    "legal_representative_email": "email@email.com"
+                    "legal_representative_email": "email@email.com",
                     "status": 1,
                     "company_id": 1
                     }
