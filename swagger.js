@@ -10,7 +10,7 @@ const doc = {
     },
     host: "52.23.209.121:" + process.env.PORT,
     basePath: "/",
-    schemes: ['http'],
+    schemes: ['http', 'https'],
     consumes: ['application/json'],
     produces: ['application/json'],
     securityDefinitions: {
@@ -30,3 +30,5 @@ const endpointsFiles = ['./src/index.js']
 swaggerAutogen(outputFile, endpointsFiles, doc).then(() => {
     console.log("Documentacion Generada.");
 })
+
+

@@ -24,7 +24,7 @@ const options = {
 app.use(cors({
     origin: '*', // Permitir todas las solicitudes
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Authorization'
+    allowedHeaders: 'Content-Type, Authorization, X-API-KEY',
 }));
 app.use(express.json());
 app.use(compression());

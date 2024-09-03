@@ -5,11 +5,11 @@
     "title": "Api Agrisoft",
     "description": ""
   },
-
-  "host": "52.23.209.121:4000",
+  "host": "localhost:4000",
   "basePath": "/",
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "securityDefinitions": {
     "apiKeyAuth": {
@@ -4874,7 +4874,55 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "deals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Negocio 1"
+                      },
+                      "harvest_format": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "price": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         },
         "security": [
@@ -5023,7 +5071,87 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "exporters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Exportador 1"
+                      },
+                      "rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "giro": {
+                        "type": "string",
+                        "example": "Giro 1"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "Región 1"
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Ciudad 1"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "Dirección 1"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "123456789"
+                      },
+                      "web": {
+                        "type": "string",
+                        "example": "www.exportador1.cl"
+                      },
+                      "legal_representative_name": {
+                        "type": "string",
+                        "example": "Representante 1"
+                      },
+                      "legal_representative_rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "legal_representative_phone": {
+                        "type": "string",
+                        "example": "123456789"
+                      },
+                      "legal_representative_email": {
+                        "type": "string",
+                        "example": "email@email.com"
+                      },
+                      "status": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         },
         "security": [
