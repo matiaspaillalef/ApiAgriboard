@@ -5,12 +5,20 @@ import compression from 'compression';
 import helmet from 'helmet';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import https from 'https';
 
 // Cargar variables de entorno
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+
+const options = {
+    key: fs.readFileSync('./server.key'),
+    cert: fs.readFileSync('./server.cert')
+  };
+
 
 // Configurar middlewares
 app.use(cors({
@@ -45,6 +53,14 @@ const swaggerFile = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf-8')
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Iniciar el servidor HTTP
-app.listen(port, '0.0.0.0', () => {
+/*app.listen(port, '0.0.0.0', () => {
     console.log(`Servidor corriendo en http://0.0.0.0:${port}`);
-});
+});*/
+
+
+//app.listen(port, () => console.log('https://localhost:' + port));
+
+// Crear un servidor HTTPS con las opciones
+https.createServer(options, app).listen(port, () => {
+    console.log('Servidor HTTPS corriendo en https://localhost:' + port);
+  });
