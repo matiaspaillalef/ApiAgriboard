@@ -951,7 +951,7 @@ router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundI
             }
 
             // Verifica que `results` tenga los datos esperados
-            console.log('Query Results:', results);
+            /*console.log('Query Results:', results);*/
 
             const data = {
                 humedad: results.map(row => row.humedad),

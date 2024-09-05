@@ -78,16 +78,16 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
 
                             results.forEach(element => {
                                 const jsonResult = {
-                                    "userId": element.id,
-                                    "nombre": element.name,
-                                    "apellido": element.lastname,
+                                    "id": element.id,
+                                    "name": element.name,
+                                    "lastname": element.lastname,
                                     "mail": element.mail,
                                     "password": element.password,
                                     "id_rol": element.id_rol,
                                     "rol_descripcion": element.rol,
                                     "id_company": element.id_company,
                                     "company_name": element.company,
-                                    "estado": element.id_state,
+                                    "id_state": element.id_state,
                                 };
                                 usuarios.push(jsonResult);
                             });
@@ -150,7 +150,8 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
     */
     try {
 
-        let { name, lastName, userEmail, menuRol, userPassword, menuState ,menuCompany} = req.body;
+        let { name, lastname, mail, id_rol, password, id_state ,id_company} = req.body;
+
         const saltRounds = 10;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -170,7 +171,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                 //valido que usuario no exista
 
-                var queryString = "select id,name ,lastname,mail,id_rol,id_state,id_company,password  from users u where mail='" + userEmail + "'";
+                var queryString = "select id,name ,lastname,mail,id_rol,id_state,id_company,password  from users u where mail='" + mail + "'";
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -190,7 +191,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "El usuario " + userEmail + " ya existe en el sistema."
+                                "mensaje": "El usuario " + mail + " ya existe en el sistema."
                             }
 
                             res.json(jsonResult);
@@ -199,12 +200,12 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                         else {
 
                             const saltRounds = 10;
-                            userPassword = userPassword.trim();
-                            const hashedPassword = bcrypt.hashSync(userPassword, saltRounds);
+                            password = password.trim();
+                            const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
                             var queryString = "INSERT INTO users";
                             queryString += " (name, lastname, mail, id_rol, password, id_state, id_company)";
-                            queryString += "VALUES('" + name + "' , '" + lastName + "', '" + userEmail + "'," + menuRol + ", '" + hashedPassword + "'," + menuState + "," + menuCompany  +")";
+                            queryString += "VALUES('" + name + "' , '" + lastname + "', '" + mail + "'," + id_rol + ", '" + hashedPassword + "'," + id_state + "," + id_company  +")";
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
                                 //console.log("error", error);
@@ -288,7 +289,9 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
     try {
 
         
-        let { id, name, lastName, userEmail, menuRol, userPassword, menuState ,menuCompany} = req.body;
+        let { id, name, lastname, mail, id_rol, password, id_company, id_state} = req.body;
+
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -305,7 +308,7 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
             } else {
 
                 var queryString = "UPDATE users";
-                queryString += " SET name='" + name + "', lastname='" + lastName + "', mail='" + userEmail + "', id_rol=" + menuRol + ", password='" + userPassword + "', id_state=" + menuState + ", id_company=" + menuCompany;
+                queryString += " SET name='" + name + "', lastname='" + lastname + "', mail='" + mail + "', id_rol=" + id_rol + ", password='" + password + "', id_state=" + id_state + ", id_company=" + id_company;
                 queryString += " WHERE id=" + id;
                 ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -354,6 +357,7 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
         res.json({ error: e })
     }
 });
+
 
 router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res) => {
     /*  
@@ -445,6 +449,8 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
     }
 });
 
+//Roles
+
 router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Configuración - Usuarios']
@@ -526,6 +532,91 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
                                 "mensaje": "no se encontraron datos disponibles."
                             }
 
+                            res.json(jsonResult);
+
+                        }
+                    }
+                });
+
+                mysqlConn.end();
+            }
+        });
+
+    } catch (e) {
+
+        console.log(e);
+        res.json({ error: e })
+    }
+});
+
+router.get('/configuracion/usuarios/createRoles', validateToken, (req, res) => {
+    /*  
+        #swagger.tags = ['Configuración - Usuarios']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+        
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            schema: {
+                descripcion: "Cosecheros"
+            }
+        }  
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Rol creado correctamente."
+            }
+        } 
+    */
+    try {
+
+        let { descripcion } = req.body;
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+
+            if (err) {
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            } else {
+
+                var queryString = "INSERT INTO roles (descripcion) VALUES ('" + descripcion + "')";
+
+                mysqlConn.query(queryString, function (error, results, fields) {
+
+                    if (error) {
+
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    } else {
+
+                        if (results && results.insertId != 0) {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Rol creado correctamente."
+                            }
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el rol."
+                            }
                             res.json(jsonResult);
 
                         }
@@ -836,6 +927,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                                 "mensaje": "La empresa con RUT " + rut + " ya existe en el sistema."
                             }
                             res.json(jsonResult);
+
                         } else {
                             // Construir la consulta SQL para insertar la empresa
                             var insertFields = "name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status";
@@ -874,6 +966,9 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                             });
                         }
                     }
+
+
+                    
                 });
             }
         });
