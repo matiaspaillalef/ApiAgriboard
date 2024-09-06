@@ -173,7 +173,7 @@ router.post('/configuracion/production/updateGround', validateToken, (req, res) 
             }
             else {
 
-                console.log(obj.latitude);
+                //console.log(obj.latitude);
 
                 var queryString = "UPDATE ground SET name = '" + obj.name + "', state = '" + obj.state + "', city = '" + obj.city + "', address = '" + obj.address + "', latitude = " + (obj.latitude == null ? 'NULL' : '') + ", longitude = " + (obj.longitude == null ? 'NULL' : '') + ", zone = '" + obj.zone + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
@@ -558,7 +558,7 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
             }
             else {
 
-                console.log(obj.latitude);
+                //console.log(obj.latitude);
 
                 var queryString = "UPDATE sector SET name = '" + obj.name + "', ground = " + obj.ground + ", company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
@@ -864,7 +864,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
                     else {
                         if (results && results.length > 0) {
 
-                            console.log('result', results);
+                            //console.log('result', results);
 
                             results.forEach(element => {
                                 const jsonResult = {
@@ -1245,7 +1245,7 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
                 }
 
                 if (results && results.length > 0) {
-                    console.log('result', results);
+                    //console.log('result', results);
 
                     results.forEach(element => {
                         species.push({
@@ -1523,7 +1523,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
             }
 
             var queryString = "SELECT * FROM season s WHERE company_id = ?";
-            console.log('query', queryString);
+            //console.log('query', queryString);
 
             mysqlConn.query(queryString, [companyID], function (error, results) {
                 if (error) {
@@ -1535,7 +1535,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
                 }
 
                 if (results && results.length > 0) {
-                    console.log('result', results);
+                    //console.log('result', results);
 
                     results.forEach(element => {
                         seasons.push({
@@ -1550,7 +1550,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
                         });
                     });
 
-                    console.log('seasons', seasons);
+                    //console.log('seasons', seasons);
 
                     return res.json({
                         "code": "OK",

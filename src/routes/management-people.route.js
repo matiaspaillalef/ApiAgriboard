@@ -1420,7 +1420,7 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
         // Convertir workers a una cadena JSON
         const workersJson = JSON.stringify(workers);
 
-        console.log('req.body:', req.body)
+        //console.log('req.body:', req.body)
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 

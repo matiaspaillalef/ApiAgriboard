@@ -1,0 +1,35 @@
+2024/09/06-18:50:49.791 a103 Reusing MANIFEST /Users/matiaspaillalef/Documents/GitHub/ApiAgriboard/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/09/06-18:50:49.791 a103 Recovering log #727
+2024/09/06-18:50:49.807 a103 Reusing old log /Users/matiaspaillalef/Documents/GitHub/ApiAgriboard/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000727.log 
+2024/09/06-18:50:51.761 14627 Level-0 table #744: started
+2024/09/06-18:50:51.772 14627 Level-0 table #744: 127132 bytes OK
+2024/09/06-18:50:51.780 14627 Delete type=0 #727
+2024/09/06-18:50:51.781 14627 Manual compaction at level-0 from '\x00#\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00$\x00\x00\x00' @ 0 : 0; will stop at '\x00#\x00\x00\x05' @ 2598350 : 1
+2024/09/06-18:50:51.781 14627 Compacting 1@0 + 1@1 files
+2024/09/06-18:50:51.791 14627 Generated table #745@0: 6574 keys, 57650 bytes
+2024/09/06-18:50:51.802 14627 Generated table #746@0: 9532 keys, 204385 bytes
+2024/09/06-18:50:51.802 14627 Compacted 1@0 + 1@1 files => 262035 bytes
+2024/09/06-18:50:51.810 14627 compacted to: files[ 0 2 16 0 0 0 0 ]
+2024/09/06-18:50:51.810 14627 Delete type=2 #744
+2024/09/06-18:50:51.811 14627 Manual compaction at level-0 from '\x00#\x00\x00\x05' @ 2598350 : 1 .. '\x00$\x00\x00\x00' @ 0 : 0; will stop at (end)
+2024/09/06-18:50:54.061 f703 Compacting 1@1 + 8@2 files
+2024/09/06-18:50:54.131 f703 Generated table #747@1: 30980 keys, 2185102 bytes
+2024/09/06-18:50:54.181 f703 Generated table #748@1: 4817 keys, 2157814 bytes
+2024/09/06-18:50:54.208 f703 Generated table #749@1: 3389 keys, 2148999 bytes
+2024/09/06-18:50:54.248 f703 Generated table #750@1: 4003 keys, 2150377 bytes
+2024/09/06-18:50:54.273 f703 Generated table #751@1: 3934 keys, 2151983 bytes
+2024/09/06-18:50:54.350 f703 Generated table #752@1: 38835 keys, 2231061 bytes
+2024/09/06-18:50:54.466 f703 Generated table #753@1: 36840 keys, 2247716 bytes
+2024/09/06-18:50:54.499 f703 Generated table #754@1: 21399 keys, 2131375 bytes
+2024/09/06-18:50:54.499 f703 Compacted 1@1 + 8@2 files => 17404427 bytes
+2024/09/06-18:50:54.506 f703 compacted to: files[ 0 1 16 0 0 0 0 ]
+2024/09/06-18:50:54.507 f703 Delete type=2 #738
+2024/09/06-18:50:54.507 f703 Delete type=2 #745
+2024/09/06-18:50:54.507 f703 Delete type=2 #731
+2024/09/06-18:50:54.507 f703 Delete type=2 #730
+2024/09/06-18:50:54.507 f703 Delete type=2 #732
+2024/09/06-18:50:54.507 f703 Delete type=2 #733
+2024/09/06-18:50:54.507 f703 Delete type=2 #737
+2024/09/06-18:50:54.507 f703 Delete type=2 #736
+2024/09/06-18:50:54.507 f703 Delete type=2 #734
+2024/09/06-18:50:54.507 f703 Delete type=2 #735
