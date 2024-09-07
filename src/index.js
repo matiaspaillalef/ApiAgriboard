@@ -8,7 +8,7 @@ import helmet from "helmet";
 import fs from 'fs'
 
 
-const swaggerFile = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf-8'));
+//const swaggerFile = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf-8'));
 
 import tokenRouter from './routes/auth.route.js'
 import configurationRouter from './routes/configuration.route.js'
