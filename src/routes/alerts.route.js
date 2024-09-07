@@ -4,9 +4,9 @@ import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import qrcode from 'qrcode-terminal';
-import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth } = pkg;
+//import qrcode from 'qrcode-terminal';
+//import pkg from 'whatsapp-web.js';
+//const { Client, LocalAuth } = pkg;
 
 const router = Router();
 
@@ -22,7 +22,7 @@ mysqlConn.connect((err) => {
 });
 
 // Configuración del cliente de WhatsApp
-const client = new Client({
+/*const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
@@ -49,7 +49,7 @@ client.on('disconnected', (reason) => {
     client.initialize();
 });
 
-client.initialize();
+client.initialize();*/
 
 // Función para enviar el reporte por correo
 async function enviarReportePorCorreo(email, nombre, datos) {
@@ -174,7 +174,7 @@ async function enviarReportePorCorreo(email, nombre, datos) {
 }
 
 // Función para enviar el reporte por WhatsApp
-async function enviarReportePorWhatsApp(phone, nombre, datos) {
+/*async function enviarReportePorWhatsApp(phone, nombre, datos) {
     // Verifica si el cliente está listo
     if (!client.info || !client.info.wid) {
         console.log('Cliente no está listo. Esperando...');
@@ -203,7 +203,7 @@ async function enviarReportePorWhatsApp(phone, nombre, datos) {
     } catch (error) {
         console.error('Error al enviar mensaje de WhatsApp:', error);
     }
-}
+}*/
 
 // Configura el cron para ejecutar la función a las 23:59 cada día
 cron.schedule('59 23 * * *', () => {

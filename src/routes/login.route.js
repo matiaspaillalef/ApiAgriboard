@@ -11,6 +11,7 @@ function generateResetToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+
 // Función para enviar el correo de restablecimiento
 async function sendPasswordResetEmail(to, url, nombre) {
     let transporter = nodemailer.createTransport({
