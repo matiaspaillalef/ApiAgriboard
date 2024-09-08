@@ -792,6 +792,344 @@ router.post('/configuracion/production/createSectorBarrack', validateToken, (req
 
 });
 
+//PRODUCCIÓN - ATTRIBUTES SECTOR
+router.get('/configuracion/production/getAttributesSector/:companyID', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Attributes Sector']
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "attributes": [
+                    {
+                        "id": 1,
+                        "sector": 1,
+                        "specie": 1,
+                        "variety": 1,
+                        "ha_productivas": 10,
+                        "hileras": 10,
+                        "plants": 10,
+                        "min_daily_frecuency": 10,
+                        "max_daily_frecuency": 10,
+                        "harvest_end": 1,
+                        "stimation_good": 10,
+                        "stimation_regular": 10,
+                        "stimation_bad": 10,
+                        "stimation_replant_kg": 10,
+                        "surface": 10,
+                        "interrow_density": 10,
+                        "row_density": 10,
+                        "quantity_plants_ha": 10,
+                        "clasification": 1,
+                        "rotation": 1,
+                        "kg_sector": 10,
+                        "kg_hectares": 10,
+                        "kg_plants": 10,
+                        "porc_regular": 10,
+                        "porc_replant": 10,
+                        "season": 1,
+                        "company_id": 1,
+
+                    }
+                ]
+            }
+        }
+    */
+    try {
+        let { companyID } = req.params;
+
+        var attributes = [];
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "SELECT * FROM sector_attr a WHERE company_id = ?";
+            //console.log(queryString);
+
+            mysqlConn.query(queryString, [companyID], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.length > 0) {
+                    //console.log('result', results);
+
+                    results.forEach(element => {
+                        attributes.push({
+                            "id": element.id,
+                            "season": element.season,
+                            "sector": element.sector,
+                            "specie": element.specie,
+                            "variety": element.variety,
+                            "year_harvest": element.year_harvest,
+                            "ha_productivas": element.ha_productivas,
+                            "hileras": element.hileras,
+                            "plants": element.plants,
+                            "min_daily_frecuency": element.min_daily_frecuency,
+                            "max_daily_frecuency": element.max_daily_frecuency,
+                            "harvest_end": element.harvest_end,
+                            "stimation_good": element.stimation_good,
+                            "stimation_regular": element.stimation_regular,
+                            "stimation_bad": element.stimation_bad,
+                            "stimation_replant_kg": element.stimation_replant_kg,
+                            "surface": element.surface,
+                            "interrow_density": element.interrow_density,
+                            "row_density": element.row_density,
+                            "quantity_plants_ha": element.quantity_plants_ha,
+                            "clasification": element.clasification,
+                            "rotation": element.rotation,
+                            "kg_sector": element.kg_sector,
+                            "kg_hectares": element.kg_hectares,
+                            "kg_plants": element.kg_plants,
+                            "porc_regular": element.porc_regular,
+                            "porc_replant": element.porc_replant,
+                            "company_id": element.company_id,
+                        });
+                    });
+
+                    //console.log('attributes', attributes);
+
+                    return res.json({
+                        "code": "OK",
+                        "attributes": attributes
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se encuentran registros."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+router.post('/configuracion/production/updateAttributeSector', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Attributes Sector']
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+        #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Datos del atributo del sector',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/AttributeSector" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Atributo del sector actualizado correctamente."
+            }
+        }
+    */
+    try {
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "UPDATE sector_attr SET season = ?, sector = ?, specie = ?, variety = ?, year_harvest = ?, ha_productivas = ?, hileras = ?, plants = ?, min_daily_frecuency = ?, max_daily_frecuency = ?, harvest_end = ?, stimation_good = ?, stimation_regular = ?, stimation_bad = ?, stimation_replant_kg = ?, surface = ?, interrow_density = ?, row_density = ?, quantity_plants_ha = ?, clasification = ?, rotation = ?, kg_sector = ?, kg_hectares = ?, kg_plants = ?, porc_regular = ?, porc_replant = ?, company_id = ? WHERE id = ?";
+            //console.log(queryString);
+
+            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.harvest_end, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id, obj.id], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                return res.json({
+                    "code": "OK",
+                    "mensaje": "Registro actualizado correctamente."
+                });
+            });
+
+            mysqlConn.end();
+
+        });
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+router.post('/configuracion/production/deleteAttributeSector', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Attributes Sector']
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+        #swagger.parameters['id'] = {
+            in: 'body',
+            description: 'ID del atributo del sector',
+            required: true,
+            type: "integer",
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro eliminado correctamente."
+            }
+        }
+    */
+    try {
+        let { id } = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "DELETE FROM sector_attr WHERE id = ?";
+            //console.log(queryString);
+
+            mysqlConn.query(queryString, [id], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.affectedRows != 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro eliminado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo eliminar el registro."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+router.post('/configuracion/production/createAttributeSector', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Attributes Sector']
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+        #swagger.parameters['obj'] = {
+
+            in: 'body',
+            description: 'Datos del atributo del sector',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/AttributeSector" }
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado correctamente."
+            }
+        }
+    */
+    try {
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            var queryString = "INSERT INTO sector_attr (season, sector, specie, variety, year_harvest, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, harvest_end, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, company_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            //console.log(queryString);
+
+            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.harvest_end, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId != 0) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
+            }
+            );
+
+            mysqlConn.end();
+
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+
+});
+
+
 
 //PRODUCCIÓN - VARIETIES
 router.get('/configuracion/production/getVarieties/:companyID', validateToken, (req, res) => {
@@ -5228,8 +5566,8 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
     }, []);
 
     let queryString = `SELECT ${shouldGroup
-            ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
-            : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
+        ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
+        : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
         } FROM harvest WHERE company_id = ?`;
 
     const queryValues = [companyID];
