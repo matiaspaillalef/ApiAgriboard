@@ -234,7 +234,7 @@ async function generarYEnviarReportesDiarios() {
             ground g ON h.ground = g.id
         WHERE 
             s.status = 1 -- solo temporadas abiertas
-            AND DATE(h.harvest_date) =  '2024-08-06' -- CURDATE() -- Solo los pesajes del día actual
+            AND DATE(h.harvest_date) =  CURDATE() -- Solo los pesajes del día actual
         GROUP BY 
             w.email, 
             w.phone,
