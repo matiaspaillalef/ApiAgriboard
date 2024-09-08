@@ -5276,7 +5276,7 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
     if (shouldGroup) {
         const selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
         const groupByColumns = [...new Set([...selectColumns, ...columns.filter(col => acceptedGroup.includes(col))])].map(escapeColumnName).join(', ');
-        queryString += ' GROUP BY ' + groupByColumns;
+        queryString += ' GROUP BY ' + selectGroupColumns;
     }
 
     //console.log(queryString);
