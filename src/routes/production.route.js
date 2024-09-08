@@ -3,6 +3,7 @@ const router = Router()
 import validateToken from '../middleware/validateToken.js'
 import mysql from 'mysql';
 import bcrypt, { compareSync } from 'bcrypt';
+import { filter } from 'compression';
 
 
 //PRODUCCIÓN - CAMPOS
@@ -5196,31 +5197,90 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
     const { companyID } = req.params;
     const filters = req.body; // Los filtros enviados desde el frontend
 
-    let queryString = 'SELECT * FROM harvest WHERE company_id = ?';
-    const queryValues = [companyID];
+    const totals = filters.totals;
+    const shouldGroup = totals === 1;
 
-    if (filters.from) {
-        queryString += ` AND DATE(harvest_date) >= ?`;
-        queryValues.push(filters.from);
+    // Filtra las columnas 'totals'
+    const { totals: _, ...filteredFilters } = filters;
+    const columns = Object.keys(filteredFilters).filter(key => key !== 'from' && key !== 'to');
+
+
+    const indexOfTotals = columns.indexOf('totals');
+    if (indexOfTotals > -1) {
+        columns.splice(indexOfTotals, 1);
     }
 
+    const selectColumns = [];
+    const selectColumnsDetails = ['season', 'boxes', 'kg_boxes', 'zone', 'hilera', 'turns', 'temp', 'wet', 'sync', 'sync_date', 'date_register'];
+    const acceptedGroup = ['zone', 'ground', 'sector', 'hilera', 'turns', 'temp', 'wet', 'sync', 'sync_date', 'date_register', 'worker', 'worker_rut', 'specie', 'variety', 'harvest_format', 'season', 'weigther_rut', 'contractor'];
+
+    // Función para escapar nombres de columnas
+    const escapeColumnName = (col) => mysql.escapeId(col);
+
+    // Construye las condiciones para la cláusula WHERE
+    const conditions = columns.reduce((acc, key) => {
+        if (filters[key] !== '') {
+            acc.push(`${escapeColumnName(key)} = ?`);
+        } else {
+            acc.push(`${escapeColumnName(key)} IS NULL`);
+        }
+        return acc;
+    }, []);
+
+    let queryString = `SELECT ${shouldGroup
+            ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
+            : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
+        } FROM harvest WHERE company_id = ?`;
+
+    const queryValues = [companyID];
+
+    // Validar y añadir la condición de la fecha de inicio
+    if (filters.from) {
+        const fromDate = new Date(filters.from);
+        if (!isNaN(fromDate.getTime())) { // Verifica que la fecha es válida
+            queryString += ` AND DATE(harvest_date) >= ?`;
+            queryValues.push(filters.from);
+        } else {
+            return res.status(400).json({
+                code: "ERROR",
+                mensaje: "Fecha de inicio inválida."
+            });
+        }
+    }
+
+    // Validar y añadir la condición de la fecha final
     if (filters.to) {
-        queryString += ` AND DATE(harvest_date) <= ?`;
-        queryValues.push(filters.to);
+        const toDate = new Date(filters.to);
+        if (!isNaN(toDate.getTime())) { // Verifica que la fecha es válida
+            queryString += ` AND DATE(harvest_date) <= ?`;
+            queryValues.push(filters.to);
+        } else {
+            return res.status(400).json({
+                code: "ERROR",
+                mensaje: "Fecha final inválida."
+            });
+        }
     }
 
     for (const [key, value] of Object.entries(filters)) {
-        if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to') {
-
+        if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to' && key !== 'totals') {
             if (key === 'date_register') {
-                // Si el filtro es para la fecha, usa DATE() en la consulta
-                queryString += ` AND DATE(${mysql.escapeId(key)}) = ?`;
+                queryString += ` AND DATE(${escapeColumnName(key)}) = ?`;
             } else {
-                queryString += ` AND ${mysql.escapeId(key)} = ?`;
+                queryString += ` AND ${escapeColumnName(key)} = ?`;
             }
             queryValues.push(value);
         }
     }
+
+    if (shouldGroup) {
+        const selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
+        const groupByColumns = [...new Set([...selectColumns, ...columns.filter(col => acceptedGroup.includes(col))])].map(escapeColumnName).join(', ');
+        queryString += ' GROUP BY ' + selectGroupColumns;
+    }
+
+    //console.log(queryString);
+    //console.log(filters);
 
     const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -5258,7 +5318,6 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
         });
     });
 });
-
 
 export default router
 

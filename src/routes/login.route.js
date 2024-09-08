@@ -45,24 +45,23 @@ async function sendPasswordResetEmail(to, url, nombre) {
                                 </div>
                             </div>
                                 <div style="padding:75px 40px 75px 40px;color:#0b1437;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left;">
-                                    <table style="margin: 0 auto;background-color:#ffffff;width:100%;padding:25px 40px;color:#0b1437;border-bottom:1px solid #b6b6b6; padding-top: 25px;">
-                                        <tr style="text-align:left;">
-                                            <td style="vertical-align: baseline;">
+                                    <div style="margin: 0 auto;background-color:#ffffff;width:100%;padding:25px 40px;color:#0b1437;border-bottom:1px solid #b6b6b6; padding-top: 25px;">
+                                        <div style="text-align:left;">
+                                            <div style="vertical-align: baseline;">
                                                 <h3 style="text-align:left;font-size:25px">Hola ${nombre}.</h3>
                                                 <p style="font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:900;text-align:left;">
                                                     Haz clic en el siguiente enlace para restablecer tu contraseña
                                                 </p>
                                                 <p style="line-height:normal;text-decoration:none;">
-                                                    <a style="background-color: #0b1437;padding:15px 25px; border-radius: 8px;display:block;color: white; text-align: center;text-transform: uppercase;font-weight: bold;text-decoration: none;width: 250px;margin: 0 auto;" href="${url}">
+                                                    <a href="http://${url}" style="background-color: #0b1437;padding:15px 25px; border-radius: 8px;display:block;color: white; text-align: center;text-transform: uppercase;font-weight: bold;text-decoration: none;width: 250px;margin: 0 auto;" >
                                                         Restablece tu contraseña
                                                     </a>
                                                 </p>
-
                                                  <p style="text-align:center;margin-top:15px; font-size: 16px;">Si no has solicitado este restablecimiento de la contraseña, omite el mensaje.</p>
 
-                                            </td>
-                                        </tr>
-                                    </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div style="background-color:#0b1437;color:#FFFFFF;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;text-align:center;padding-top:50px;">
                                     <p
