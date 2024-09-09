@@ -342,12 +342,12 @@ router.post('/auth/reset-password', (req, res) => {
             mysqlConn.query(query, [token], async function (error, results) {
                 if (error) {
                     console.error('Error executing query: ' + error.message);
-                    mysqlConn.end(); // Asegúrate de cerrar la conexión
+                    mysqlConn.end();
                     return res.json({ code: "ERROR", message: error.message });
                 }
 
                 if (results.length === 0 || new Date(results[0].expires) < new Date()) {
-                    mysqlConn.end(); // Asegúrate de cerrar la conexión
+                    mysqlConn.end(); 
                     console.log('Token inválido o expirado.');
                     return res.json({ code: "ERROR", message: "Token inválido o expirado." });
                 }
@@ -360,14 +360,14 @@ router.post('/auth/reset-password', (req, res) => {
                 mysqlConn.query(updateQuery, [hashedPassword, userId], function (error) {
                     if (error) {
                         console.error('Error executing query: ' + error.message);
-                        mysqlConn.end(); // Asegúrate de cerrar la conexión
+                        mysqlConn.end();
                         return res.json({ code: "ERROR", message: error.message });
                     }
 
                     // Elimina el token después de restablecer la contraseña
                     const deleteQuery = "DELETE FROM password_resets WHERE token = ?";
                     mysqlConn.query(deleteQuery, [token], function (error) {
-                        mysqlConn.end(); // Asegúrate de cerrar la conexión
+                        mysqlConn.end(); 
                         if (error) {
                             console.error('Error executing query: ' + error.message);
                             return res.json({ code: "ERROR", message: error.message });

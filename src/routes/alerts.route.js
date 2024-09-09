@@ -4,52 +4,8 @@ import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-//import qrcode from 'qrcode-terminal';
-//import pkg from 'whatsapp-web.js';
-//const { Client, LocalAuth } = pkg;
 
 const router = Router();
-
-// Configuración de conexión a la base de datos MySQL
-const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-mysqlConn.connect((err) => {
-    if (err) {
-        console.error('Error conectando a la base de datos:', err.sqlMessage);
-        return;
-    }
-    console.log('Conectado a la base de datos MySQL');
-});
-
-// Configuración del cliente de WhatsApp
-/*const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        timeout: 60000 // Aumenta el tiempo de espera a 60 segundos
-    }
-});
-
-client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
-});
-
-client.on('ready', () => {
-    console.log('Cliente de WhatsApp está listo.');
-});
-
-client.on('auth_failure', () => {
-    console.error('Error de autenticación. Asegúrate de escanear el QR correctamente.');
-});
-
-client.on('disconnected', (reason) => {
-    console.log('Cliente desconectado:', reason);
-    // Intenta reiniciar el cliente
-    client.initialize();
-});
-
-client.initialize();*/
 
 // Función para enviar el reporte por correo
 async function enviarReportePorCorreo(email, nombre, datos) {
@@ -165,45 +121,12 @@ async function enviarReportePorCorreo(email, nombre, datos) {
     await transporter.sendMail({
         from: '"Sistema de Pesaje" <noreply@agrisoft.cl.com>',
         to: email,
-        //subject: "Reporte Diario de Pesaje",
-        subject: `Reporte Diario de Pesaje - ${nombre} - ${new Date().toLocaleString()}`, // Asunto único
+        subject: `Reporte Diario de Pesaje - ${nombre} - ${new Date().toLocaleString()}`,
         html: htmlContent
     });
 
     console.log("Correo enviado a: %s", email);
 }
-
-// Función para enviar el reporte por WhatsApp
-/*async function enviarReportePorWhatsApp(phone, nombre, datos) {
-    // Verifica si el cliente está listo
-    if (!client.info || !client.info.wid) {
-        console.log('Cliente no está listo. Esperando...');
-        return;
-    }
-
-    const numeroWhatsApp = `${phone}@c.us`; // Formato para WhatsApp Web
-
-    let mensaje = `
-        *Reporte Diario de Pesaje*\n
-        *Fecha*: ${datos.date}\n
-        *Trabajador*: ${nombre}\n\n
-    `;
-
-    datos.datos.forEach(({ ground, total_kg, total_boxes }) => {
-        mensaje += `
-            *Campo*: ${ground}\n
-            *Total Kg*: ${total_kg}\n
-            *Total Cajas*: ${total_boxes}\n\n
-        `;
-    });
-
-    try {
-        await client.sendMessage(numeroWhatsApp, mensaje);
-        console.log('Mensaje de WhatsApp enviado a: %s', phone);
-    } catch (error) {
-        console.error('Error al enviar mensaje de WhatsApp:', error);
-    }
-}*/
 
 // Configura el cron para ejecutar la función a las 23:59 cada día
 cron.schedule('59 23 * * *', () => {
@@ -248,11 +171,21 @@ async function generarYEnviarReportesDiarios() {
             w.email, g.name;
     `;
 
-    mysqlConn.query(query, async (error, results) => {
-        if (error) {
-            console.error('Error ejecutando query:', error.sqlMessage);
-            return;
-        }
+    // Crear conexión dentro de la función
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    try {
+        // Promesa para ejecutar la consulta
+        const results = await new Promise((resolve, reject) => {
+            mysqlConn.query(query, (error, results) => {
+                if (error) {
+                    console.error('Error ejecutando query:', error.sqlMessage);
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
 
         if (results.length === 0) {
             console.log("No hay datos para enviar.");
@@ -279,14 +212,24 @@ async function generarYEnviarReportesDiarios() {
             return acc;
         }, {});
 
+        // Enviar reportes por correo
         for (let [email, { phone, first_name, last_name, datos, date }] of Object.entries(reportesPorTrabajador)) {
             await enviarReportePorCorreo(email, `${first_name} ${last_name}`, datos);
             //await enviarReportePorWhatsApp(phone, `${first_name} ${last_name}`, { date, datos });
         }
-    });
+    } catch (error) {
+        console.error('Error en la generación o envío de reportes:', error);
+    } finally {
+        // Cierre de la conexión a la base de datos
+        mysqlConn.end((err) => {
+            if (err) {
+                console.error('Error al cerrar la conexión:', err);
+            } else {
+                console.log('Conexión cerrada correctamente.');
+            }
+        });
+    }
 }
-
-//generarYEnviarReportesDiarios();
 
 // Exportar el router para su uso en la aplicación
 export default router;
