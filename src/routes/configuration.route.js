@@ -792,6 +792,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                 queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ";
                 queryString += "FROM companies";
 
+                console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
                     if (error) {
