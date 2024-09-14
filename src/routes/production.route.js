@@ -1078,58 +1078,82 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
             }
         }
     */
-    try {
-        let obj = req.body;
+        try {
+            let obj = req.body;
+    
+            // Asegurarse de que todos los valores sean del tipo correcto
+            const values = [
+                obj.season, obj.sector, obj.specie, obj.variety,
+                parseFloat(obj.ha_productivas) || null,
+                parseInt(obj.hileras) || null,
+                parseInt(obj.plants) || null,
+                parseInt(obj.min_daily_frecuency) || null,
+                parseInt(obj.max_daily_frecuency) || null,
+                parseInt(obj.harvest_end) || null,
+                parseInt(obj.stimation_good) || null,
+                parseInt(obj.stimation_regular) || null,
+                obj.stimation_bad !== undefined ? parseInt(obj.stimation_bad) : null,
+                parseInt(obj.stimation_replant_kg) || null,
+                parseFloat(obj.surface) || '0.00',
+                parseFloat(obj.interrow_density) || '0.00',
+                parseFloat(obj.row_density) || '0.00',
+                parseFloat(obj.quantity_plants_ha) || '0.00',
+                obj.clasification || null,
+                parseInt(obj.rotation) || null,
+                parseFloat(obj.kg_sector) || '0.00',
+                parseFloat(obj.kg_hectares) || '0.00',
+                parseFloat(obj.kg_plants) || '0.00',
+                parseFloat(obj.porc_regular) || '0.00',
+                parseFloat(obj.porc_replant) || '0.00',
+                obj.company_id,
+                obj.year_harvest ? new Date(obj.year_harvest).toISOString().split('T')[0] : null
+            ];
+    
+            const queryString = "INSERT INTO sector_attr (season, sector, specie, variety, year_harvest, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, harvest_end, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, company_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    
+            console.log('Executing query:', queryString);
+            console.log('With values:', values);
 
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-            if (err) {
-                console.error('error connecting: ' + err.message);
-                return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.message
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('Error connecting: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                mysqlConn.query(queryString, values, function (error, results) {
+                    if (error) {
+                        console.error('Error executing query: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+    
+                    if (results && results.insertId) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
                 });
-            }
-
-            var queryString = "INSERT INTO sector_attr (season, sector, specie, variety, year_harvest, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, harvest_end, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, company_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-            //console.log(queryString);
-
-            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.harvest_end, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id], function (error, results) {
-                if (error) {
-                    console.error('error ejecutando query: ' + error.message);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.message
-                    });
-                }
-
-                if (results && results.insertId != 0) {
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-                } else {
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
-                    });
-                }
-            }
-            );
-
-            mysqlConn.end();
-
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
-    }
-
-});
-
-
+    
+                mysqlConn.end();
+            });
+    
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
 
 //PRODUCCIÓN - VARIETIES
 router.get('/configuracion/production/getVarieties/:companyID', validateToken, (req, res) => {
