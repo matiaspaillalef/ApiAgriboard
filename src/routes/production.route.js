@@ -518,11 +518,7 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
 
     /*
         #swagger.tags = ['Production - Sectors Barracks']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-
+        #swagger.security = [{ "apiKeyAuth": [] }]
         #swagger.parameters['obj'] = {
             in: 'body',
             description: 'Datos del sector',
@@ -530,7 +526,6 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
             type: "object",
             schema: { $ref: "#/definitions/Sector" }
         }  
-        
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -539,65 +534,80 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
         } 
     */
 
-    try {
+    // Extract request body
+    const { id, name, ground, company_id, status } = req.body;
 
-        let obj = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                res.json(jsonResult);
-
-            }
-            else {
-
-                //console.log(obj.latitude);
-
-                var queryString = "UPDATE sector SET name = '" + obj.name + "', ground = " + obj.ground + ", company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
-
-                //console.log(queryString);
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
-                    }
-                    else {
-
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado correctamente."
-                        }
-                        res.json(jsonResult);
-
-                    }
-                });
-
-                mysqlConn.end();
-
-            }
+    // Validate input
+    if (!id || !name || !ground || !company_id || status === undefined) {
+        return res.status(400).json({
+            code: 'ERROR',
+            mensaje: 'Faltan parámetros requeridos'
         });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
     }
 
+    // Create a connection to the database
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    mysqlConn.connect(err => {
+        if (err) {
+            console.error('Error connecting: ' + err.message);
+            return res.status(500).json({
+                code: 'ERROR',
+                mensaje: 'Error de conexión: ' + err.message
+            });
+        }
+
+        // Check if the name already exists for the same company
+        const checkNameQuery = "SELECT id FROM sector WHERE name = ? AND company_id = ? AND id != ?";
+        mysqlConn.query(checkNameQuery, [name, company_id, id], (error, results) => {
+            if (error) {
+                console.error('Error checking name: ' + error.message);
+                mysqlConn.end();
+                return res.status(500).json({
+                    code: 'ERROR',
+                    mensaje: 'Error al verificar el nombre: ' + error.message
+                });
+            }
+
+            if (results.length > 0) {
+                mysqlConn.end();
+                return res.status(400).json({
+                    code: 'ERROR',
+                    mensaje: 'El nombre del sector ya existe para esta compañía.'
+                });
+            }
+
+            // Proceed with the update
+            const updateQuery = "UPDATE sector SET name = ?, ground = ?, company_id = ?, status = ? WHERE id = ?";
+            const updateParams = [name, ground, company_id, status, id];
+            
+            mysqlConn.query(updateQuery, updateParams, (updateError, updateResults) => {
+                mysqlConn.end();
+
+                if (updateError) {
+                    console.error('Error executing update query: ' + updateError.message);
+                    return res.status(500).json({
+                        code: 'ERROR',
+                        mensaje: 'Error ejecutando la consulta de actualización: ' + updateError.message
+                    });
+                }
+
+                if (updateResults.affectedRows > 0) {
+                    return res.status(200).json({
+                        code: 'OK',
+                        mensaje: 'Registro actualizado correctamente.'
+                    });
+                } else {
+                    return res.status(404).json({
+                        code: 'ERROR',
+                        mensaje: 'No se pudo actualizar el registro.'
+                    });
+                }
+            });
+        });
+    });
 });
+
 
 router.post('/configuracion/production/deleteSectorBarrack', validateToken, (req, res) => {
 
@@ -697,99 +707,93 @@ router.post('/configuracion/production/deleteSectorBarrack', validateToken, (req
 });
 
 router.post('/configuracion/production/createSectorBarrack', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Sectors Barracks']
- 
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
- 
+        #swagger.security = [{ "apiKeyAuth": [] }]
         #swagger.parameters['obj'] = {
             in: 'body',
             description: 'Datos del sector',
             required: true,
-            type: "object",
-            schema: { $ref: "#/definitions/Sector" }
-        }  
-        
+            type: 'object',
+            schema: { $ref: '#/definitions/Sector' }
+        }
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
                 "mensaje": "Sector creado correctamente."
             }
-        } 
+        }
     */
 
-    try {
+    const { name, ground, company_id, status } = req.body;
 
-        let obj = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                res.json(jsonResult);
-
-            }
-            else {
-
-                var queryString = "INSERT INTO sector (name, ground, company_id, status) VALUES ('" + obj.name + "', " + obj.ground + ", " + obj.company_id + ", " + obj.status + ")";
-
-                //console.log(queryString);
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
-                    }
-                    else {
-
-                        if (results && results.insertId != 0) {
-
-                            const jsonResult = {
-                                "code": "OK",
-                                "mensaje": "Registro creado correctamente."
-                            }
-
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo crear el registro ."
-                            }
-
-                            res.json(jsonResult);
-                        }
-
-                    }
-                });
-
-                mysqlConn.end();
-
-            }
+    if (!name || !ground || !company_id || status === undefined) {
+        return res.status(400).json({
+            code: 'ERROR',
+            mensaje: 'Faltan parámetros requeridos'
         });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
     }
 
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    mysqlConn.connect(err => {
+        if (err) {
+            console.error('Error connecting: ' + err.message);
+            return res.status(500).json({
+                code: 'ERROR',
+                mensaje: 'Error de conexión: ' + err.message
+            });
+        }
+
+        // Primero verificar si el nombre ya existe para la compañía
+        const checkQuery = "SELECT COUNT(*) AS count FROM sector WHERE name = ? AND company_id = ?";
+        mysqlConn.query(checkQuery, [name, company_id], (checkError, checkResults) => {
+            if (checkError) {
+                mysqlConn.end();
+                console.error('Error checking existence: ' + checkError.message);
+                return res.status(500).json({
+                    code: 'ERROR',
+                    mensaje: 'Error al verificar la existencia del sector: ' + checkError.message
+                });
+            }
+
+            if (checkResults[0].count > 0) {
+                mysqlConn.end();
+                return res.status(400).json({
+                    code: 'ERROR',
+                    mensaje: 'El nombre del sector ya existe para esta compañía.'
+                });
+            }
+
+            // Si no existe, proceder a la inserción
+            const queryString = "INSERT INTO sector (name, ground, company_id, status) VALUES (?, ?, ?, ?)";
+            const queryParams = [name, ground, company_id, status];
+
+            mysqlConn.query(queryString, queryParams, (insertError, insertResults) => {
+                mysqlConn.end();
+
+                if (insertError) {
+                    console.error('Error executing query: ' + insertError.message);
+                    return res.status(500).json({
+                        code: 'ERROR',
+                        mensaje: 'Error ejecutando la consulta: ' + insertError.message
+                    });
+                }
+
+                if (insertResults && insertResults.insertId) {
+                    return res.status(200).json({
+                        code: 'OK',
+                        mensaje: 'Registro creado correctamente.'
+                    });
+                } else {
+                    return res.status(500).json({
+                        code: 'ERROR',
+                        mensaje: 'No se pudo crear el registro.'
+                    });
+                }
+            });
+        });
+    });
 });
 
 //PRODUCCIÓN - ATTRIBUTES SECTOR
@@ -2105,37 +2109,82 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
                 });
             }
 
-            var queryString = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            console.log('Verificando si la temporada es activa...', obj);
 
-            mysqlConn.query(queryString, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (error, results) {
-                if (error) {
-                    console.error('Error al ejecutar la consulta: ' + error.message);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.message
-                    });
-                }
+            if (obj.status === 1) {
+                
+                // Paso 1: Actualizar todas las temporadas a status 2 para la misma compañía
+                const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ?";
+                mysqlConn.query(updateQuery, [obj.company_id], function (updateError) {
+                    if (updateError) {
+                        console.error('Error al actualizar las temporadas existentes: ' + updateError.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": 'Error al actualizar las temporadas existentes: ' + updateError.message
+                        });
+                    }
 
-                if (results && results.insertId) {
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-                } else {
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
-                    });
-                }
-            });
+                    // Paso 2: Insertar la nueva temporada
+                    const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
+                        mysqlConn.end();
 
-            mysqlConn.end();
+                        if (insertError) {
+                            console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": insertError.message
+                            });
+                        }
+
+                        if (results && results.insertId) {
+                            return res.json({
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            });
+                        } else {
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el registro."
+                            });
+                        }
+                    });
+                });
+            } else {
+                // Insertar la nueva temporada sin actualizar el status de otras temporadas
+                const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
+                    mysqlConn.end();
+
+                    if (insertError) {
+                        console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": insertError.message
+                        });
+                    }
+
+                    if (results && results.insertId) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
+                });
+            }
         });
     } catch (e) {
         console.log(e);
         res.json({ error: e.message });
     }
 });
+
+
 
 //PRODUCCIÓN - TIPO DE RECOLECCIÓN
 

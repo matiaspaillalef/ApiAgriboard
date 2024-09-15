@@ -1715,6 +1715,12 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -3281,6 +3287,300 @@
                 "mensaje": {
                   "type": "string",
                   "example": "Sector creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/getAttributesSector/{companyID}": {
+      "get": {
+        "tags": [
+          "Production - Attributes Sector"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "companyID",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "sector": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "variety": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "ha_productivas": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "hileras": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "plants": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "min_daily_frecuency": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "max_daily_frecuency": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "harvest_end": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "stimation_good": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "stimation_regular": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "stimation_bad": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "stimation_replant_kg": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "surface": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "interrow_density": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "row_density": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "quantity_plants_ha": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "clasification": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "rotation": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "kg_sector": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "kg_hectares": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "kg_plants": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "porc_regular": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "porc_replant": {
+                        "type": "number",
+                        "example": 10
+                      },
+                      "season": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/updateAttributeSector": {
+      "post": {
+        "tags": [
+          "Production - Attributes Sector"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del atributo del sector",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AttributeSector"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Atributo del sector actualizado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/deleteAttributeSector": {
+      "post": {
+        "tags": [
+          "Production - Attributes Sector"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                }
+              }
+            },
+            "description": "ID del atributo del sector",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro eliminado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/createAttributeSector": {
+      "post": {
+        "tags": [
+          "Production - Attributes Sector"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del atributo del sector",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AttributeSector"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado correctamente."
                 }
               },
               "xml": {
@@ -6122,6 +6422,9 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -6945,17 +7248,6 @@
             "apiKeyAuth": []
           }
         ]
-      }
-    },
-    "/api/v1/send-daily-report": {
-      "post": {
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
       }
     }
   }
