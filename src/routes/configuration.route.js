@@ -58,10 +58,20 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                 queryString += " where u.id_rol = r.id_rol";
                 queryString += " and u.id_state = e.id_estado";
                 queryString += " and u.id_company  = c.id ";
+                queryString += " order by  u.id asc";
 
 
                 ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
+
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
 
                     if (error) {
 
@@ -101,23 +111,31 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                         else {
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "No se encuentran usuarios disponibles.."
+                                "mensaje": "No se encuentran usuarios disponibles."
                             }
                             res.json(jsonResult);
                         }
 
                     }
                 });
-
-                mysqlConn.end();
-
             }
         });
-
 
     } catch (e) {
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
+
     }
 });
 
@@ -150,7 +168,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
     */
     try {
 
-        let { name, lastname, mail, id_rol, password, id_state ,id_company} = req.body;
+        let { name, lastname, mail, id_rol, password, id_state, id_company } = req.body;
 
         const saltRounds = 10;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -182,11 +200,18 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
 
                     }
                     else {
-
                         if (results && results.length > 0) {
 
                             const jsonResult = {
@@ -195,6 +220,14 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                             }
 
                             res.json(jsonResult);
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
 
                         }
                         else {
@@ -205,13 +238,22 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                             var queryString = "INSERT INTO users";
                             queryString += " (name, lastname, mail, id_rol, password, id_state, id_company)";
-                            queryString += "VALUES('" + name + "' , '" + lastname + "', '" + mail + "'," + id_rol + ", '" + hashedPassword + "'," + id_state + "," + id_company  +")";
+                            queryString += "VALUES('" + name + "' , '" + lastname + "', '" + mail + "'," + id_rol + ", '" + hashedPassword + "'," + id_state + "," + id_company + ")";
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
-                                //console.log("error", error);
-                                //console.log("resultsInsert", resultsInsert);
-                                //console.log("fields", fields);
+
+
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+                                });
+
+
                                 if (error) {
+
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
                                         "code": "ERROR",
@@ -221,12 +263,12 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                                 }
                                 else {
-                                    console.log("resultsInsert", resultsInsert);
+                                    
                                     if (resultsInsert.insertId != 0) {
 
                                         const jsonResult = {
                                             "code": "OK",
-                                            "usuarios": "usuario creado correctamente."
+                                            "usuarios": "Usuario creado correctamente."
                                         }
                                         res.json(jsonResult);
 
@@ -234,7 +276,7 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
 
                                         const jsonResult = {
                                             "code": "ERROR",
-                                            "mensaje": "no se pudo crear el usuario seleccionado."
+                                            "mensaje": "No se pudo crear el usuario seleccionado."
                                         }
                                         res.json(jsonResult);
 
@@ -245,16 +287,23 @@ router.post('/configuracion/usuarios/crearUsuarios', validateToken, (req, res) =
                         }
                     }
                 });
-
-                // mysqlConn.end();
-
             }
         });
-
 
     } catch (e) {
         console.log(e);
         res.json({ error: e })
+    
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
@@ -288,8 +337,8 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
     */
     try {
 
-        
-        let { id, name, lastname, mail, id_rol, password, id_company, id_state} = req.body;
+
+        let { id, name, lastname, mail, id_rol, password, id_company, id_state } = req.body;
 
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -313,6 +362,14 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
                 ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
 
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
                     if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
@@ -329,7 +386,7 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
 
                             const jsonResult = {
                                 "code": "OK",
-                                "usuarios": "usuario actualizado correctamente."
+                                "mensaje": "Usuario actualizado correctamente."
                             }
 
                             res.json(jsonResult);
@@ -338,15 +395,13 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
 
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "no se pudo actualizar el usuario seleccionado."
+                                "mensaje": "No se pudo actualizar el usuario seleccionado."
                             }
 
                             res.json(jsonResult);
                         }
                     }
                 });
-
-                mysqlConn.end();
             }
         });
 
@@ -355,6 +410,17 @@ router.post('/configuracion/usuarios/actualizarUsuarios', validateToken, (req, r
 
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
@@ -403,7 +469,15 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
@@ -419,7 +493,7 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
 
                             const jsonResult = {
                                 "code": "OK",
-                                "usuarios": "usuario eliminado correctamente."
+                                "mensaje": "Usuario eliminado correctamente."
                             }
 
                             res.json(jsonResult);
@@ -428,7 +502,7 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
 
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "no se pudo eliminar el usuario seleccionado."
+                                "mensaje": "No se pudo eliminar el usuario seleccionado."
                             }
 
                             res.json(jsonResult);
@@ -436,8 +510,6 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
                         }
                     }
                 });
-
-                mysqlConn.end();
             }
         });
 
@@ -446,6 +518,17 @@ router.post('/configuracion/usuarios/eliminarUsuarios', validateToken, (req, res
 
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
@@ -494,7 +577,18 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    mysqlConn.end((err) => {
+
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+
+                    });
+
+
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
@@ -537,8 +631,6 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
                         }
                     }
                 });
-
-                mysqlConn.end();
             }
         });
 
@@ -546,190 +638,18 @@ router.get('/configuracion/usuarios/getRoles', validateToken, (req, res) => {
 
         console.log(e);
         res.json({ error: e })
-    }
-});
 
-router.get('/configuracion/usuarios/createRoles', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Configuración - Usuarios']
+        if (mysqlConn) {
 
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                descripcion: "Cosecheros"
-            }
-        }  
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Rol creado correctamente."
-            }
-        } 
-    */
-    try {
-
-        let { descripcion } = req.body;
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
                 }
-                res.json(jsonResult);
-
-            } else {
-
-                var queryString = "INSERT INTO roles (descripcion) VALUES ('" + descripcion + "')";
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
-                    } else {
-
-                        if (results && results.insertId != 0) {
-
-                            const jsonResult = {
-                                "code": "OK",
-                                "mensaje": "Rol creado correctamente."
-                            }
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo crear el rol."
-                            }
-                            res.json(jsonResult);
-
-                        }
-                    }
-                });
-
-                mysqlConn.end();
-            }
-        });
-
-    } catch (e) {
-
-        console.log(e);
-        res.json({ error: e })
-    }
-});
-
-router.get('/configuracion/usuarios/getEstados', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Configuración - Usuarios']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "estados": [
-                    {
-                        "id_estado": 1,
-                        "descripcion": "ACTIVO"
-                    }
-                ]
-            }
+            });
         } 
-    */
-    try {
 
-        var estados = [];
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-
-                res.json(jsonResult);
-
-            } else {
-
-                var queryString = "select  * from estado";
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (err) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": err.sqlMessage
-                        }
-
-                        res.json(jsonResult);
-
-                    } else {
-
-                        if (results && results.length > 0) {
-
-                            results.forEach(element => {
-                                const jsonResult = {
-                                    "id_rol": element.id_rol,
-                                    "descripcion": element.descripcion,
-                                };
-
-                                estados.push(jsonResult);
-
-                            });
-
-                            const jsonResult = {
-                                "code": "OK",
-                                "estados": estados
-                            }
-
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "no se encontraron datos disponibles."
-                            }
-
-                            res.json(jsonResult);
-
-                        }
-                    }
-                });
-
-                mysqlConn.end();
-            }
-        });
-
-    } catch (e) {
-
-        console.log(e);
-        res.json({ error: e })
     }
 });
 
@@ -791,9 +711,17 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                 var queryString = "SELECT id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, ";
                 queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ";
                 queryString += "FROM companies";
-
-                console.log(queryString);
+                
                 mysqlConn.query(queryString, function (error, results, fields) {
+
+
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
 
                     if (error) {
 
@@ -851,13 +779,23 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                         }
                     }
                 });
-
-                mysqlConn.end();
             }
         });
     } catch (e) {
         console.log(e);
         res.json({ error: e });
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
+
     }
 });
 
@@ -914,20 +852,40 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                 var queryString = "SELECT id FROM companies WHERE rut='" + rut + "'";
 
                 mysqlConn.query(queryString, function (error, results, fields) {
+                    
                     if (error) {
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
+
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
+                        
                     } else {
                         if (results && results.length > 0) {
                             const jsonResult = {
                                 "code": "ERROR",
                                 "mensaje": "La empresa con RUT " + rut + " ya existe en el sistema."
                             }
+
                             res.json(jsonResult);
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
 
                         } else {
                             // Construir la consulta SQL para insertar la empresa
@@ -942,6 +900,15 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                             var queryString = `INSERT INTO companies (${insertFields}) VALUES (${insertValues})`;
 
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
+
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+                                });
+
                                 if (error) {
                                     console.error('error ejecutando query: ' + error.sqlMessage);
                                     const jsonResult = {
@@ -967,9 +934,6 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                             });
                         }
                     }
-
-
-                    
                 });
             }
         });
@@ -977,6 +941,18 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
     } catch (e) {
         console.log(e);
         res.json({ error: e });
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
+
     }
 });
 
@@ -1042,6 +1018,14 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
                     if (error) {
 
                         console.error('Error al ejecutar la consulta: ' + error.sqlMessage);
@@ -1074,14 +1058,24 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
                         }
                     }
                 });
-
-                mysqlConn.end();
             }
         });
 
     } catch (e) {
         console.log(e);
         res.json({ error: e });
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
+
     }
 });
 
@@ -1129,7 +1123,15 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
@@ -1145,7 +1147,7 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
 
                             const jsonResult = {
                                 "code": "OK",
-                                "companies": "empresa eliminada correctamente."
+                                "companies": "Empresa eliminada correctamente."
                             }
 
                             res.json(jsonResult);
@@ -1154,7 +1156,7 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
 
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "no se pudo eliminar la empresa seleccionada."
+                                "mensaje": "No se pudo eliminar la empresa seleccionada."
                             }
 
                             res.json(jsonResult);
@@ -1162,15 +1164,23 @@ router.post('/configuracion/empresas/deleteCompany', validateToken, (req, res) =
                         }
                     }
                 });
-
-                mysqlConn.end();
-
             }
         });
 
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
