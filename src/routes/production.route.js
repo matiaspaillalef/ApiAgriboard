@@ -955,6 +955,8 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
     try {
         let obj = req.body;
 
+        console.log(obj);
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {

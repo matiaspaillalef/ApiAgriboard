@@ -1715,7 +1715,7 @@ router.post('/management-people/shifts/createShift', validateToken, (req, res) =
                 sunday_opening_time: "08:00:00",
                 sunday_closing_time: "12:00:00",
                 status: 1,
-                idCompany: 1
+                id_company: 1
             }
         }
         
@@ -1727,77 +1727,111 @@ router.post('/management-people/shifts/createShift', validateToken, (req, res) =
         } 
     */
     try {
-        const { name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, idCompany } = req.body;
+        const {
+            name,
+            monday_opening_time,
+            monday_closing_time,
+            tuesday_opening_time,
+            tuesday_closing_time,
+            wednesday_opening_time,
+            wednesday_closing_time,
+            thursday_opening_time,
+            thursday_closing_time,
+            friday_opening_time,
+            friday_closing_time,
+            saturday_opening_time,
+            saturday_closing_time,
+            sunday_opening_time,
+            sunday_closing_time,
+            status,
+            id_company
+        } = req.body;
+
+        // Convertir valores vacíos a null
+        const formatTime = (time) => time === "" ? null : time;
+
+        const queryValues = [
+            name,
+            formatTime(monday_opening_time),
+            formatTime(monday_closing_time),
+            formatTime(tuesday_opening_time),
+            formatTime(tuesday_closing_time),
+            formatTime(wednesday_opening_time),
+            formatTime(wednesday_closing_time),
+            formatTime(thursday_opening_time),
+            formatTime(thursday_closing_time),
+            formatTime(friday_opening_time),
+            formatTime(friday_closing_time),
+            formatTime(saturday_opening_time),
+            formatTime(saturday_closing_time),
+            formatTime(sunday_opening_time),
+            formatTime(sunday_closing_time),
+            status,
+            id_company
+        ];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
-
             if (err) {
-
                 console.error('Error de conexión: ' + err.sqlMessage);
+                return res.json({
+                    code: "ERROR",
+                    mensaje: err.sqlMessage
+                });
+            }
 
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
+            var queryString = `
+                INSERT INTO shifts (
+                    name,
+                    monday_opening_time,
+                    monday_closing_time,
+                    tuesday_opening_time,
+                    tuesday_closing_time,
+                    wednesday_opening_time,
+                    wednesday_closing_time,
+                    thursday_opening_time,
+                    thursday_closing_time,
+                    friday_opening_time,
+                    friday_closing_time,
+                    saturday_opening_time,
+                    saturday_closing_time,
+                    sunday_opening_time,
+                    sunday_closing_time,
+                    status,
+                    id_company
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
 
-                res.json(jsonResult);
-
-            } else {
-
-                var queryString = `
-                    INSERT INTO shifts (name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, id_company)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-                var queryValues = [name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, idCompany];
-
-                mysqlConn.query(queryString, queryValues, function (error, results, fields) {
+            mysqlConn.query(queryString, queryValues, function (error, results) {
+                mysqlConn.end(); // Terminar la conexión
 
                 if (error) {
-
                     console.error('Error ejecutando query: ' + error.sqlMessage);
-
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-
-                    }
-
-                    res.json(jsonResult);
-
-                } else {
-
-                    if (results && results.insertId != 0) {
-
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro creado correctamente."
-                        }
-
-                        res.json(jsonResult);
-
-                    } else {
-
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": "No se pudo crear el  registro ."
-                        }
-
-                        res.json(jsonResult);
-                    }
+                    return res.json({
+                        code: "ERROR",
+                        mensaje: error.sqlMessage
+                    });
                 }
-                    // Terminar la conexión después de manejar los resultados
 
-                });
-
-                mysqlConn.end();
-            }
+                if (results && results.insertId != 0) {
+                    return res.json({
+                        code: "OK",
+                        mensaje: "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        code: "ERROR",
+                        mensaje: "No se pudo crear el registro."
+                    });
+                }
+            });
         });
 
     } catch (e) {
-        console.log(e);
-        res.json({ error: e })
+        console.error(e);
+        res.json({ error: e.message });
     }
 });
 
@@ -1830,7 +1864,8 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
                 saturday_closing_time: "12:00:00",
                 sunday_opening_time: "08:00:00",
                 sunday_closing_time: "12:00:00",
-                status: 1
+                status: 1,
+                id_company: 1
             }
         }
         
@@ -1842,85 +1877,123 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
         } 
     */
     try {
-        const { id, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status } = req.body;
+        const {
+            id,
+            name,
+            monday_opening_time,
+            monday_closing_time,
+            tuesday_opening_time,
+            tuesday_closing_time,
+            wednesday_opening_time,
+            wednesday_closing_time,
+            thursday_opening_time,
+            thursday_closing_time,
+            friday_opening_time,
+            friday_closing_time,
+            saturday_opening_time,
+            saturday_closing_time,
+            sunday_opening_time,
+            sunday_closing_time,
+            status,
+            id_company
+        } = req.body;
+
+        console.log('req.body:', req.body);
+
+        // Convertir valores vacíos a null
+        const formatTime = (time) => time === "" ? null : time;
+
+        const queryValues = [
+            name,
+            formatTime(monday_opening_time),
+            formatTime(monday_closing_time),
+            formatTime(tuesday_opening_time),
+            formatTime(tuesday_closing_time),
+            formatTime(wednesday_opening_time),
+            formatTime(wednesday_closing_time),
+            formatTime(thursday_opening_time),
+            formatTime(thursday_closing_time),
+            formatTime(friday_opening_time),
+            formatTime(friday_closing_time),
+            formatTime(saturday_opening_time),
+            formatTime(saturday_closing_time),
+            formatTime(sunday_opening_time),
+            formatTime(sunday_closing_time),
+            status,
+            id_company,
+            id
+        ];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-        mysqlConn.connect(function (err) {
-
+        mysqlConn.connect((err) => {
             if (err) {
-
                 console.error('Error de conexión: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-
-                res.json(jsonResult);
-
-            } else {
-
-                var queryString = `
-                    UPDATE shifts 
-                    SET 
-                        name = ?, 
-                        monday_opening_time = ?, monday_closing_time = ?, 
-                        tuesday_opening_time = ?, tuesday_closing_time = ?, 
-                        wednesday_opening_time = ?, wednesday_closing_time = ?, 
-                        thursday_opening_time = ?, thursday_closing_time = ?, 
-                        friday_opening_time = ?, friday_closing_time = ?, 
-                        saturday_opening_time = ?, saturday_closing_time = ?, 
-                        sunday_opening_time = ?, sunday_closing_time = ?, 
-                        status = ?
-                    WHERE id = ?`;
-
-                var queryValues = [name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status, id];
-
-                mysqlConn.query(queryString, queryValues, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('Error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-
-                        res.json(jsonResult);
-
-                    } else {
-
-                        if (results && results.affectedRows != 0) {
-
-                            const jsonResult = {
-                                "code": "OK",
-                                "mensaje": "Registro actualizado correctamente."
-                            }
-
-                            res.json(jsonResult);
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo actualizar el  registro ."
-                            }
-
-                            res.json(jsonResult);
-                        }
-
-                    }
-                    // Terminar la conexión después de manejar los resultados
-                    mysqlConn.end();
+                return res.json({
+                    code: "ERROR",
+                    mensaje: err.sqlMessage
                 });
             }
+
+            var queryString = `
+                UPDATE shifts 
+                SET 
+                    name = ?, 
+                    monday_opening_time = ?, 
+                    monday_closing_time = ?, 
+                    tuesday_opening_time = ?, 
+                    tuesday_closing_time = ?, 
+                    wednesday_opening_time = ?, 
+                    wednesday_closing_time = ?, 
+                    thursday_opening_time = ?, 
+                    thursday_closing_time = ?, 
+                    friday_opening_time = ?, 
+                    friday_closing_time = ?, 
+                    saturday_opening_time = ?, 
+                    saturday_closing_time = ?, 
+                    sunday_opening_time = ?, 
+                    sunday_closing_time = ?, 
+                    status = ?,
+                    id_company = ?
+                WHERE id = ?
+            `;
+
+            console.log('queryString:', queryString);
+            console.log('queryValues:', queryValues);
+
+            mysqlConn.query(queryString, queryValues, (error, results) => {
+                // Terminar la conexión después de manejar los resultados
+                mysqlConn.end();
+
+                if (error) {
+                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    return res.json({
+                        code: "ERROR",
+                        mensaje: error.sqlMessage
+                    });
+                }
+
+                if (results && results.affectedRows > 0) {
+                    return res.json({
+                        code: "OK",
+                        mensaje: "Registro actualizado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        code: "ERROR",
+                        mensaje: "No se pudo actualizar el registro."
+                    });
+                }
+            });
         });
 
     } catch (e) {
-        console.log(e);
-        res.json({ error: e })
+        console.error(e);
+        res.json({ code: "ERROR", mensaje: e.message });
     }
 });
+
+
 
 router.post('/management-people/shifts/deleteShift', validateToken, (req, res) => {
     /*  
