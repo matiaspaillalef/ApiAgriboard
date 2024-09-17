@@ -2092,162 +2092,93 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 
 //Management People - Workers
 router.get('/management-people/workers/getWorkers/:companyID', validateToken, (req, res) => {
-    /*  
-        #swagger.tags = ['Management People - Workers']
+    const { companyID } = req.params;
 
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-        
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "workers": [
-                    {
-                        "id": 1,
-                        "rut": "12345678-9",
-                        "name": "Juan",
-                        "lastname": "Perez",
-                        "lastname2": "Perez",
-                        "born_date": "1990-01-01",
-                        "gender": "Masculino",
-                        "state_civil": "Soltero",
-                        "state": "Maule",
-                        "city": "Talca",
-                        "address": "Calle 123",
-                        "phone": "12345678",
-                        "phone_company": "12345678",
-                        "date_admission": "2021-01-01",
-                        "status": 1,
-                        "position": 1,
-                        "contractor": 1,
-                        "squad": 1,
-                        "leader_squad": 1,
-                        "shift": 1,
-                        "wristband": "12345678",
-                        "observation": "Observación",
-                        "bank": "Banco",
-                        "account_type": "Cuenta Corriente",
-                        "account_number": "12345678",
-                        "afp": "AFP",
-                        "health": "Isapre",
-                    },
-                    
-                ]
-            }
+    console.log('Request Params:', req.params);
+
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    mysqlConn.connect((err) => {
+        if (err) {
+            console.error('Connection error:', err.message);
+            return res.status(500).json({
+                code: "ERROR",
+                mensaje: 'Error de conexión: ' + err.message
+            });
         }
-    */
-    try {
 
-        let { companyID } = req.params;
+        const queryString = `
+            SELECT * FROM workers WHERE company_id = ?
+        `;
 
-        var workers = [];
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        mysqlConn.query(queryString, [companyID], (error, results) => {
+            // Terminar la conexión después de manejar los resultados
+            mysqlConn.end();
 
-        mysqlConn.connect((err) => {
-            if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
-                return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
+            if (error) {
+                console.error('Query error:', error.message);
+                return res.status(500).json({
+                    code: "ERROR",
+                    mensaje: 'Error ejecutando query: ' + error.message
                 });
             }
 
-            const queryString = "SELECT id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, position, contractor, squad, leader_squad, shift, wristband, observation, bank, account_type, account_number, afp, health, contractor, status FROM workers WHERE company_id = " + companyID;
-            //console.log(queryString);
-
-            mysqlConn.query(queryString, (error, results) => {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    });
-                }
-
-                if (results.length > 0) {
-                    results.forEach(element => {
-                        workers.push({
-                            "id": element.id,
-                            "rut": element.rut,
-                            "name": element.name,
-                            "lastname": element.lastname,
-                            "lastname2": element.lastname2,
-                            "born_date": element.born_date,
-                            "gender": element.gender,
-                            "state_civil": element.state_civil,
-                            "state": element.state,
-                            "city": element.city,
-                            "address": element.address,
-                            "phone": element.phone,
-                            "phone_company": element.phone_company,
-                            "date_admission": element.date_admission,
-                            "position": element.position,
-                            "contractor": element.contractor,
-                            "squad": element.squad,
-                            "leader_squad": element.leader_squad,
-                            "shift": element.shift,
-                            "wristband": element.wristband,
-                            "observation": element.observation,
-                            "bank": element.bank,
-                            "account_type": element.account_type,
-                            "account_number": element.account_number,
-                            "afp": element.afp,
-                            "health": element.health,
-                            "contractor": element.contractor,
-                            "status": element.status
-                        });
-                    });
-
-                    res.json({
-                        "code": "OK",
-                        "workers": workers
-                    });
-                } else {
-                    res.json({
-                        "code": "ERROR",
-                        "mensaje": "No se encontraron registros"
-                    });
-                }
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
+            if (results.length > 0) {
+                res.json({
+                    code: "OK",
+                    workers: results
+                });
+            } else {
+                res.json({
+                    code: "ERROR",
+                    mensaje: "No se encontraron registros"
+                });
+            }
         });
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
-    }
+    });
 });
 
 router.post('/management-people/workers/updateWorker', validateToken, (req, res) => {
-    /*  
+
+
+    /*
         #swagger.tags = ['Management People - Workers']
 
         #swagger.security = [{
                "apiKeyAuth": []
         }]
-        
+
         #swagger.parameters['obj'] = {
             in: 'body',
-            description: 'Actualizar Trabajador',
-            required: true,
             schema: {
                 id: 1,
                 rut: "12345678-9",
                 name: "Juan",
-                lastname: "Perez",
-                lastname2: "Perez",
+                lastname: "Pérez",
+                lastname2: "Soto",
                 born_date: "1990-01-01",
-                gender: "Masculino",
+                gender: "M",
                 state_civil: "Soltero",
-                state: "Maule",
-                city: "Talca",
+                state: "Región Metropolitana",
+                city: "Santiago",
                 address: "Calle 123",
-                phone: "12345678",
-                phone_company: "12345678",
+                phone: "+56912345678",
+                email: "mail@mail.cl",
                 date_admission: "2021-01-01",
-                status: 1
+                status: 1,
+                position: "Operador",
+                contractor: "Empresa",
+                squad: 1,
+                leader_squad: 0,
+                shift: 1,
+                wristband: "123456",
+                observation: "Observación",
+                bank: "Banco",
+                account_type: "Cuenta Corriente",
+                account_number: "123456",
+                afp: "AFP",
+                health: "Fonasa",
+                company_id: 1
             }
         }
 
@@ -2258,66 +2189,134 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
             }
         }
     */
-    try {
-        const { id, rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status } = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect((err) => {
-            if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
-                return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
+        try {
+            const {
+                id, rut, name, lastname, lastname2, born_date, gender, state_civil, state,
+                city, address, phone, email, date_admission, status, position, contractor,
+                squad, leader_squad, shift, wristband, observation, bank, account_type,
+                account_number, afp, health, company_id
+            } = req.body;
+    
+            // Verificar si el id está presente
+            if (!id) {
+                return res.status(400).json({
+                    code: "ERROR",
+                    mensaje: "ID es obligatorio"
                 });
             }
-
-            const queryString = `
-                UPDATE workers 
-                SET 
-                    rut = ?, 
-                    name = ?, 
-                    lastname = ?, 
-                    lastname2 = ?, 
-                    born_date = ?,
-                    gender = ?,
-                    state_civil = ?,
-                    state = ?,
-                    city = ?,
-                    address = ?,
-                    phone = ?,
-                    phone_company = ?,
-                    date_admission = ?,
-                    status = ?
-                WHERE id = ?`;
-
-            const queryValues = [rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status, id];
-            //console.log(queryString);
-
-            mysqlConn.query(queryString, queryValues, (error, results) => {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
+    
+            // Asignar valores predeterminados para campos vacíos
+            const processValue = (value) => value === '' ? null : value;
+    
+            const processedPosition = processValue(position) ? Number(position) : null;
+            const processedContractor = processValue(contractor) ? Number(contractor) : null;
+            const processedSquad = processValue(squad) ? Number(squad) : null;
+            const processedLeaderSquad = processValue(leader_squad) ? Number(leader_squad) : null;
+            const processedShift = processValue(shift) ? Number(shift) : null;
+            const processedWristband = processValue(wristband) ? Number(wristband) : null;
+    
+            // Crear conexión
+            const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect((err) => {
+                if (err) {
+                    console.error('Error de conexión:', err.message);
+                    return res.status(500).json({
+                        code: "ERROR",
+                        mensaje: 'Error de conexión: ' + err.message
                     });
                 }
-
-                res.json({
-                    "code": "OK",
-                    "mensaje": "Registro actualizado"
+    
+                // Verificar si el RUT ya existe en la misma company_id, excluyendo el id actual
+                const checkRutQuery = `
+                    SELECT id FROM workers 
+                    WHERE rut = ? 
+                    AND company_id = ? 
+                    AND id != ?
+                `;
+                const checkRutValues = [rut, company_id, id];
+                mysqlConn.query(checkRutQuery, checkRutValues, (checkError, checkResults) => {
+                    if (checkError) {
+                        mysqlConn.end();
+                        console.error('Error al verificar RUT:', checkError.message);
+                        return res.status(500).json({
+                            code: "ERROR",
+                            mensaje: 'Error al verificar RUT: ' + checkError.message
+                        });
+                    }
+    
+                    if (checkResults.length > 0) {
+                        mysqlConn.end();
+                        return res.status(400).json({
+                            code: "ERROR",
+                            mensaje: 'El RUT ya está registrado en esta empresa'
+                        });
+                    }
+    
+                    // Actualizar trabajador
+                    const updateQuery = `
+                        UPDATE workers 
+                        SET 
+                            rut = ?, 
+                            name = ?, 
+                            lastname = ?, 
+                            lastname2 = ?, 
+                            born_date = ?,
+                            gender = ?,
+                            state_civil = ?,
+                            state = ?,
+                            city = ?,
+                            address = ?,
+                            phone = ?,
+                            email = ?,
+                            date_admission = ?,
+                            position = ?,
+                            contractor = ?,
+                            squad = ?,
+                            leader_squad = ?,
+                            shift = ?,
+                            wristband = ?,
+                            observation = ?,
+                            bank = ?,
+                            account_type = ?,
+                            account_number = ?,
+                            afp = ?,
+                            health = ?,
+                            status = ?,
+                            company_id = ?
+                        WHERE id = ?
+                    `;
+    
+                    const updateValues = [
+                        rut, name, lastname, lastname2, born_date, gender, state_civil, state,
+                        city, address, phone, email, date_admission, processedPosition, processedContractor, 
+                        processedSquad, processedLeaderSquad, processedShift, processedWristband, 
+                        observation, bank, account_type, account_number, afp, health, status, company_id, id
+                    ];
+    
+                    mysqlConn.query(updateQuery, updateValues, (updateError, updateResults) => {
+                        mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
+    
+                        if (updateError) {
+                            console.error('Error ejecutando query:', updateError.message);
+                            return res.status(500).json({
+                                code: "ERROR",
+                                mensaje: 'Error ejecutando query: ' + updateError.message
+                            });
+                        }
+    
+                        res.json({
+                            code: "OK",
+                            mensaje: "Registro actualizado"
+                        });
+                    });
                 });
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
             });
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ error: e.message });
         }
-        );
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
-    }
-});
+    });
 
 router.post('/management-people/workers/deleteWorker', validateToken, (req, res) => {
 
@@ -2399,20 +2398,33 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
             description: 'Crear Trabajador',
             required: true,
             schema: {
-                rut: "12345678-9",
-                name: "Juan",
-                lastname: "Perez",
-                lastname2: "Perez",
-                born_date: "1990-01-01",
-                gender: "Masculino",
-                state_civil: "Soltero",
-                state: "Maule",
-                city: "Talca",
-                address: "Calle 123",
-                phone: "12345678",
-                phone_company: "12345678",
-                date_admission: "2021-01-01",
-                status: 1
+                "rut": "12345678-9",
+                "name": "Juan",
+                "lastname": "Perez",
+                "lastname2": "Perez",
+                "born_date": "1990-01-01",
+                "gender": "Masculino",
+                "state_civil": "Soltero",
+                "state": "Maule",
+                "city": "Talca",
+                "address": "Calle 123",
+                "phone": "12345678",
+                "email": "email@email.com",
+                "date_admission": "2021-01-01",
+                "status": 1,
+                "position": 1,
+                "contractor": 1,
+                "squad": 1,
+                "leader_squad": 1,
+                "shift": 1,
+                "wristband": "12345678",
+                "observation": "Observación",
+                "bank": "Banco",
+                "account_type": "Cuenta Corriente",
+                "account_number": "12345678",
+                "afp": "AFP",
+                "health": "Isapre",
+                "company_id": 1
             }
         }
 
@@ -2424,51 +2436,91 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
         }
     */
     try {
-        const { rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status } = req.body;
+        const {
+            rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, email,
+            date_admission, status, position, contractor, squad, leader_squad, shift, wristband, observation,
+            bank, account_type, account_number, afp, health, company_id
+        } = req.body;
 
-        //console.log(req.body);
+        console.log('Received data:', req.body);
 
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect((err) => {
             if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
+                console.error('Connection error:', err.message);
                 return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
+                    code: "ERROR",
+                    mensaje: err.message
                 });
             }
 
-            const queryString = `
-                INSERT INTO workers (rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            // Verificar si ya existe un trabajador con el mismo rut y company_id
+            const checkQuery = `
+                SELECT COUNT(*) AS count FROM workers 
+                WHERE rut = ? AND company_id = ?
+            `;
 
-            const queryValues = [rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, phone_company, date_admission, status];
-            //console.log(queryString);
-
-            mysqlConn.query(queryString, queryValues, (error, results) => {
+            mysqlConn.query(checkQuery, [rut, company_id], (error, results) => {
                 if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
+                    mysqlConn.end();
+                    console.error('Error checking for duplicate:', error.message);
                     return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
+                        code: "ERROR",
+                        mensaje: error.message
                     });
                 }
 
-                res.json({
-                    "code": "OK",
-                    "mensaje": "Registro creado"
-                });
+                if (results[0].count > 0) {
+                    mysqlConn.end();
+                    return res.json({
+                        code: "ERROR",
+                        mensaje: "El rut ya está registrado para esta empresa."
+                    });
+                }
 
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
+                // Construir la consulta SQL
+                const insertQuery = `
+                    INSERT INTO workers (
+                        rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, email,
+                        date_admission, status, position, contractor, squad, leader_squad, shift, wristband, observation,
+                        bank, account_type, account_number, afp, health, company_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                const queryValues = [
+                    rut, name, lastname, lastname2 || null, born_date || null, gender || null, state_civil || null, state || null, 
+                    city || null, address || null, phone || null, email || null, date_admission || null, status || 1, 
+                    position || null, contractor || null, squad || null, leader_squad || null, shift || null, wristband || null, 
+                    observation || null, bank || null, account_type || null, account_number || null, afp || null, health || null, 
+                    company_id
+                ];
+
+                // Ejecutar la consulta SQL para insertar el nuevo trabajador
+                mysqlConn.query(insertQuery, queryValues, (insertError) => {
+                    mysqlConn.end();
+
+                    if (insertError) {
+                        console.error('Error executing query:', insertError.message);
+                        return res.json({
+                            code: "ERROR",
+                            mensaje: insertError.message
+                        });
+                    }
+
+                    res.json({
+                        code: "OK",
+                        mensaje: "Registro creado"
+                    });
+                });
             });
         });
     } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
+        console.error('Caught exception:', e.message);
+        res.json({ code: "ERROR", mensaje: e.message });
     }
 });
+
 
 export default router
 
