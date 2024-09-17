@@ -580,7 +580,7 @@ router.post('/configuracion/production/updateSectorBarrack', validateToken, (req
             // Proceed with the update
             const updateQuery = "UPDATE sector SET name = ?, ground = ?, company_id = ?, status = ? WHERE id = ?";
             const updateParams = [name, ground, company_id, status, id];
-            
+
             mysqlConn.query(updateQuery, updateParams, (updateError, updateResults) => {
                 mysqlConn.end();
 
@@ -955,6 +955,8 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
     try {
         let obj = req.body;
 
+        console.log(obj);
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -966,10 +968,10 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
                 });
             }
 
-            var queryString = "UPDATE sector_attr SET season = ?, sector = ?, specie = ?, variety = ?, year_harvest = ?, ha_productivas = ?, hileras = ?, plants = ?, min_daily_frecuency = ?, max_daily_frecuency = ?, harvest_end = ?, stimation_good = ?, stimation_regular = ?, stimation_bad = ?, stimation_replant_kg = ?, surface = ?, interrow_density = ?, row_density = ?, quantity_plants_ha = ?, clasification = ?, rotation = ?, kg_sector = ?, kg_hectares = ?, kg_plants = ?, porc_regular = ?, porc_replant = ?, company_id = ? WHERE id = ?";
-            //console.log(queryString);
+            var queryString = "UPDATE sector_attr SET season = ?, sector = ?, specie = ?, variety = ?, year_harvest = ?, ha_productivas = ?, hileras = ?, plants = ?, min_daily_frecuency = ?, max_daily_frecuency = ?, stimation_good = ?, stimation_regular = ?, stimation_bad = ?, stimation_replant_kg = ?, surface = ?, interrow_density = ?, row_density = ?, quantity_plants_ha = ?, clasification = ?, rotation = ?, kg_sector = ?, kg_hectares = ?, kg_plants = ?, porc_regular = ?, porc_replant = ?, company_id = ? WHERE id = ?";
+            console.log(queryString);
 
-            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.harvest_end, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id, obj.id], function (error, results) {
+            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id, obj.id], function (error, results) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
@@ -1082,82 +1084,154 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
             }
         }
     */
-        try {
-            let obj = req.body;
-    
-            // Asegurarse de que todos los valores sean del tipo correcto
-            const values = [
-                obj.season, obj.sector, obj.specie, obj.variety,
-                parseFloat(obj.ha_productivas) || null,
-                parseInt(obj.hileras) || null,
-                parseInt(obj.plants) || null,
-                parseInt(obj.min_daily_frecuency) || null,
-                parseInt(obj.max_daily_frecuency) || null,
-                parseInt(obj.harvest_end) || null,
-                parseInt(obj.stimation_good) || null,
-                parseInt(obj.stimation_regular) || null,
-                obj.stimation_bad !== undefined ? parseInt(obj.stimation_bad) : null,
-                parseInt(obj.stimation_replant_kg) || null,
-                parseFloat(obj.surface) || '0.00',
-                parseFloat(obj.interrow_density) || '0.00',
-                parseFloat(obj.row_density) || '0.00',
-                parseFloat(obj.quantity_plants_ha) || '0.00',
-                obj.clasification || null,
-                parseInt(obj.rotation) || null,
-                parseFloat(obj.kg_sector) || '0.00',
-                parseFloat(obj.kg_hectares) || '0.00',
-                parseFloat(obj.kg_plants) || '0.00',
-                parseFloat(obj.porc_regular) || '0.00',
-                parseFloat(obj.porc_replant) || '0.00',
-                obj.company_id,
-                obj.year_harvest ? new Date(obj.year_harvest).toISOString().split('T')[0] : null
-            ];
-    
-            const queryString = "INSERT INTO sector_attr (season, sector, specie, variety, year_harvest, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, harvest_end, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, company_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    
-            console.log('Executing query:', queryString);
-            console.log('With values:', values);
+    try {
+        let obj = req.body;
+        console.log(obj);
+        const values = [
+            obj.sector,
+            obj.specie,
+            obj.variety,
+            parseFloat(obj.ha_productivas) || null,
+            parseInt(obj.hileras) || null,
+            parseInt(obj.plants) || null,
+            parseInt(obj.min_daily_frecuency) || null,
+            parseInt(obj.max_daily_frecuency) || null,
+            parseInt(obj.stimation_good) || null,
+            parseInt(obj.stimation_regular) || null,
+            parseInt(obj.stimation_bad) || null,
+            parseInt(obj.stimation_replant_kg) || null,
+            parseFloat(obj.surface) || '0.00',
+            parseFloat(obj.interrow_density) || '0.00',
+            parseFloat(obj.row_density) || '0.00',
+            parseFloat(obj.quantity_plants_ha) || '0.00',
+            obj.clasification || null,
+            parseInt(obj.rotation) || null,
+            parseFloat(obj.kg_sector) || '0.00',
+            parseFloat(obj.kg_hectares) || '0.00',
+            parseFloat(obj.kg_plants) || '0.00',
+            parseFloat(obj.porc_regular) || '0.00',
+            parseFloat(obj.porc_replant) || '0.00',
+            obj.season,
+            obj.company_id,
+            parseInt(obj.year_harvest)
+        ];
 
-            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-            mysqlConn.connect(function (err) {
-                if (err) {
-                    console.error('Error connecting: ' + err.message);
+        const queryString = "INSERT INTO sector_attr (sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency,stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        console.log('Executing query:', queryString);
+        console.log('With values:', values);
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            mysqlConn.query(queryString, values, function (error, results) {
+                if (error) {
+                    console.error('Error executing query: ' + error.message);
                     return res.json({
                         "code": "ERROR",
-                        "mensaje": err.message
+                        "mensaje": error.message
                     });
                 }
-    
-                mysqlConn.query(queryString, values, function (error, results) {
-                    if (error) {
-                        console.error('Error executing query: ' + error.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": error.message
-                        });
-                    }
-    
-                    if (results && results.insertId) {
-                        return res.json({
-                            "code": "OK",
-                            "mensaje": "Registro creado correctamente."
-                        });
-                    } else {
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": "No se pudo crear el registro."
-                        });
-                    }
-                });
-    
-                mysqlConn.end();
+
+                if (results && results.insertId) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
             });
-    
-        } catch (e) {
-            console.log(e);
-            res.json({ error: e.message });
+
+            mysqlConn.end();
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
+
+router.post('/configuracion/production/cloneAttributesSector', validateToken, (req, res) => {
+    /*
+        #swagger.tags = ['Production - Attributes Sector']
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+        #swagger.parameters['obj'] = {
+ 
+            in: 'body',
+            description: 'Datos del atributo del sector',
+            required: true,
+            type: "object",
+            schema: { $ref: "#/definitions/AttributeSector" }
         }
-    });
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "mensaje": "Registro creado correctamente."
+            }
+        }
+    */
+    try {
+
+        let {id}  = req.body;
+        console.log(id);
+        
+        let  queryString = "insert into sector_attr (sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest)";   
+        queryString += "  select sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest  from sector_attr where id = " +  id;
+        console.log('Executing query:', queryString);
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('Error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            mysqlConn.query(queryString, function (error, results) {
+                if (error) {
+                    console.error('Error executing query: ' + error.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.message
+                    });
+                }
+
+                if (results && results.insertId) {
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro creado correctamente."
+                    });
+                } else {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "No se pudo crear el registro."
+                    });
+                }
+            });
+
+            mysqlConn.end();
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
 
 //PRODUCCIÓN - VARIETIES
 router.get('/configuracion/production/getVarieties/:companyID', validateToken, (req, res) => {
@@ -1917,7 +1991,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
                         });
                     });
 
-                    //console.log('seasons', seasons);
+                    console.log('seasons', seasons);
 
                     return res.json({
                         "code": "OK",
@@ -2112,7 +2186,7 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
             console.log('Verificando si la temporada es activa...', obj);
 
             if (obj.status === 1) {
-                
+
                 // Paso 1: Actualizar todas las temporadas a status 2 para la misma compañía
                 const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ?";
                 mysqlConn.query(updateQuery, [obj.company_id], function (updateError) {
