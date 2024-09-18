@@ -2639,7 +2639,6 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
 );
 
 router.post('/configuracion/production/updateQuality', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Quality']
         #swagger.security = [{
@@ -2651,17 +2650,24 @@ router.post('/configuracion/production/updateQuality', validateToken, (req, res)
             required: true,
             type: "object",
             schema: { $ref: "#/definitions/Quality" }
-        }  
+        }
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
                 "mensaje": "Calidad actualizada correctamente."
             }
-        } 
+        }
     */
 
     try {
         let obj = req.body;
+
+        if (!obj.id || !obj.name || !obj.company_id) {
+            return res.json({
+                "code": "ERROR",
+                "mensaje": "ID, name y company_id son obligatorios."
+            });
+        }
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -2674,31 +2680,64 @@ router.post('/configuracion/production/updateQuality', validateToken, (req, res)
                 });
             }
 
-            var queryString = "UPDATE quality SET name = ?, abbreviation = ?, company_id = ?, status = ? WHERE id = ?";
+            // Verificar si el nombre ya existe en la misma empresa, excluyendo el registro actual
+            const checkNameQuery = `
+                SELECT id FROM quality 
+                WHERE name = ? AND company_id = ? AND id != ?
+            `;
+            const checkNameValues = [obj.name, obj.company_id, obj.id];
 
-            mysqlConn.query(queryString, [obj.name, obj.abbreviation, obj.company_id, obj.status, obj.id], function (error) {
-                if (error) {
-                    console.error('error ejecutando query: ' + error.message);
+            mysqlConn.query(checkNameQuery, checkNameValues, function (checkError, checkResults) {
+                if (checkError) {
+                    mysqlConn.end();
+                    console.error('error al verificar nombre:', checkError.message);
                     return res.json({
                         "code": "ERROR",
-                        "mensaje": error.message
+                        "mensaje": 'Error al verificar nombre: ' + checkError.message
                     });
                 }
 
-                return res.json({
-                    "code": "OK",
-                    "mensaje": "Registro actualizado correctamente."
+                if (checkResults.length > 0) {
+                    mysqlConn.end();
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": 'El nombre ya está registrado en la misma empresa.'
+                    });
+                }
+
+                // Actualizar el registro si el nombre no está en uso
+                var queryString = `
+                    UPDATE quality 
+                    SET name = ?, abbreviation = ?, company_id = ?, status = ? 
+                    WHERE id = ?
+                `;
+
+                var updateValues = [obj.name, obj.abbreviation || null, obj.company_id, obj.status || null, obj.id];
+
+                mysqlConn.query(queryString, updateValues, function (updateError) {
+                    mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
+
+                    if (updateError) {
+                        console.error('error ejecutando query:', updateError.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": 'Error ejecutando query: ' + updateError.message
+                        });
+                    }
+
+                    return res.json({
+                        "code": "OK",
+                        "mensaje": "Registro actualizado correctamente."
+                    });
                 });
             });
-
-            mysqlConn.end();
         });
     } catch (e) {
         console.log(e);
         res.json({ error: e.message });
     }
-}
-);
+});
+
 
 router.post('/configuracion/production/deleteQuality', validateToken, (req, res) => {
 
@@ -2792,50 +2831,71 @@ router.post('/configuracion/production/createQuality', validateToken, (req, res)
     try {
         let obj = req.body;
 
+        console.log(obj);
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
             if (err) {
-                console.error('error connecting: ' + err.message);
-                return res.json({
+                console.error('Error connecting: ' + err.message);
+                return res.status(500).json({
                     "code": "ERROR",
                     "mensaje": err.message
                 });
             }
 
-            var queryString = "INSERT INTO quality (name, abbreviation, company_id, status) VALUES (?, ?, ?, ?)";
-
-            mysqlConn.query(queryString, [obj.name, obj.abbreviation, obj.company_id, obj.status], function (error, results) {
-                if (error) {
-                    console.error('error ejecutando query: ' + error.message);
-                    return res.json({
+            // Verificar si ya existe una calidad con el mismo nombre para el mismo company_id
+            var checkQuery = "SELECT id FROM quality WHERE name = ? AND company_id = ?";
+            mysqlConn.query(checkQuery, [obj.name, obj.company_id], function (checkError, checkResults) {
+                if (checkError) {
+                    mysqlConn.end();
+                    console.error('Error executing check query: ' + checkError.message);
+                    return res.status(500).json({
                         "code": "ERROR",
-                        "mensaje": error.message
+                        "mensaje": 'Error executing check query: ' + checkError.message
                     });
                 }
 
-                if (results && results.insertId) {
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-                } else {
-                    return res.json({
+                if (checkResults.length > 0) {
+                    mysqlConn.end();
+                    return res.status(400).json({
                         "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
+                        "mensaje": "Ya existe una calidad con el mismo nombre para esta empresa."
                     });
                 }
+
+                // Si el nombre no existe, proceder a la inserción
+                var insertQuery = "INSERT INTO quality (name, abbreviation, company_id, status) VALUES (?, ?, ?, ?)";
+                mysqlConn.query(insertQuery, [obj.name, obj.abbreviation, obj.company_id, obj.status], function (insertError, insertResults) {
+                    mysqlConn.end(); // Cerrar la conexión aquí
+
+                    if (insertError) {
+                        console.error('Error executing insert query: ' + insertError.message);
+                        return res.status(500).json({
+                            "code": "ERROR",
+                            "mensaje": 'Error executing insert query: ' + insertError.message
+                        });
+                    }
+
+                    if (insertResults && insertResults.insertId) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.status(500).json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
+                });
             });
-
-            mysqlConn.end();
         });
     } catch (e) {
         console.log(e);
-        res.json({ error: e.message });
+        res.status(500).json({ error: e.message });
     }
-}
-);
-
+});
 
 //PRODUCCIÓN - BALANZAS
 router.get('/configuracion/production/getScale/:companyID', validateToken, (req, res) => {
@@ -3568,7 +3628,6 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
                     "specie": 1,
                     "min_weight": 1,
                     "max_weight": 1,
-                    "average_weight": 1,
                     "quantity_trays": 1,
                     "collection": 1,
                     "status": 1,
@@ -3625,7 +3684,6 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
                             "specie": element.specie,
                             "min_weight": element.min_weight,
                             "max_weight": element.max_weight,
-                            "average_weight": element.average_weight,
                             "quantity_trays": element.quantity_trays,
                             "collection": element.collection,
                             "status": element.status,
@@ -3700,9 +3758,9 @@ router.post('/configuracion/production/updateHarvestFormat', validateToken, (req
 
             }
 
-            var queryString = "UPDATE harvest_format SET name = ?, tara_base = ?, specie = ?, min_weight = ?, max_weight = ?, average_weight = ?, quantity_trays = ?, collection = ?, status = ?, company_id = ? WHERE id = ?";
+            var queryString = "UPDATE harvest_format SET name = ?, tara_base = ?, specie = ?, min_weight = ?, max_weight = ?, quantity_trays = ?, collection = ?, status = ?, company_id = ? WHERE id = ?";
 
-            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.average_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id, obj.id], function (error) {
+            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id, obj.id], function (error) {
 
                 if (error) {
 
@@ -3855,9 +3913,9 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
 
             }
 
-            var queryString = "INSERT INTO harvest_format (name, tara_base, specie, min_weight, max_weight, average_weight, quantity_trays, collection, status, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            var queryString = "INSERT INTO harvest_format (name, tara_base, specie, min_weight, max_weight, quantity_trays, collection, status, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.average_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id], function (error, results) {
+            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id], function (error, results) {
 
                 if (error) {
 
