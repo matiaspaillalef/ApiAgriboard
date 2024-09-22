@@ -97,6 +97,8 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
                                 grounds.push(jsonResult);
                             });
 
+                           
+
                             const jsonResult = {
                                 "code": "OK",
                                 "grounds": grounds
@@ -130,14 +132,11 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
 });
 
 router.post('/configuracion/production/updateGround', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Grounds']
-
         #swagger.security = [{
                "apiKeyAuth": []
         }]
-
         #swagger.parameters['obj'] = {
             in: 'body',
             description: 'Datos del campo',
@@ -153,65 +152,93 @@ router.post('/configuracion/production/updateGround', validateToken, (req, res) 
             }
         } 
     */
-
-    try {
-
-        let obj = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
+        try {
+            let obj = req.body;
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.sqlMessage);
+                    return res.json({ "code": "ERROR", "mensaje": err.sqlMessage });
                 }
-                res.json(jsonResult);
-
-            }
-            else {
-
-                //console.log(obj.latitude);
-
-                var queryString = "UPDATE ground SET name = '" + obj.name + "', state = '" + obj.state + "', city = '" + obj.city + "', address = '" + obj.address + "', latitude = " + (obj.latitude == null ? 'NULL' : '') + ", longitude = " + (obj.longitude == null ? 'NULL' : '') + ", zone = '" + obj.zone + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
+    
+                //console.log('Datos recibidos: ', JSON.stringify(obj, null, 2));
+    
+                // Verificar si el ID existe
+                var checkIdQuery = `SELECT * FROM ground WHERE id = ?`;
+                mysqlConn.query(checkIdQuery, [obj.id], function (idCheckError, idCheckResults) {
+                    if (idCheckError) {
+                        console.error('error verificando ID: ' + idCheckError.sqlMessage);
+                        return res.json({ "code": "ERROR", "mensaje": idCheckError.sqlMessage });
                     }
-                    else {
-
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado correctamente."
-                        }
-                        res.json(jsonResult);
-
+    
+                    if (idCheckResults.length === 0) {
+                        return res.json({ "code": "ERROR", "mensaje": "No se encontró el registro con ese ID." });
                     }
+    
+                    // Verificamos si ya existe un campo con el mismo nombre para el mismo company_id, excluyendo el registro actual
+                    var checkQuery = `
+                        SELECT COUNT(*) as count 
+                        FROM ground 
+                        WHERE LOWER(name) = LOWER(?) 
+                        AND company_id = ? 
+                        AND id != ?
+                    `;
+    
+                    mysqlConn.query(checkQuery, [obj.name, obj.company_id, obj.id], function (checkError, checkResults) {
+                        if (checkError) {
+                            console.error('error ejecutando checkQuery: ' + checkError.sqlMessage);
+                            return res.json({ "code": "ERROR", "mensaje": checkError.sqlMessage });
+                        }
+    
+                        if (checkResults[0].count > 0) {
+                            return res.json({ "code": "ERROR", "mensaje": "Ya existe un campo con ese nombre dentro de la misma compañía." });
+                        }
+    
+                        // Realizamos la actualización
+                        var queryString = `
+                            UPDATE ground 
+                            SET 
+                                name = ?, 
+                                state = ?, 
+                                city = ?, 
+                                address = ?, 
+                                latitude = ?, 
+                                longitude = ?, 
+                                zone = ?, 
+                                company_id = ?, 
+                                status = ? 
+                            WHERE id = ?
+                        `;
+    
+                        mysqlConn.query(queryString, [
+                            obj.name, 
+                            obj.state, 
+                            obj.city, 
+                            obj.address, 
+                            obj.latitude,
+                            obj.longitude,
+                            obj.zone, 
+                            obj.company_id, 
+                            obj.status, 
+                            obj.id
+                        ], function (error, results, fields) {
+                            if (error) {
+                                console.error('error ejecutando query: ', error);
+                                return res.json({ "code": "ERROR", "mensaje": "Ocurrió un error en la consulta de actualización." });
+                            } else {
+                                return res.json({ "code": "OK", "mensaje": "Registro actualizado correctamente." });
+                            }
+                        });
+                    });
                 });
-
-                mysqlConn.end();
-
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
-    }
-
-});
+            });
+    
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
 
 router.post('/configuracion/production/deleteGround', validateToken, (req, res) => {
 
@@ -308,7 +335,6 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
 });
 
 router.post('/configuracion/production/createGround', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Grounds']
 
@@ -333,75 +359,86 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
     */
 
     try {
-
         let obj = req.body;
-
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
-
             if (err) {
-
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-                res.json(jsonResult);
+                return res.json(jsonResult);
+            } else {
+                // Verificar si ya existe un campo con el mismo nombre dentro del mismo company_id
+                const checkQuery = `
+                    SELECT COUNT(*) AS count FROM ground 
+                    WHERE LOWER(name) = LOWER(?) AND company_id = ?
+                `;
 
-            }
-            else {
-
-                var queryString = "INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) VALUES ('" + obj.name + "', '" + obj.state + "', '" + obj.city + "', '" + obj.address + "', " + (obj.latitude == null ? 'NULL' : obj.latitude) + ", " + (obj.longitude == null ? 'NULL' : obj.longitude) + ", '" + obj.zone + "', " + obj.company_id + ", " + obj.status + ")";
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-
-                    if (error) {
-
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
+                mysqlConn.query(checkQuery, [obj.name, obj.company_id], (checkError, checkResults) => {
+                    if (checkError) {
+                        console.error('error ejecutando query: ' + checkError.sqlMessage);
+                        return res.json({
                             "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-                        res.json(jsonResult);
-
+                            "mensaje": checkError.sqlMessage
+                        });
                     }
-                    else {
+
+                    if (checkResults[0].count > 0) {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "Ya existe un campo con ese nombre en esta compañía."
+                        });
+                    }
+
+                    // Si no existe, proceder a insertar el nuevo campo
+                    var queryString = `
+                        INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+
+                    const values = [
+                        obj.name, obj.state, obj.city, obj.address,
+                        obj.latitude == null ? null : obj.latitude,
+                        obj.longitude == null ? null : obj.longitude,
+                        obj.zone, obj.company_id, obj.status
+                    ];
+
+                    mysqlConn.query(queryString, values, function (insertError, results) {
+                        if (insertError) {
+                            console.error('error ejecutando query: ' + insertError.sqlMessage);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": insertError.sqlMessage
+                            });
+                        }
 
                         if (results && results.insertId != 0) {
-
                             const jsonResult = {
                                 "code": "OK",
                                 "mensaje": "Registro creado correctamente."
                             }
-
-                            res.json(jsonResult);
-
+                            return res.json(jsonResult);
                         } else {
-
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "No se pudo crear el registro ."
+                                "mensaje": "No se pudo crear el registro."
                             }
-
-                            res.json(jsonResult);
+                            return res.json(jsonResult);
                         }
+                    });
 
-                    }
+                    mysqlConn.end();
                 });
-
-                mysqlConn.end();
-
             }
         });
-
     } catch (e) {
         console.log(e);
-        res.json({ error: e })
+        res.json({ error: e });
     }
-
 });
-
 
 //PRODUCCIÓN - CUARTELES
 router.get('/configuracion/production/getSectorsBarracks/:companyID', validateToken, (req, res) => {
@@ -2183,22 +2220,72 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
                 });
             }
 
-            console.log('Verificando si la temporada es activa...', obj);
+            // Paso 1: Verificar si ya existe una temporada con el mismo nombre y company_id
+            const checkQuery = `
+                SELECT COUNT(*) as count 
+                FROM season 
+                WHERE LOWER(name) = LOWER(?) 
+                AND company_id = ?
+            `;
 
-            if (obj.status === 1) {
+            mysqlConn.query(checkQuery, [obj.name, obj.company_id], function (checkError, checkResults) {
+                if (checkError) {
+                    console.error('Error al ejecutar la consulta de verificación: ' + checkError.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": checkError.message
+                    });
+                }
 
-                // Paso 1: Actualizar todas las temporadas a status 2 para la misma compañía
-                const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ?";
-                mysqlConn.query(updateQuery, [obj.company_id], function (updateError) {
-                    if (updateError) {
-                        console.error('Error al actualizar las temporadas existentes: ' + updateError.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": 'Error al actualizar las temporadas existentes: ' + updateError.message
+                if (checkResults[0].count > 0) {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "Ya existe una temporada con ese nombre para esta compañía."
+                    });
+                }
+
+                console.log('Verificando si la temporada es activa...', obj);
+
+                // Paso 2: Si la temporada es activa, actualizar todas las temporadas a status 2 para la misma compañía, excluyendo la nueva
+                if (obj.status === 1) {
+                    const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ? AND status != 1";
+                    mysqlConn.query(updateQuery, [obj.company_id], function (updateError) {
+                        if (updateError) {
+                            console.error('Error al actualizar las temporadas existentes: ' + updateError.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": 'Error al actualizar las temporadas existentes: ' + updateError.message
+                            });
+                        }
+
+                        // Paso 3: Insertar la nueva temporada con status 1
+                        const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, 1], function (insertError, results) {
+                            mysqlConn.end();
+
+                            if (insertError) {
+                                console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
+                                return res.json({
+                                    "code": "ERROR",
+                                    "mensaje": insertError.message
+                                });
+                            }
+
+                            if (results && results.insertId) {
+                                return res.json({
+                                    "code": "OK",
+                                    "mensaje": "Registro creado correctamente."
+                                });
+                            } else {
+                                return res.json({
+                                    "code": "ERROR",
+                                    "mensaje": "No se pudo crear el registro."
+                                });
+                            }
                         });
-                    }
-
-                    // Paso 2: Insertar la nueva temporada
+                    });
+                } else {
+                    // Paso 4: Insertar la nueva temporada sin actualizar el status de otras temporadas
                     const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
                     mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
                         mysqlConn.end();
@@ -2223,34 +2310,8 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
                             });
                         }
                     });
-                });
-            } else {
-                // Insertar la nueva temporada sin actualizar el status de otras temporadas
-                const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
-                    mysqlConn.end();
-
-                    if (insertError) {
-                        console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": insertError.message
-                        });
-                    }
-
-                    if (results && results.insertId) {
-                        return res.json({
-                            "code": "OK",
-                            "mensaje": "Registro creado correctamente."
-                        });
-                    } else {
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": "No se pudo crear el registro."
-                        });
-                    }
-                });
-            }
+                }
+            });
         });
     } catch (e) {
         console.log(e);
