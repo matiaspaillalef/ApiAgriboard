@@ -1329,30 +1329,56 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
                 });
             }
 
-            // Preparar la consulta SQL
-            const queryString = `
-                INSERT INTO squads (name, id_group, status, workers, id_company)
-                VALUES (?, ?, ?, '[]', ?)
+            // Paso 1: Verificar si ya existe un squad con el mismo nombre y company_id
+            const checkQuery = `
+                SELECT COUNT(*) as count 
+                FROM squads 
+                WHERE LOWER(name) = LOWER(?) 
+                AND id_company = ?
             `;
 
-            // Establecer el valor de `group` como `NULL` si está vacío o no definido
-            const groupValue = group ? group : null;
-
-            // Ejecutar la consulta
-            mysqlConn.query(queryString, [name, groupValue, status, idCompany], function (error, results) {
-                mysqlConn.end();
-
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.message);
+            mysqlConn.query(checkQuery, [name, idCompany], function (checkError, checkResults) {
+                if (checkError) {
+                    console.error('Error ejecutando checkQuery: ' + checkError.message);
+                    mysqlConn.end();
                     return res.status(500).json({
                         code: "ERROR",
-                        mensaje: error.message
+                        mensaje: checkError.message
                     });
                 }
 
-                res.json({
-                    code: "OK",
-                    mensaje: "Registro creado"
+                // Si ya existe, respondemos con un error
+                if (checkResults[0].count > 0) {
+                    mysqlConn.end();
+                    return res.status(400).json({
+                        code: "ERROR",
+                        mensaje: "Ya existe un squad con ese nombre dentro de la misma compañía."
+                    });
+                }
+
+                // Paso 2: Si no hay duplicados, proceder con la inserción
+                const queryString = `
+                    INSERT INTO squads (name, id_group, status, workers, id_company)
+                    VALUES (?, ?, ?, '[]', ?)
+                `;
+
+                const groupValue = group ? group : null;
+
+                mysqlConn.query(queryString, [name, groupValue, status, idCompany], function (error, results) {
+                    mysqlConn.end();
+
+                    if (error) {
+                        console.error('Error ejecutando query: ' + error.message);
+                        return res.status(500).json({
+                            code: "ERROR",
+                            mensaje: error.message
+                        });
+                    }
+
+                    res.json({
+                        code: "OK",
+                        mensaje: "Registro creado"
+                    });
                 });
             });
         });
@@ -1365,26 +1391,22 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
     }
 });
 
-router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
 
+router.post('/management-people/squads/updateSquad', validateToken, (req, res) => {
     /*
         #swagger.tags = ['Management People - Squads']
- 
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
- 
+        #swagger.security = [{ "apiKeyAuth": [] }]
         #swagger.parameters['obj'] = {
             in: 'body',
             schema: {
-                id: 1,
-                name: "cuadrilla 1",
-                group: 1,  // Puede estar vacío o nulo
+                id: 3,
+                name: 'a',
+                group: '3',
                 status: 1,
-                workers: []
+                workers: [2, 3, 49],
+                company_id: 1
             }
         }
- 
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -1394,7 +1416,9 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
     */
 
     try {
-        const { id, name, group, status, workers } = req.body;
+        const { id, name, group, status, workers, company_id } = req.body;
+
+        console.log('req.body:', req.body);
 
         // Convertir workers a una cadena JSON
         const workersJson = JSON.stringify(workers);
@@ -1407,49 +1431,50 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
         mysqlConn.connect(function (err) {
             if (err) {
                 console.error('Error al conectar: ' + err.sqlMessage);
-                const jsonResult = {
-                    "code": "ERROR",
-                    "mensaje": err.sqlMessage
-                }
-                return res.json(jsonResult);
+                return res.json({ "code": "ERROR", "mensaje": err.sqlMessage });
             }
 
-            var queryString = `
-                UPDATE squads 
-                SET 
-                    name = ?, 
-                    id_group = ?, 
-                    status = ?, 
-                    workers = ? 
-                WHERE 
-                    id = ?
+            // Primero verificar si ya existe otro registro con el mismo nombre y company_id
+            const checkQuery = `
+                SELECT id FROM squads 
+                WHERE name = ? AND id_company = ? AND id != ?
             `;
 
-            mysqlConn.query(queryString, [name, groupValue, status, workersJson, id], function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                } else {
-                    if (results && results.affectedRows != 0) {
-                        const jsonResult = {
-                            "code": "OK",
-                            "mensaje": "Registro actualizado correctamente."
-                        }
-                        res.json(jsonResult);
-                    } else {
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": "No se pudo actualizar el registro."
-                        }
-                        res.json(jsonResult);
-                    }
+            mysqlConn.query(checkQuery, [name, company_id, id], function (checkError, checkResults) {
+                if (checkError) {
+                    console.error('Error al ejecutar la consulta de verificación: ' + checkError.sqlMessage);
+                    return res.json({ "code": "ERROR", "mensaje": checkError.sqlMessage });
                 }
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
+
+                // Si hay resultados, significa que ya existe un registro con el mismo nombre
+                if (checkResults.length > 0) {
+                    return res.json({ "code": "ERROR", "mensaje": "Ya existe un registro con el mismo nombre en esta empresa." });
+                }
+
+                // Si no existe, proceder a actualizar el registro
+                var queryString = `
+                    UPDATE squads 
+                    SET 
+                        name = ?, 
+                        id_group = ?, 
+                        status = ?, 
+                        workers = ? 
+                    WHERE 
+                        id = ?
+                `;
+
+                mysqlConn.query(queryString, [name, groupValue, status, workersJson, id], function (updateError, results) {
+                    if (updateError) {
+                        console.error('Error ejecutando query: ' + updateError.sqlMessage);
+                        return res.json({ "code": "ERROR", "mensaje": updateError.sqlMessage });
+                    }
+
+                    if (results && results.affectedRows != 0) {
+                        return res.json({ "code": "OK", "mensaje": "Registro actualizado correctamente." });
+                    } else {
+                        return res.json({ "code": "ERROR", "mensaje": "No se pudo actualizar el registro." });
+                    }
+                });
             });
         });
     } catch (e) {
@@ -1457,6 +1482,8 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
         res.json({ error: e.message });
     }
 });
+
+
 
 router.post('/management-people/squads/deleteSquad', validateToken, (req, res) => {
 
