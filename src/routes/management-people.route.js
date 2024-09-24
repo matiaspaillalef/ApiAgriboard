@@ -926,18 +926,15 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
 router.post('/management-people/groups/createGroup', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Groups']
-
         #swagger.security = [{
             "apiKeyAuth": []
         }]
-        
         #swagger.parameters['obj'] = {
             in: 'body',
             description: 'Create Group',
             required: true,
             schema: {name: "Grupo 1", status: 1, idCompany: 1}
         }
-        
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -979,34 +976,54 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
                 });
             }
 
-            // Define la consulta SQL
-            const queryString = "INSERT INTO `groups` (name, status, id_company) VALUES (?, ?, ?)";
-            const queryParams = [name, numericStatus, numericIdCompany];
-
-            // Ejecuta la consulta
-            mysqlConn.query(queryString, queryParams, (error, results) => {
-                if (error) {
-                    console.error('Error executing query: ' + error.message);
+            // Verifica si ya existe un grupo con el mismo nombre y id_company
+            const checkQueryString = "SELECT * FROM `groups` WHERE name = ? AND id_company = ?";
+            mysqlConn.query(checkQueryString, [name, numericIdCompany], (checkError, checkResults) => {
+                if (checkError) {
+                    console.error('Error executing check query: ' + checkError.message);
                     return res.status(500).json({
                         "code": "ERROR",
-                        "mensaje": error.message
+                        "mensaje": checkError.message
                     });
                 }
 
-                if (results && results.insertId) {
-                    return res.status(200).json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-                } else {
-                    return res.status(500).json({
+                // Si ya existe, retorna un mensaje de error
+                if (checkResults.length > 0) {
+                    return res.status(400).json({
                         "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
+                        "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
                     });
                 }
+
+                // Define la consulta SQL para crear el grupo
+                const queryString = "INSERT INTO `groups` (name, status, id_company) VALUES (?, ?, ?)";
+                const queryParams = [name, numericStatus, numericIdCompany];
+
+                // Ejecuta la consulta para crear el grupo
+                mysqlConn.query(queryString, queryParams, (error, results) => {
+                    if (error) {
+                        console.error('Error executing query: ' + error.message);
+                        return res.status(500).json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+
+                    if (results && results.insertId) {
+                        return res.status(200).json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.status(500).json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
+                });
+
+                mysqlConn.end();
             });
-
-            mysqlConn.end();
         });
     } catch (e) {
         console.error(e);
@@ -1014,23 +1031,18 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
     }
 });
 
-
-
 router.post('/management-people/groups/updateGroup', validateToken, (req, res) => {
     /*  
         #swagger.tags = ['Management People - Groups']
-
         #swagger.security = [{
             "apiKeyAuth": []
         }]
-        
         #swagger.parameters['obj'] = {
             in: 'body',
             description: 'Update Group',
             required: true,
             schema: {id: 1, name: "Grupo 1", status: 1, company_id: 1}
         }
-        
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -1071,40 +1083,61 @@ router.post('/management-people/groups/updateGroup', validateToken, (req, res) =
                 });
             }
 
-            // Define la consulta SQL con parámetros
-            const queryString = "UPDATE `groups` SET name = ?, status = ?, id_company = ? WHERE id = ?";
-            const queryParams = [name, numericStatus, id_company, id];
-
-            // Ejecuta la consulta
-            mysqlConn.query(queryString, queryParams, (error, results) => {
-                if (error) {
-                    console.error('Error executing query: ' + error.message);
+            // Verifica si ya existe un grupo con el mismo nombre y id_company, excluyendo el grupo que se está editando
+            const checkQueryString = "SELECT * FROM `groups` WHERE name = ? AND id_company = ? AND id != ?";
+            mysqlConn.query(checkQueryString, [name, id_company, id], (checkError, checkResults) => {
+                if (checkError) {
+                    console.error('Error executing check query: ' + checkError.message);
                     return res.status(500).json({
                         "code": "ERROR",
-                        "mensaje": error.message
+                        "mensaje": checkError.message
                     });
                 }
 
-                if (results && results.affectedRows > 0) {
-                    return res.status(200).json({
-                        "code": "OK",
-                        "mensaje": "Registro actualizado correctamente."
-                    });
-                } else {
-                    return res.status(404).json({
+                // Si ya existe, retorna un mensaje de error
+                if (checkResults.length > 0) {
+                    return res.status(400).json({
                         "code": "ERROR",
-                        "mensaje": "No se encontró el registro para actualizar."
+                        "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
                     });
                 }
-            });
 
-            mysqlConn.end();
+                // Define la consulta SQL para actualizar el grupo
+                const queryString = "UPDATE `groups` SET name = ?, status = ?, id_company = ? WHERE id = ?";
+                const queryParams = [name, numericStatus, id_company, id];
+
+                // Ejecuta la consulta para actualizar el grupo
+                mysqlConn.query(queryString, queryParams, (error, results) => {
+                    if (error) {
+                        console.error('Error executing query: ' + error.message);
+                        return res.status(500).json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+
+                    if (results && results.affectedRows > 0) {
+                        return res.status(200).json({
+                            "code": "OK",
+                            "mensaje": "Registro actualizado correctamente."
+                        });
+                    } else {
+                        return res.status(404).json({
+                            "code": "ERROR",
+                            "mensaje": "No se encontró el registro para actualizar."
+                        });
+                    }
+                });
+
+                mysqlConn.end();
+            });
         });
     } catch (e) {
         console.error(e);
         res.status(500).json({ "code": "ERROR", "mensaje": e.message });
     }
 });
+
 
 router.post('/management-people/groups/deleteGroup', validateToken, (req, res) => {
     /*  
