@@ -2766,29 +2766,55 @@ router.post('/configuracion/production/updateQuality', validateToken, (req, res)
                     });
                 }
 
-                // Actualizar el registro si el nombre no está en uso
-                var queryString = `
-                    UPDATE quality 
-                    SET name = ?, abbreviation = ?, company_id = ?, status = ? 
-                    WHERE id = ?
+                // Verificar si la abbreviation ya existe en la misma empresa, excluyendo el registro actual
+                const checkAbbreviationQuery = `
+                    SELECT id FROM quality 
+                    WHERE abbreviation = ? AND company_id = ? AND id != ?
                 `;
+                const checkAbbreviationValues = [obj.abbreviation || null, obj.company_id, obj.id];
 
-                var updateValues = [obj.name, obj.abbreviation || null, obj.company_id, obj.status || null, obj.id];
-
-                mysqlConn.query(queryString, updateValues, function (updateError) {
-                    mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
-
-                    if (updateError) {
-                        console.error('error ejecutando query:', updateError.message);
+                mysqlConn.query(checkAbbreviationQuery, checkAbbreviationValues, function (abbrevError, abbrevResults) {
+                    if (abbrevError) {
+                        mysqlConn.end();
+                        console.error('error al verificar abbreviation:', abbrevError.message);
                         return res.json({
                             "code": "ERROR",
-                            "mensaje": 'Error ejecutando query: ' + updateError.message
+                            "mensaje": 'Error al verificar abbreviation: ' + abbrevError.message
                         });
                     }
 
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro actualizado correctamente."
+                    if (abbrevResults.length > 0) {
+                        mysqlConn.end();
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": 'La abbreviation ya está registrada en la misma empresa.'
+                        });
+                    }
+
+                    // Actualizar el registro si el nombre y la abbreviation no están en uso
+                    var queryString = `
+                        UPDATE quality 
+                        SET name = ?, abbreviation = ?, company_id = ?, status = ? 
+                        WHERE id = ?
+                    `;
+
+                    var updateValues = [obj.name, obj.abbreviation || null, obj.company_id, obj.status || null, obj.id];
+
+                    mysqlConn.query(queryString, updateValues, function (updateError) {
+                        mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
+
+                        if (updateError) {
+                            console.error('error ejecutando query:', updateError.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": 'Error ejecutando query: ' + updateError.message
+                            });
+                        }
+
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro actualizado correctamente."
+                        });
                     });
                 });
             });
@@ -2798,7 +2824,6 @@ router.post('/configuracion/production/updateQuality', validateToken, (req, res)
         res.json({ error: e.message });
     }
 });
-
 
 router.post('/configuracion/production/deleteQuality', validateToken, (req, res) => {
 
@@ -2906,14 +2931,14 @@ router.post('/configuracion/production/createQuality', validateToken, (req, res)
             }
 
             // Verificar si ya existe una calidad con el mismo nombre para el mismo company_id
-            var checkQuery = "SELECT id FROM quality WHERE name = ? AND company_id = ?";
-            mysqlConn.query(checkQuery, [obj.name, obj.company_id], function (checkError, checkResults) {
+            var checkNameQuery = "SELECT id FROM quality WHERE name = ? AND company_id = ?";
+            mysqlConn.query(checkNameQuery, [obj.name, obj.company_id], function (checkError, checkResults) {
                 if (checkError) {
                     mysqlConn.end();
-                    console.error('Error executing check query: ' + checkError.message);
+                    console.error('Error executing check name query: ' + checkError.message);
                     return res.status(500).json({
                         "code": "ERROR",
-                        "mensaje": 'Error executing check query: ' + checkError.message
+                        "mensaje": 'Error executing check name query: ' + checkError.message
                     });
                 }
 
@@ -2925,30 +2950,51 @@ router.post('/configuracion/production/createQuality', validateToken, (req, res)
                     });
                 }
 
-                // Si el nombre no existe, proceder a la inserción
-                var insertQuery = "INSERT INTO quality (name, abbreviation, company_id, status) VALUES (?, ?, ?, ?)";
-                mysqlConn.query(insertQuery, [obj.name, obj.abbreviation, obj.company_id, obj.status], function (insertError, insertResults) {
-                    mysqlConn.end(); // Cerrar la conexión aquí
-
-                    if (insertError) {
-                        console.error('Error executing insert query: ' + insertError.message);
+                // Verificar si ya existe una calidad con la misma abbreviation para el mismo company_id
+                var checkAbbreviationQuery = "SELECT id FROM quality WHERE abbreviation = ? AND company_id = ?";
+                mysqlConn.query(checkAbbreviationQuery, [obj.abbreviation || null, obj.company_id], function (abbrevError, abbrevResults) {
+                    if (abbrevError) {
+                        mysqlConn.end();
+                        console.error('Error executing check abbreviation query: ' + abbrevError.message);
                         return res.status(500).json({
                             "code": "ERROR",
-                            "mensaje": 'Error executing insert query: ' + insertError.message
+                            "mensaje": 'Error executing check abbreviation query: ' + abbrevError.message
                         });
                     }
 
-                    if (insertResults && insertResults.insertId) {
-                        return res.json({
-                            "code": "OK",
-                            "mensaje": "Registro creado correctamente."
-                        });
-                    } else {
-                        return res.status(500).json({
+                    if (abbrevResults.length > 0) {
+                        mysqlConn.end();
+                        return res.status(400).json({
                             "code": "ERROR",
-                            "mensaje": "No se pudo crear el registro."
+                            "mensaje": "Ya existe una calidad con la misma abbreviation para esta empresa."
                         });
                     }
+
+                    // Si ambos chequeos son exitosos, proceder a la inserción
+                    var insertQuery = "INSERT INTO quality (name, abbreviation, company_id, status) VALUES (?, ?, ?, ?)";
+                    mysqlConn.query(insertQuery, [obj.name, obj.abbreviation, obj.company_id, obj.status], function (insertError, insertResults) {
+                        mysqlConn.end(); // Cerrar la conexión aquí
+
+                        if (insertError) {
+                            console.error('Error executing insert query: ' + insertError.message);
+                            return res.status(500).json({
+                                "code": "ERROR",
+                                "mensaje": 'Error executing insert query: ' + insertError.message
+                            });
+                        }
+
+                        if (insertResults && insertResults.insertId) {
+                            return res.json({
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            });
+                        } else {
+                            return res.status(500).json({
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el registro."
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -2957,6 +3003,7 @@ router.post('/configuracion/production/createQuality', validateToken, (req, res)
         res.status(500).json({ error: e.message });
     }
 });
+
 
 //PRODUCCIÓN - BALANZAS
 router.get('/configuracion/production/getScale/:companyID', validateToken, (req, res) => {
@@ -3085,55 +3132,69 @@ router.post('/configuracion/production/updateScale', validateToken, (req, res) =
         } 
     */
 
-    try {
+        try {
+            let obj = req.body;
 
-        let obj = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.message);
-                return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.message
-                });
-
-            }
-
-            var queryString = "UPDATE scale SET name = ?, location = ?, company_id = ?, status = ? WHERE id = ?";
-
-            mysqlConn.query(queryString, [obj.name, obj.location, obj.company_id, obj.status, obj.id], function (error) {
-
-                if (error) {
-
-                    console.error('error ejecutando query: ' + error.message);
+            console.log(obj);
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.message);
                     return res.json({
                         "code": "ERROR",
-                        "mensaje": error.message
+                        "mensaje": err.message
                     });
-
                 }
-
-                return res.json({
-                    "code": "OK",
-                    "mensaje": "Registro actualizado correctamente."
+    
+                // Verificar si ya existe otra escala con el mismo nombre y company_id
+                var checkQueryString = "SELECT * FROM scale WHERE name = ? AND company_id = ? AND id != ?";
+                mysqlConn.query(checkQueryString, [obj.name, obj.company_id, obj.id], function (checkError, checkResults) {
+                    if (checkError) {
+                        console.error('error ejecutando query de verificación: ' + checkError.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": checkError.message
+                        });
+                    }
+    
+                    // Si ya existe una escala con ese nombre y company_id
+                    if (checkResults.length > 0) {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "Ya existe una escala con el mismo nombre para esta compañía."
+                        });
+                    }
+    
+                    // Si no existe, procede a actualizar la escala
+                    var queryString = "UPDATE scale SET name = ?, location = ?, company_id = ?, status = ? WHERE id = ?";
+                    mysqlConn.query(queryString, [obj.name, obj.location, obj.company_id, obj.status, obj.id], function (error) {
+                        if (error) {
+                            console.error('error ejecutando query de actualización: ' + error.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": error.message
+                            });
+                        }
+    
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro actualizado correctamente."
+                        });
+                    });
+    
+                    mysqlConn.end();
                 });
-
             });
+    
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
 
-            mysqlConn.end();
-
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
-    }
-
-});
+    
 
 router.post('/configuracion/production/deleteScale', validateToken, (req, res) => {
 
@@ -3239,66 +3300,72 @@ router.post('/configuracion/production/createScale', validateToken, (req, res) =
         }
     */
 
-    try {
-
-        let obj = req.body;
-
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-        mysqlConn.connect(function (err) {
-
-            if (err) {
-
-                console.error('error connecting: ' + err.message);
-                return res.json({
-                    "code": "ERROR",
-                    "mensaje": err.message
+        try {
+            let obj = req.body;
+    
+            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    
+            mysqlConn.connect(function (err) {
+                if (err) {
+                    console.error('error connecting: ' + err.message);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": err.message
+                    });
+                }
+    
+                // Primero, verifica si ya existe una escala con el mismo nombre y company_id
+                var checkQueryString = "SELECT * FROM scale WHERE name = ? AND company_id = ?";
+                mysqlConn.query(checkQueryString, [obj.name, obj.company_id], function (checkError, checkResults) {
+                    if (checkError) {
+                        console.error('error ejecutando query de verificación: ' + checkError.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": checkError.message
+                        });
+                    }
+    
+                    // Si ya existe una balanza con ese nombre y company_id
+                    if (checkResults.length > 0) {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "Ya existe una balanza con el mismo nombre para esta compañía."
+                        });
+                    }
+    
+                    // Si no existe, procede a insertar la nueva balanza
+                    var queryString = "INSERT INTO scale (name, location, company_id, status) VALUES (?, ?, ?, ?)";
+                    mysqlConn.query(queryString, [obj.name, obj.location, obj.company_id, obj.status], function (error, results) {
+                        if (error) {
+                            console.error('error ejecutando query de inserción: ' + error.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": error.message
+                            });
+                        }
+    
+                        if (results && results.insertId) {
+                            return res.json({
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            });
+                        } else {
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el registro."
+                            });
+                        }
+                    });
+    
+                    mysqlConn.end();
                 });
-
-            }
-
-            var queryString = "INSERT INTO scale (name, location, company_id, status) VALUES (?, ?, ?, ?)";
-
-            mysqlConn.query(queryString, [obj.name, obj.location, obj.company_id, obj.status], function (error, results) {
-
-                if (error) {
-
-                    console.error('error ejecutando query: ' + error.message);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.message
-                    });
-
-                }
-
-                if (results && results.insertId) {
-
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-
-                } else {
-
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
-                    });
-
-                }
-
             });
-
-            mysqlConn.end();
-
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
-    }
-
-});
+    
+        } catch (e) {
+            console.log(e);
+            res.json({ error: e.message });
+        }
+    });
 
 //PRODUCCIÓN - SCALE REGISTER
 
@@ -4041,7 +4108,7 @@ router.get('/configuracion/production/getDeals/:companyID', validateToken, (req,
                     "harvest_format": 1,
                     "quality": 1,
                     "price": 100,
-                    "status": 1
+                    "status": 1,
                     "company_id": 1,
                     }
                 ]    
@@ -4370,7 +4437,7 @@ router.get('/configuracion/production/getExporters/:companyID', validateToken, (
                     "legal_representative_name": "Representante 1",
                     "legal_representative_rut": "12345678-9",
                     "legal_representative_phone": "123456789",
-                    "legal_representative_email": "email@email.com"
+                    "legal_representative_email": "email@email.com",
                     "status": 1,
                     "company_id": 1
                     }
