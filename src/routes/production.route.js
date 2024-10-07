@@ -68,6 +68,15 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
+
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
                     if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
@@ -97,8 +106,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
                                 grounds.push(jsonResult);
                             });
 
-                           
-
                             const jsonResult = {
                                 "code": "OK",
                                 "grounds": grounds
@@ -117,10 +124,6 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
 
                     }
                 });
-
-
-                mysqlConn.end();
-
             }
         });
 
@@ -279,6 +282,7 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+
                 res.json(jsonResult);
 
             }
@@ -289,23 +293,31 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
-                    if (err) {
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
+                    if (error) {
 
                         console.error('error ejecutando query: ' + error.sqlMessage);
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
+
                         res.json(jsonResult);
 
-                    }
-                    else {
+                    } else {
 
-                        if (results && results.affectedRows != 0) {
+                        if (results && results.affectedRows == 1) {
 
                             const jsonResult = {
                                 "code": "OK",
-                                "mensaje": "Registro eliminado correctamente."
+                                "mensaje": "registro eliminado correctamente."
                             }
 
                             res.json(jsonResult);
@@ -314,16 +326,14 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
 
                             const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": "No se pudo elmiminar el registro ."
+                                "mensaje": "No se pudo eliminar el registro seleccionado."
                             }
 
                             res.json(jsonResult);
-                        }
 
+                        }
                     }
                 });
-
-                mysqlConn.end();
 
             }
         });
@@ -331,6 +341,17 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
     } catch (e) {
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
@@ -363,14 +384,18 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
+
                 console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-                return res.json(jsonResult);
+                res.json(jsonResult);
+
             } else {
+                
                 // Verificar si ya existe un campo con el mismo nombre dentro del mismo company_id
                 const checkQuery = `
                     SELECT COUNT(*) AS count FROM ground 
@@ -378,65 +403,121 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
                 `;
 
                 mysqlConn.query(checkQuery, [obj.name, obj.company_id], (checkError, checkResults) => {
+
                     if (checkError) {
+
                         console.error('error ejecutando query: ' + checkError.sqlMessage);
-                        return res.json({
+                        const jsonResult = {
                             "code": "ERROR",
                             "mensaje": checkError.sqlMessage
+                        };
+
+                        res.json(jsonResult);
+
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
                         });
+
+
                     }
+                    else {
 
-                    if (checkResults[0].count > 0) {
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": "Ya existe un campo con ese nombre en esta compañía."
-                        });
-                    }
+                        if (checkResults[0].count > 0) {
 
-                    // Si no existe, proceder a insertar el nuevo campo
-                    var queryString = `
-                        INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `;
-
-                    const values = [
-                        obj.name, obj.state, obj.city, obj.address,
-                        obj.latitude == null ? null : obj.latitude,
-                        obj.longitude == null ? null : obj.longitude,
-                        obj.zone, obj.company_id, obj.status
-                    ];
-
-                    mysqlConn.query(queryString, values, function (insertError, results) {
-                        if (insertError) {
-                            console.error('error ejecutando query: ' + insertError.sqlMessage);
-                            return res.json({
+                            const jsonResult = {
                                 "code": "ERROR",
-                                "mensaje": insertError.sqlMessage
+                                "mensaje": "Ya existe un campo con ese nombre en esta compañía."
+                            };
+
+                            res.json(jsonResult);
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
                             });
-                        }
-
-                        if (results && results.insertId != 0) {
-                            const jsonResult = {
-                                "code": "OK",
-                                "mensaje": "Registro creado correctamente."
-                            }
-                            return res.json(jsonResult);
                         } else {
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo crear el registro."
-                            }
-                            return res.json(jsonResult);
-                        }
-                    });
 
-                    mysqlConn.end();
+                                // Si no existe, proceder a insertar el nuevo campo
+                                var queryString = `
+                                    INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                `;
+
+                                const values = [
+                                    obj.name, obj.state, obj.city, obj.address,
+                                    obj.latitude == null ? null : obj.latitude,
+                                    obj.longitude == null ? null : obj.longitude,
+                                    obj.zone, obj.company_id, obj.status
+                                ];
+
+                                mysqlConn.query(queryString, values, function (error, resultsInsert, fields) {
+
+
+                                    mysqlConn.end((err) => {
+                                        if (err) {
+                                            console.error('Error al cerrar la conexión:', err);
+                                        } else {
+                                            console.log('Conexión cerrada correctamente.');
+                                        }
+                                    });
+    
+    
+                                    if (error) {
+    
+                                        console.error('error ejecutando query: ' + error.sqlMessage);
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": error.sqlMessage
+                                        }
+                                        res.json(jsonResult);
+    
+                                    }
+                                    else {
+                                        
+                                        if (resultsInsert.insertId != 0) {
+    
+                                            const jsonResult = {
+                                                "code": "OK",
+                                                "mensaje": "campo creado correctamente."
+                                            }
+                                            res.json(jsonResult);
+    
+                                        } else {
+    
+                                            const jsonResult = {
+                                                "code": "ERROR",
+                                                "mensaje": "No se pudo crear el campo."
+                                            }
+                                            res.json(jsonResult);
+                                        }
+                                    }
+                                });
+                        }
+                    }
                 });
             }
         });
     } catch (e) {
         console.log(e);
-        res.json({ error: e });
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        } 
     }
 });
 
@@ -851,32 +932,16 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
                 "attributes": [
                     {
                         "id": 1,
+                        "season": 1,
                         "sector": 1,
                         "specie": 1,
                         "variety": 1,
-                        "ha_productivas": 10,
-                        "hileras": 10,
-                        "plants": 10,
-                        "min_daily_frecuency": 10,
-                        "max_daily_frecuency": 10,
-                        "harvest_end": 1,
-                        "stimation_good": 10,
-                        "stimation_regular": 10,
-                        "stimation_bad": 10,
-                        "stimation_replant_kg": 10,
-                        "surface": 10,
-                        "interrow_density": 10,
-                        "row_density": 10,
-                        "quantity_plants_ha": 10,
-                        "clasification": 1,
-                        "rotation": 1,
-                        "kg_sector": 10,
-                        "kg_hectares": 10,
-                        "kg_plants": 10,
-                        "porc_regular": 10,
-                        "porc_replant": 10,
-                        "season": 1,
-                        "company_id": 1,
+                        "year_harvest": 2024,
+                        "ha_productivas": 100,
+                        "on_ha": 500,
+                        "between_ha": 100,
+                        "quantity_plants_ha": 10000,
+                        "company_id": element.company_id,
 
                     }
                 ]
@@ -900,7 +965,8 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
             }
 
             var queryString = "SELECT * FROM sector_attr a WHERE company_id = ?";
-            //console.log(queryString);
+            console.log(queryString);
+            console.log(companyID);
 
             mysqlConn.query(queryString, [companyID], function (error, results) {
                 if (error) {
@@ -910,7 +976,6 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
                         "mensaje": error.message
                     });
                 }
-
                 if (results && results.length > 0) {
                     //console.log('result', results);
 
@@ -923,26 +988,9 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
                             "variety": element.variety,
                             "year_harvest": element.year_harvest,
                             "ha_productivas": element.ha_productivas,
-                            "hileras": element.hileras,
-                            "plants": element.plants,
-                            "min_daily_frecuency": element.min_daily_frecuency,
-                            "max_daily_frecuency": element.max_daily_frecuency,
-                            "harvest_end": element.harvest_end,
-                            "stimation_good": element.stimation_good,
-                            "stimation_regular": element.stimation_regular,
-                            "stimation_bad": element.stimation_bad,
-                            "stimation_replant_kg": element.stimation_replant_kg,
-                            "surface": element.surface,
-                            "interrow_density": element.interrow_density,
-                            "row_density": element.row_density,
+                            "on_ha": element.on_ha,
+                            "between_ha": element.between_ha,
                             "quantity_plants_ha": element.quantity_plants_ha,
-                            "clasification": element.clasification,
-                            "rotation": element.rotation,
-                            "kg_sector": element.kg_sector,
-                            "kg_hectares": element.kg_hectares,
-                            "kg_plants": element.kg_plants,
-                            "porc_regular": element.porc_regular,
-                            "porc_replant": element.porc_replant,
                             "company_id": element.company_id,
                         });
                     });
@@ -994,6 +1042,31 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
 
         console.log(obj);
 
+        let quantity_plants_ha = 0;
+        
+        if (parseFloat(obj.on_ha) != 0 && parseFloat(obj.ha_productivas) && parseFloat(obj.between_ha)) {
+
+            let on_ha = parseFloat(obj.on_ha);
+            let between_ha  = parseFloat(obj.between_ha);
+            let ha_productivas = parseFloat(obj.ha_productivas);
+            quantity_plants_ha= 10000 / (on_ha * between_ha) * ha_productivas;
+            console.log(quantity_plants_ha);
+        }
+
+        const values = [
+            obj.sector,
+            parseFloat(obj.between_ha) || '0.00',
+            parseFloat(obj.ha_productivas) || '0.00',
+            obj.variety,
+            parseInt(obj.year_harvest),
+            quantity_plants_ha,
+            obj.specie,
+            obj.season,
+            obj.company_id,
+            parseFloat(obj.on_ha) || '0.00',
+            obj.id
+        ];
+
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -1005,10 +1078,10 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
                 });
             }
 
-            var queryString = "UPDATE sector_attr SET season = ?, sector = ?, specie = ?, variety = ?, year_harvest = ?, ha_productivas = ?, hileras = ?, plants = ?, min_daily_frecuency = ?, max_daily_frecuency = ?, stimation_good = ?, stimation_regular = ?, stimation_bad = ?, stimation_replant_kg = ?, surface = ?, interrow_density = ?, row_density = ?, quantity_plants_ha = ?, clasification = ?, rotation = ?, kg_sector = ?, kg_hectares = ?, kg_plants = ?, porc_regular = ?, porc_replant = ?, company_id = ? WHERE id = ?";
+            var queryString = "UPDATE sector_attr SET sector=?,between_ha=?,ha_productivas=?,variety=?,year_harvest=?,quantity_plants_ha=?,specie=?,season=?,company_id=?,on_ha=? WHERE id=?;";
             console.log(queryString);
 
-            mysqlConn.query(queryString, [obj.season, obj.sector, obj.specie, obj.variety, obj.year_harvest, obj.ha_productivas, obj.hileras, obj.plants, obj.min_daily_frecuency, obj.max_daily_frecuency, obj.stimation_good, obj.stimation_regular, obj.stimation_bad, obj.stimation_replant_kg, obj.surface, obj.interrow_density, obj.row_density, obj.quantity_plants_ha, obj.clasification, obj.rotation, obj.kg_sector, obj.kg_hectares, obj.kg_plants, obj.porc_regular, obj.porc_replant, obj.company_id, obj.id], function (error, results) {
+            mysqlConn.query(queryString, values, function (error, results) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
@@ -1123,37 +1196,33 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
     */
     try {
         let obj = req.body;
-        console.log(obj);
+
+        let quantity_plants_ha = 0;
+
+        if (parseFloat(obj.on_ha) != 0 && parseFloat(obj.ha_productivas) && parseFloat(obj.between_ha)) {
+
+            let on_ha = parseFloat(obj.on_ha);
+            let between_ha  = parseFloat(obj.between_ha);
+            let ha_productivas = parseFloat(obj.ha_productivas);
+            quantity_plants_ha= 10000 / (on_ha * between_ha) * ha_productivas;
+            console.log(quantity_plants_ha);
+        }
+
         const values = [
             obj.sector,
             obj.specie,
             obj.variety,
-            parseFloat(obj.ha_productivas) || null,
-            parseInt(obj.hileras) || null,
-            parseInt(obj.plants) || null,
-            parseInt(obj.min_daily_frecuency) || null,
-            parseInt(obj.max_daily_frecuency) || null,
-            parseInt(obj.stimation_good) || null,
-            parseInt(obj.stimation_regular) || null,
-            parseInt(obj.stimation_bad) || null,
-            parseInt(obj.stimation_replant_kg) || null,
-            parseFloat(obj.surface) || '0.00',
-            parseFloat(obj.interrow_density) || '0.00',
-            parseFloat(obj.row_density) || '0.00',
-            parseFloat(obj.quantity_plants_ha) || '0.00',
-            obj.clasification || null,
-            parseInt(obj.rotation) || null,
-            parseFloat(obj.kg_sector) || '0.00',
-            parseFloat(obj.kg_hectares) || '0.00',
-            parseFloat(obj.kg_plants) || '0.00',
-            parseFloat(obj.porc_regular) || '0.00',
-            parseFloat(obj.porc_replant) || '0.00',
+            parseFloat(obj.ha_productivas) || '0.00',
+            quantity_plants_ha,
             obj.season,
             obj.company_id,
-            parseInt(obj.year_harvest)
+            parseInt(obj.year_harvest),
+            parseFloat(obj.on_ha) || '0.00',
+            parseFloat(obj.between_ha) || '0.00',
+
         ];
 
-        const queryString = "INSERT INTO sector_attr (sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency,stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        const queryString = "INSERT INTO sector_attr (sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         console.log('Executing query:', queryString);
         console.log('With values:', values);
@@ -1225,8 +1294,8 @@ router.post('/configuracion/production/cloneAttributesSector', validateToken, (r
         let {id}  = req.body;
         console.log(id);
         
-        let  queryString = "insert into sector_attr (sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest)";   
-        queryString += "  select sector, specie, variety, ha_productivas, hileras, plants, min_daily_frecuency, max_daily_frecuency, stimation_good, stimation_regular, stimation_bad, stimation_replant_kg, surface, interrow_density, row_density, quantity_plants_ha, clasification, rotation, kg_sector, kg_hectares, kg_plants, porc_regular, porc_replant, season, company_id, year_harvest  from sector_attr where id = " +  id;
+        let  queryString = "insert into sector_attr (sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha)";   
+        queryString += "  select sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha  from sector_attr where id = " +  id;
         console.log('Executing query:', queryString);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -4033,48 +4102,107 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
 
             if (err) {
 
-                console.error('error connecting: ' + err.message);
-                return res.json({
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
                     "code": "ERROR",
-                    "mensaje": err.message
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            } else {
+
+                // Verificar que el formato de cosecha  no exista
+                var queryString = "SELECT id FROM harvest_format WHERE name ='" + obj.name + "'";
+
+                mysqlConn.query(queryString, function (error, results, fields) {
+                    
+                    if (error) {
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+
+                        res.json(jsonResult);
+
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
+                        
+                    } else {
+                        if (results && results.length > 0) {
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "El nombre :  " + obj.name + " ya existe en el sistema."
+                            }
+
+                            res.json(jsonResult);
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+                        } else {
+                            // Construir la consulta SQL para insertar la empresa
+                            var insertFields = "name, tara_base, specie, min_weight, max_weight, quantity_trays, collection, status, company_id";
+                            var insertValues = `'${obj.name}', '${obj.tara_base}', '${obj.specie}', '${ obj.min_weight}', '${obj.max_weight}', '${obj.quantity_trays}', '${obj.collection}', '${obj.status}', '${obj.company_id}'`;
+                           
+
+                            var queryString = `INSERT INTO harvest_format (${insertFields}) VALUES (${insertValues})`;
+console.log(queryString);
+                            mysqlConn.query(queryString, function (error, resultsInsert, fields) {
+
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+                                });
+
+                                if (error) {
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+
+                                    res.json(jsonResult);
+
+                                } else {
+
+                                    if (resultsInsert && resultsInsert.insertId != 0) {
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro creado correctamente."
+                                        }
+
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo crear el registro."
+                                        }
+
+                                        res.json(jsonResult);
+                                    }
+                                }
+                            });
+                        }
+                    }
                 });
 
             }
-
-            var queryString = "INSERT INTO harvest_format (name, tara_base, specie, min_weight, max_weight, quantity_trays, collection, status, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id], function (error, results) {
-
-                if (error) {
-
-                    console.error('error ejecutando query: ' + error.message);
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": error.message
-                    });
-
-                }
-
-                if (results && results.insertId) {
-
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-
-                } else {
-
-                    return res.json({
-                        "code": "ERROR",
-                        "mensaje": "No se pudo crear el registro."
-                    });
-
-                }
-
-            });
-
-            mysqlConn.end();
-
         });
 
     } catch (e) {

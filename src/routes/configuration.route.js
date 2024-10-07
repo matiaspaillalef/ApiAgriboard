@@ -683,6 +683,10 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                         "legal_representative_rut": "98765432-1",
                         "legal_representative_phone": "987654321",
                         "legal_representative_email": "representante1@empresa1.com",
+                        "system_representative_name": "Representante 2",
+                        "system_representative_rut": "98765432-1",
+                        "system_representative_phone": "987654321",
+                        "system_representative_email": "representante1@empresa1.com",
                         "status": 1
                     }
                 ]
@@ -709,7 +713,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
             } else {
 
                 var queryString = "SELECT id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, ";
-                queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ";
+                queryString += "legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status , system_representative_name,system_representative_rut,system_representative_phone,system_representative_email ";
                 queryString += "FROM companies";
                 
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -754,6 +758,10 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                                     "legal_representative_rut": element.legal_representative_rut,
                                     "legal_representative_phone": element.legal_representative_phone,
                                     "legal_representative_email": element.legal_representative_email,
+                                    "system_representative_name": element.system_representative_name,
+                                    "system_representative_rut": element.system_representative_rut,
+                                    "system_representative_phone": element.system_representative_phone,
+                                    "system_representative_email": element.system_representative_email,
                                     "status": element.status
                                 };
 
@@ -825,6 +833,10 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                 "legal_representative_rut": "98765432-1",
                 "legal_representative_phone": "987654321",
                 "legal_representative_email": "representante1@empresa1.com",
+                "system_representative_name": "Representante 2",
+                "system_representative_rut": "98765432-1",
+                "system_representative_phone": "987654321",
+                "system_representative_email": "representante1@empresa1.com",
                 "status": 1
             }
         }  
@@ -836,7 +848,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
         } 
     */
     try {
-        let { logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
+        let { logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status ,system_representative_name, system_representative_rut,system_representative_phone,system_representative_email} = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -889,8 +901,8 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
 
                         } else {
                             // Construir la consulta SQL para insertar la empresa
-                            var insertFields = "name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status";
-                            var insertValues = `'${name_company}', '${rut}', '${giro}', '${state}', '${city}', '${address}', '${phone}', '${web}', '${compensation_box}', '${legal_representative_name}', '${legal_representative_rut}', '${legal_representative_phone}', '${legal_representative_email}', ${status}`;
+                            var insertFields = "name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status , system_representative_name, system_representative_rut,system_representative_phone,system_representative_email";
+                            var insertValues = `'${name_company}', '${rut}', '${giro}', '${state}', '${city}', '${address}', '${phone}', '${web}', '${compensation_box}', '${legal_representative_name}', '${legal_representative_rut}', '${legal_representative_phone}', '${legal_representative_email}', ${status}, '${system_representative_name}', '${system_representative_rut}', '${system_representative_phone}', '${system_representative_email}'`;
 
                             if (logo) {
                                 insertFields += ", logo";
@@ -898,7 +910,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                             }
 
                             var queryString = `INSERT INTO companies (${insertFields}) VALUES (${insertValues})`;
-
+console.log(queryString);
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
 
                                 mysqlConn.end((err) => {
@@ -983,6 +995,14 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
                 "legal_representative_rut": "98765432-1",
                 "legal_representative_phone": "987654321",
                 "legal_representative_email": "representante1@empresa1.com",
+                "legal_representative_name": "Representante 1",
+                "legal_representative_rut": "98765432-1",
+                "legal_representative_phone": "987654321",
+                "legal_representative_email": "representante1@empresa1.com",
+                "system_representative_name": "Representante 2",
+                "system_representative_rut": "98765432-1",
+                "system_representative_phone": "987654321",
+                "system_representative_email": "representante1@empresa1.com",
                 "status": 1
             }
         }  
@@ -995,7 +1015,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
     */
     try {
 
-        let { id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status } = req.body;
+        let { id, logo, name_company, rut, giro, state, city, address, phone, web, compensation_box, legal_representative_name, legal_representative_rut, legal_representative_phone, legal_representative_email, status , system_representative_name, system_representative_rut,system_representative_phone,system_representative_email } = req.body;
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
@@ -1013,8 +1033,9 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
             } else {
 
                 var queryString = "UPDATE companies";
-                queryString += " SET logo='" + logo + "', name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box='" + compensation_box + "', legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status;
+                queryString += " SET logo='" + logo + "', name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box=" + compensation_box + ", legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status + "," +  "system_representative_name='" + system_representative_name + "', system_representative_rut='" + system_representative_rut + "', system_representative_phone='" + system_representative_phone + "', system_representative_email='" + system_representative_email + "'";
                 queryString += " WHERE id=" + id;
+                console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
