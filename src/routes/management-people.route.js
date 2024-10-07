@@ -859,15 +859,23 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-
                 res.json(jsonResult);
 
             } else {
 
                 var queryString = "SELECT * FROM `groups` g where id_company = " + companyID;
-                ////console.log(queryString);
+                console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
+
+
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
 
                     if (error) {
 
@@ -912,14 +920,23 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
                             res.json(jsonResult);
                         }
                     }
-                    // Terminar la conexión después de manejar los resultados
-                    mysqlConn.end();
                 });
             }
         });
     } catch (e) {
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -947,10 +964,13 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
 
         // Verifica si los parámetros están presentes
         if (!name || !status || !id_company) {
-            return res.status(400).json({
+
+            const jsonResult = {
                 "code": "ERROR",
                 "mensaje": "Faltan parámetros requeridos"
-            });
+            }
+
+            res.json(jsonResult);
         }
 
         // Convierte los valores a enteros
@@ -958,76 +978,150 @@ router.post('/management-people/groups/createGroup', validateToken, (req, res) =
         const numericIdCompany = parseInt(id_company, 10);
 
         if (isNaN(numericStatus) || isNaN(numericIdCompany)) {
-            return res.status(400).json({
+
+            const jsonResult = {
                 "code": "ERROR",
                 "mensaje": "El status o id_company no son números válidos"
-            });
+            }
+            res.json(jsonResult);
+
         }
 
         // Crea la conexión a la base de datos
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-        mysqlConn.connect(err => {
+        mysqlConn.connect(function (err) {
+
             if (err) {
-                console.error('Error connecting: ' + err.message);
-                return res.status(500).json({
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
                     "code": "ERROR",
-                    "mensaje": err.message
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            }
+            else {
+
+                // Verifica si ya existe un grupo con el mismo nombre y id_company
+                const checkQueryString = "SELECT * FROM `groups` WHERE name = ? AND id_company = ?";
+
+                mysqlConn.query(checkQueryString, [name, numericIdCompany], (checkError, checkResults) => {
+
+                    if (checkError) {
+
+                        console.error('Error executing check query: ' + checkError.message);
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": checkError.sqlMessage
+                        }
+
+                        mysqlConn.end((err) => {
+
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+
+                        });
+
+                        res.json(jsonResult);
+
+                    } else {
+
+
+                        // Si ya existe, retorna un mensaje de error
+                        if (checkResults.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
+                            }
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            // Define la consulta SQL para crear el grupo
+                            const queryString = "INSERT INTO `groups` (name, status, id_company) VALUES (?, ?, ?)";
+                            const queryParams = [name, numericStatus, numericIdCompany];
+
+                            // Ejecuta la consulta para crear el grupo
+                            mysqlConn.query(queryString, queryParams, (error, resultsInsert) => {
+
+                                mysqlConn.end((err) => {
+
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+
+                                });
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                } else {
+
+                                    if (resultsInsert.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo crear el Registro seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+
+                                }
+                            });
+                        }
+                    }
                 });
             }
-
-            // Verifica si ya existe un grupo con el mismo nombre y id_company
-            const checkQueryString = "SELECT * FROM `groups` WHERE name = ? AND id_company = ?";
-            mysqlConn.query(checkQueryString, [name, numericIdCompany], (checkError, checkResults) => {
-                if (checkError) {
-                    console.error('Error executing check query: ' + checkError.message);
-                    return res.status(500).json({
-                        "code": "ERROR",
-                        "mensaje": checkError.message
-                    });
-                }
-
-                // Si ya existe, retorna un mensaje de error
-                if (checkResults.length > 0) {
-                    return res.status(400).json({
-                        "code": "ERROR",
-                        "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
-                    });
-                }
-
-                // Define la consulta SQL para crear el grupo
-                const queryString = "INSERT INTO `groups` (name, status, id_company) VALUES (?, ?, ?)";
-                const queryParams = [name, numericStatus, numericIdCompany];
-
-                // Ejecuta la consulta para crear el grupo
-                mysqlConn.query(queryString, queryParams, (error, results) => {
-                    if (error) {
-                        console.error('Error executing query: ' + error.message);
-                        return res.status(500).json({
-                            "code": "ERROR",
-                            "mensaje": error.message
-                        });
-                    }
-
-                    if (results && results.insertId) {
-                        return res.status(200).json({
-                            "code": "OK",
-                            "mensaje": "Registro creado correctamente."
-                        });
-                    } else {
-                        return res.status(500).json({
-                            "code": "ERROR",
-                            "mensaje": "No se pudo crear el registro."
-                        });
-                    }
-                });
-
-                mysqlConn.end();
-            });
         });
+
     } catch (e) {
-        console.error(e);
-        res.status(500).json({ "code": "ERROR", "mensaje": e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1055,86 +1149,155 @@ router.post('/management-people/groups/updateGroup', validateToken, (req, res) =
 
         // Verifica si los parámetros necesarios están presentes
         if (!id || !name || status === undefined || !id_company) {
-            return res.status(400).json({
+
+            console.error('error connecting: ' + err.sqlMessage);
+            const jsonResult = {
                 "code": "ERROR",
                 "mensaje": "Faltan parámetros requeridos"
-            });
+            }
+            res.json(jsonResult);
         }
 
         // Convierte el `status` a un entero
         const numericStatus = parseInt(status, 10);
 
         if (isNaN(numericStatus)) {
-            return res.status(400).json({
+
+            const jsonResult = {
                 "code": "ERROR",
                 "mensaje": "El status no es un número válido"
-            });
+            }
+            res.json(jsonResult);
+
         }
 
         // Crea la conexión a la base de datos
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-        mysqlConn.connect(err => {
+        mysqlConn.connect(function (err) {
+
             if (err) {
-                console.error('Error connecting: ' + err.message);
-                return res.status(500).json({
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
                     "code": "ERROR",
-                    "mensaje": err.message
-                });
+                    "mensaje": err.sqlMessage
+                }
+
+                res.json(jsonResult);
+
             }
 
             // Verifica si ya existe un grupo con el mismo nombre y id_company, excluyendo el grupo que se está editando
             const checkQueryString = "SELECT * FROM `groups` WHERE name = ? AND id_company = ? AND id != ?";
             mysqlConn.query(checkQueryString, [name, id_company, id], (checkError, checkResults) => {
+
                 if (checkError) {
-                    console.error('Error executing check query: ' + checkError.message);
-                    return res.status(500).json({
+
+                    console.error('error ejecutando query: ' + checkError.sqlMessage);
+                    const jsonResult = {
                         "code": "ERROR",
-                        "mensaje": checkError.message
-                    });
-                }
-
-                // Si ya existe, retorna un mensaje de error
-                if (checkResults.length > 0) {
-                    return res.status(400).json({
-                        "code": "ERROR",
-                        "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
-                    });
-                }
-
-                // Define la consulta SQL para actualizar el grupo
-                const queryString = "UPDATE `groups` SET name = ?, status = ?, id_company = ? WHERE id = ?";
-                const queryParams = [name, numericStatus, id_company, id];
-
-                // Ejecuta la consulta para actualizar el grupo
-                mysqlConn.query(queryString, queryParams, (error, results) => {
-                    if (error) {
-                        console.error('Error executing query: ' + error.message);
-                        return res.status(500).json({
-                            "code": "ERROR",
-                            "mensaje": error.message
-                        });
+                        "mensaje": checkError.sqlMessage
                     }
 
-                    if (results && results.affectedRows > 0) {
-                        return res.status(200).json({
-                            "code": "OK",
-                            "mensaje": "Registro actualizado correctamente."
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
+
+                    res.json(jsonResult);
+
+                } else {
+
+                    // Si ya existe, retorna un mensaje de error
+                    if (checkResults.length > 0) {
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": "Ya existe un grupo con ese nombre para esta compañía."
+                        }
+
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
                         });
+
+                        res.json(jsonResult);
+
                     } else {
-                        return res.status(404).json({
-                            "code": "ERROR",
-                            "mensaje": "No se encontró el registro para actualizar."
+
+                        // Define la consulta SQL para actualizar el grupo
+                        const queryString = "UPDATE `groups` SET name = ?, status = ?, id_company = ? WHERE id = ?";
+                        const queryParams = [name, numericStatus, id_company, id];
+
+                        // Ejecuta la consulta para actualizar el grupo
+                        mysqlConn.query(queryString, queryParams, (error, resultsInsert) => {
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+
+                            if (error) {
+
+                                console.error('error ejecutando query: ' + error.sqlMessage);
+                                const jsonResult = {
+                                    "code": "ERROR",
+                                    "mensaje": error.sqlMessage
+                                }
+                                res.json(jsonResult);
+
+                            }
+                            else {
+
+                                if (resultsInsert.affectedRows != 0) {
+
+                                    const jsonResult = {
+                                        "code": "OK",
+                                        "mensaje": "Registro actualizar correctamente."
+                                    }
+                                    res.json(jsonResult);
+
+                                } else {
+
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": "No se pudo actualizar el Registro seleccionado."
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                            }
                         });
                     }
-                });
-
-                mysqlConn.end();
+                }
             });
         });
     } catch (e) {
-        console.error(e);
-        res.status(500).json({ "code": "ERROR", "mensaje": e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1168,10 +1331,13 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
         const groupId = parseInt(id, 10);
 
         if (isNaN(groupId)) {
-            return res.status(400).json({
+
+            const jsonResult = {
                 "code": "ERROR",
                 "mensaje": "ID inválido"
-            });
+            }
+
+            res.json(jsonResult);
         }
 
         //console.log(`Deleting group with ID: ${groupId}`);
@@ -1180,42 +1346,77 @@ router.post('/management-people/groups/deleteGroup', validateToken, (req, res) =
 
         mysqlConn.connect(err => {
             if (err) {
-                console.error('Error connecting: ' + err.message);
-                return res.status(500).json({
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
                     "code": "ERROR",
-                    "mensaje": err.message
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+
+            } else {
+
+                const queryString = "DELETE FROM `groups` WHERE id = ?";
+                mysqlConn.query(queryString, [groupId], (error, results) => {
+
+                    mysqlConn.end((err) => {
+
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+
+                    });
+
+                    if (error) {
+
+                        console.error('Error executing query: ' + error.message);
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    } else {
+
+                        if (results.affectedRows > 0) {
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro Eliminado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "No se pudo eliminar el registro selecionado."
+                            }
+
+                            res.json(jsonResult);
+                        }
+                    }
                 });
             }
-
-            // Escapa el nombre de la tabla usando acentos graves
-            const queryString = "DELETE FROM `groups` WHERE id = ?";
-            mysqlConn.query(queryString, [groupId], (error, results) => {
-                if (error) {
-                    console.error('Error executing query: ' + error.message);
-                    return res.status(500).json({
-                        "code": "ERROR",
-                        "mensaje": error.message
-                    });
-                }
-
-                if (results.affectedRows > 0) {
-                    return res.status(200).json({
-                        "code": "OK",
-                        "mensaje": "Registro eliminado correctamente."
-                    });
-                } else {
-                    return res.status(404).json({
-                        "code": "ERROR",
-                        "mensaje": "No se encontró el registro para eliminar."
-                    });
-                }
-            });
-
-            mysqlConn.end();
         });
     } catch (e) {
+
         console.log(e);
-        res.status(500).json({ "code": "ERROR", "mensaje": e.message });
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1256,69 +1457,90 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
 
             if (err) {
 
-                console.error('Error al conectar: ' + err.sqlMessage);
+                console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
+                res.json(jsonResult);
 
-                return res.json(jsonResult);
+            } else {
 
-            }
+                let queryString = "SELECT * FROM squads where id_company = " + companyID;
 
-            let queryString = "SELECT * FROM squads where id_company = " + companyID;
+                mysqlConn.query(queryString, function (error, results, fields) {
 
-            mysqlConn.query(queryString, function (error, results, fields) {
-
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                if (results && results.length > 0) {
-
-                    results.forEach(element => {
-
-                        const jsonResult = {
-                            "id": element.id,
-                            "name": element.name,
-                            "group": element.id_group,
-                            "workers": element.workers,
-                            "status": element.status,
-                        };
-
-                        squads.push(jsonResult);
-
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
                     });
 
-                    const jsonResult = {
-                        "code": "OK",
-                        "squads": squads
+                    if (error) {
+
+                        console.error('error ejecutando query: ' + error.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    } else {
+
+                        if (results && results.length > 0) {
+
+                            results.forEach(element => {
+
+                                const jsonResult = {
+                                    "id": element.id,
+                                    "name": element.name,
+                                    "group": element.id_group,
+                                    "workers": element.workers,
+                                    "status": element.status,
+                                };
+
+                                squads.push(jsonResult);
+
+                            });
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "squads": squads
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "No se encontraron registros"
+                            }
+
+                            res.json(jsonResult);
+                        }
+
                     }
-
-                    res.json(jsonResult);
-
-                } else {
-
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": "No se encontraron registros"
-                    }
-
-                    res.json(jsonResult);
-                }
-
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
+                });
+            }
         });
     } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1355,72 +1577,142 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
 
         mysqlConn.connect(function (err) {
             if (err) {
-                console.error('Error al conectar: ' + err.message);
-                return res.status(500).json({
-                    code: "ERROR",
-                    mensaje: err.message
-                });
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
             }
+            else {
 
-            // Paso 1: Verificar si ya existe un squad con el mismo nombre y company_id
-            const checkQuery = `
-                SELECT COUNT(*) as count 
-                FROM squads 
-                WHERE LOWER(name) = LOWER(?) 
-                AND id_company = ?
-            `;
-
-            mysqlConn.query(checkQuery, [name, idCompany], function (checkError, checkResults) {
-                if (checkError) {
-                    console.error('Error ejecutando checkQuery: ' + checkError.message);
-                    mysqlConn.end();
-                    return res.status(500).json({
-                        code: "ERROR",
-                        mensaje: checkError.message
-                    });
-                }
-
-                // Si ya existe, respondemos con un error
-                if (checkResults[0].count > 0) {
-                    mysqlConn.end();
-                    return res.status(400).json({
-                        code: "ERROR",
-                        mensaje: "Ya existe un squad con ese nombre dentro de la misma compañía."
-                    });
-                }
-
-                // Paso 2: Si no hay duplicados, proceder con la inserción
-                const queryString = `
-                    INSERT INTO squads (name, id_group, status, workers, id_company)
-                    VALUES (?, ?, ?, '[]', ?)
+                // Paso 1: Verificar si ya existe un squad con el mismo nombre y company_id
+                const checkQuery = `
+                    SELECT COUNT(*) as count 
+                    FROM squads 
+                    WHERE LOWER(name) = LOWER(?) 
+                    AND id_company = ?
                 `;
 
-                const groupValue = group ? group : null;
+                mysqlConn.query(checkQuery, [name, idCompany], function (checkError, checkResults) {
 
-                mysqlConn.query(queryString, [name, groupValue, status, idCompany], function (error, results) {
-                    mysqlConn.end();
+                    if (checkError) {
 
-                    if (error) {
-                        console.error('Error ejecutando query: ' + error.message);
-                        return res.status(500).json({
-                            code: "ERROR",
-                            mensaje: error.message
+                        console.error('Error executing check query: ' + checkError.message);
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": checkError.sqlMessage
+                        }
+
+                        mysqlConn.end((err) => {
+
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+
                         });
-                    }
 
-                    res.json({
-                        code: "OK",
-                        mensaje: "Registro creado"
-                    });
+                        res.json(jsonResult);
+
+                    } else {
+
+                        // Si ya existe, respondemos con un error
+                        if (checkResults[0].count > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "Ya existe un cuadrilla con ese nombre para esta compañía."
+                            }
+
+                            mysqlConn.end((err) => {
+
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+
+                            });
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            // Paso 2: Si no hay duplicados, proceder con la inserción
+                            const queryString = `
+                                INSERT INTO squads (name, id_group, status, workers, id_company)
+                                VALUES (?, ?, ?, '[]', ?)
+                            `;
+
+                            const groupValue = group ? group : null;
+
+                            mysqlConn.query(queryString, [name, groupValue, status, idCompany], function (error, results) {
+
+                                mysqlConn.end((err) => {
+
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+
+                                });
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                } else {
+
+                                    if (results.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo crear el Registro."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+
+                                }
+                            });
+                        }
+                    }
                 });
-            });
+            }
         });
     } catch (e) {
-        console.error(e);
-        res.status(500).json({
-            code: "ERROR",
-            mensaje: e.message
-        });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1456,63 +1748,151 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
         // Convertir workers a una cadena JSON
         const workersJson = JSON.stringify(workers);
 
-        // Si group está vacío o es undefined, establecerlo en null
-        const groupValue = (group === undefined || group === '' || group === null) ? null : group;
+        if ((group === undefined || group === '' || group === null)) {
+
+            const jsonResult = {
+                "code": "ERROR",
+                "mensaje": "Faltan parámetros requeridos"
+            }
+            res.json(jsonResult);
+
+        }
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
-                return res.json({ "code": "ERROR", "mensaje": err.sqlMessage });
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+
+                res.json(jsonResult);
+
             }
+            else {
 
-            // Primero verificar si ya existe otro registro con el mismo nombre y company_id
-            const checkQuery = `
+                // Primero verificar si ya existe otro registro con el mismo nombre y company_id
+                const checkQuery = `
                 SELECT id FROM squads 
-                WHERE name = ? AND id_company = ? AND id != ?
-            `;
+                WHERE name = ? AND id_company = ? AND id != ?`;
 
-            mysqlConn.query(checkQuery, [name, company_id, id], function (checkError, checkResults) {
-                if (checkError) {
-                    console.error('Error al ejecutar la consulta de verificación: ' + checkError.sqlMessage);
-                    return res.json({ "code": "ERROR", "mensaje": checkError.sqlMessage });
-                }
+                mysqlConn.query(checkQuery, [name, company_id, id], function (checkError, checkResults) {
 
-                // Si hay resultados, significa que ya existe un registro con el mismo nombre
-                if (checkResults.length > 0) {
-                    return res.json({ "code": "ERROR", "mensaje": "Ya existe un registro con el mismo nombre en esta empresa." });
-                }
+                    if (checkError) {
 
-                // Si no existe, proceder a actualizar el registro
-                var queryString = `
-                    UPDATE squads 
-                    SET 
-                        name = ?, 
-                        id_group = ?, 
-                        status = ?, 
-                        workers = ? 
-                    WHERE 
-                        id = ?
-                `;
+                        console.error('error ejecutando query: ' + checkError.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": checkError.sqlMessage
+                        }
 
-                mysqlConn.query(queryString, [name, groupValue, status, workersJson, id], function (updateError, results) {
-                    if (updateError) {
-                        console.error('Error ejecutando query: ' + updateError.sqlMessage);
-                        return res.json({ "code": "ERROR", "mensaje": updateError.sqlMessage });
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
+
+                        res.json(jsonResult);
                     }
+                    else {
 
-                    if (results && results.affectedRows != 0) {
-                        return res.json({ "code": "OK", "mensaje": "Registro actualizado correctamente." });
-                    } else {
-                        return res.json({ "code": "ERROR", "mensaje": "No se pudo actualizar el registro." });
+                        if (checkResults.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "Ya existe un registro con ese nombre para esta compañía."
+                            }
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+                            res.json(jsonResult);
+                        }
+                        else {
+
+                            // Si no existe, proceder a actualizar el registro
+                            var queryString = `
+                            UPDATE squads 
+                            SET 
+                                name = ?, 
+                                id_group = ?, 
+                                status = ?, 
+                                workers = ? 
+                            WHERE 
+                                id = ?`;
+
+                            mysqlConn.query(queryString, [name, group, status, workersJson, id], function (updateError, results) {
+
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+                                });
+
+                                if (updateError) {
+
+                                    console.error('error ejecutando query: ' + updateError.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": updateError.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                                else {
+
+                                    if (results.affectedRows != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro actualizar correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo actualizar el Registro seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+                                }
+                            });
+                        }
                     }
                 });
-            });
+            }
         });
     } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1551,40 +1931,79 @@ router.post('/management-people/squads/deleteSquad', validateToken, (req, res) =
 
         mysqlConn.connect(function (err) {
             if (err) {
-                console.error('Error al conectar: ' + err.sqlMessage);
+
+                console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-                return res.json(jsonResult);
-            }
-
-            let queryString = "DELETE FROM squads WHERE id = ?";
-            //console.log(queryString);
-
-            mysqlConn.query(queryString, [id], function (error, results, fields) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    return res.json(jsonResult);
-                }
-
-                const jsonResult = {
-                    "code": "OK",
-                    "mensaje": "Registro eliminado"
-                }
                 res.json(jsonResult);
+            }
+            else {
 
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-            });
+                let queryString = "DELETE FROM squads WHERE id = ?";
+                //console.log(queryString);
+
+                mysqlConn.query(queryString, [id], function (error, results, fields) {
+
+                    mysqlConn.end((err) => {
+
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+
+                    });
+
+                    if (error) {
+
+                        console.error('Error executing query: ' + error.message);
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": error.sqlMessage
+                        }
+                        res.json(jsonResult);
+
+                    } else {
+
+                        if (results.affectedRows > 0) {
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "Registro Eliminado correctamente."
+                            }
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            const jsonResult = {
+                                "code": "OK",
+                                "mensaje": "No se pudo eliminar el registro selecionado."
+                            }
+
+                            res.json(jsonResult);
+                        }
+                    }
+                });
+            }
         });
     } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 }
 
@@ -1665,12 +2084,11 @@ router.get('/management-people/shifts/getShifts/:companyID', validateToken, (req
 
             if (err) {
 
-                console.error('Error de conexión: ' + err.sqlMessage);
+                console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-
                 res.json(jsonResult);
 
             } else {
@@ -1678,6 +2096,14 @@ router.get('/management-people/shifts/getShifts/:companyID', validateToken, (req
                 var queryString = "SELECT id, name, monday_opening_time, monday_closing_time, tuesday_opening_time, tuesday_closing_time, wednesday_opening_time, wednesday_closing_time, thursday_opening_time, thursday_closing_time, friday_opening_time, friday_closing_time, saturday_opening_time, saturday_closing_time, sunday_opening_time, sunday_closing_time, status FROM shifts where id_company = " + companyID;
                 //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
+
+                    mysqlConn.end((err) => {
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+                    });
 
                     if (error) {
 
@@ -1734,15 +2160,24 @@ router.get('/management-people/shifts/getShifts/:companyID', validateToken, (req
                             res.json(jsonResult);
                         }
                     }
-                    // Terminar la conexión después de manejar los resultados
-
-                    mysqlConn.end();
                 });
             }
         });
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1833,65 +2268,151 @@ router.post('/management-people/shifts/createShift', validateToken, (req, res) =
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
+
             if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
-                return res.json({
-                    code: "ERROR",
-                    mensaje: err.sqlMessage
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+                res.json(jsonResult);
+            }
+            else {
+
+                // Verifica si ya existe un turnos con el mismo nombre y id_company
+                const checkQueryString = "SELECT * FROM `shifts` WHERE name = ? AND id_company = ?";
+
+                mysqlConn.query(checkQueryString, [name, id_company], (checkError, checkResults) => {
+
+                    if (checkError) {
+
+                        console.error('Error executing check query: ' + checkError.message);
+
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": checkError.sqlMessage
+                        }
+
+                        mysqlConn.end((err) => {
+
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+
+                        });
+
+                        res.json(jsonResult);
+
+                    } else {
+
+                        // Si ya existe, retorna un mensaje de error
+                        if (checkResults.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "Ya existe un registro con ese nombre para esta compañía."
+                            }
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            var queryString = `
+                            INSERT INTO shifts (
+                                name,
+                                monday_opening_time,
+                                monday_closing_time,
+                                tuesday_opening_time,
+                                tuesday_closing_time,
+                                wednesday_opening_time,
+                                wednesday_closing_time,
+                                thursday_opening_time,
+                                thursday_closing_time,
+                                friday_opening_time,
+                                friday_closing_time,
+                                saturday_opening_time,
+                                saturday_closing_time,
+                                sunday_opening_time,
+                                sunday_closing_time,
+                                status,
+                                id_company
+                            )
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+                            mysqlConn.query(queryString, queryValues, function (error, resultsInsert) {
+
+                                mysqlConn.end((err) => {
+
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+
+                                });
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                } else {
+
+                                    if (resultsInsert.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo crear el Registro seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+
+                                }
+                            });
+                        }
+                    }
                 });
             }
-
-            var queryString = `
-                INSERT INTO shifts (
-                    name,
-                    monday_opening_time,
-                    monday_closing_time,
-                    tuesday_opening_time,
-                    tuesday_closing_time,
-                    wednesday_opening_time,
-                    wednesday_closing_time,
-                    thursday_opening_time,
-                    thursday_closing_time,
-                    friday_opening_time,
-                    friday_closing_time,
-                    saturday_opening_time,
-                    saturday_closing_time,
-                    sunday_opening_time,
-                    sunday_closing_time,
-                    status,
-                    id_company
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-
-            mysqlConn.query(queryString, queryValues, function (error, results) {
-                mysqlConn.end(); // Terminar la conexión
-
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    return res.json({
-                        code: "ERROR",
-                        mensaje: error.sqlMessage
-                    });
-                }
-
-                if (results && results.insertId != 0) {
-                    return res.json({
-                        code: "OK",
-                        mensaje: "Registro creado correctamente."
-                    });
-                } else {
-                    return res.json({
-                        code: "ERROR",
-                        mensaje: "No se pudo crear el registro."
-                    });
-                }
-            });
         });
 
     } catch (e) {
-        console.error(e);
-        res.json({ error: e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -1987,69 +2508,151 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect((err) => {
+
             if (err) {
-                console.error('Error de conexión: ' + err.sqlMessage);
-                return res.json({
-                    code: "ERROR",
-                    mensaje: err.sqlMessage
+
+                console.error('error connecting: ' + err.sqlMessage);
+                const jsonResult = {
+                    "code": "ERROR",
+                    "mensaje": err.sqlMessage
+                }
+
+                res.json(jsonResult);
+
+            }
+            else {
+
+                // Verifica si ya existe un grupo con el mismo nombre y id_company, excluyendo el grupo que se está editando
+                const checkQueryString = "SELECT * FROM `shifts` WHERE name = ? AND id_company = ? AND id != ?";
+                mysqlConn.query(checkQueryString, [name, id_company, id], (checkError, checkResults) => {
+
+                    if (checkError) {
+
+                        console.error('error ejecutando query: ' + checkError.sqlMessage);
+                        const jsonResult = {
+                            "code": "ERROR",
+                            "mensaje": checkError.sqlMessage
+                        }
+
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
+
+                        res.json(jsonResult);
+
+                    } else {
+
+                        if (checkResults.length > 0) {
+
+                            const jsonResult = {
+                                "code": "ERROR",
+                                "mensaje": "Ya existe un horario con ese nombre para esta compañía."
+                            }
+
+                            mysqlConn.end((err) => {
+                                if (err) {
+                                    console.error('Error al cerrar la conexión:', err);
+                                } else {
+                                    console.log('Conexión cerrada correctamente.');
+                                }
+                            });
+
+                            res.json(jsonResult);
+
+                        } else {
+
+                            var queryString = `
+                            UPDATE shifts 
+                            SET 
+                                name = ?, 
+                                monday_opening_time = ?, 
+                                monday_closing_time = ?, 
+                                tuesday_opening_time = ?, 
+                                tuesday_closing_time = ?, 
+                                wednesday_opening_time = ?, 
+                                wednesday_closing_time = ?, 
+                                thursday_opening_time = ?, 
+                                thursday_closing_time = ?, 
+                                friday_opening_time = ?, 
+                                friday_closing_time = ?, 
+                                saturday_opening_time = ?, 
+                                saturday_closing_time = ?, 
+                                sunday_opening_time = ?, 
+                                sunday_closing_time = ?, 
+                                status = ?,
+                                id_company = ?
+                            WHERE id = ?`;
+
+                            console.log('queryString:', queryString);
+                            console.log('queryValues:', queryValues);
+
+                            mysqlConn.query(queryString, queryValues, (error, results) => {
+
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
+                                    }
+                                });
+
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                                else {
+
+                                    if (results.affectedRows != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "Registro actualizar correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo actualizar el Registro seleccionado."
+                                        }
+                                        res.json(jsonResult);
+
+                                    }
+                                }
+                            });
+                        }
+                    }
                 });
             }
-
-            var queryString = `
-                UPDATE shifts 
-                SET 
-                    name = ?, 
-                    monday_opening_time = ?, 
-                    monday_closing_time = ?, 
-                    tuesday_opening_time = ?, 
-                    tuesday_closing_time = ?, 
-                    wednesday_opening_time = ?, 
-                    wednesday_closing_time = ?, 
-                    thursday_opening_time = ?, 
-                    thursday_closing_time = ?, 
-                    friday_opening_time = ?, 
-                    friday_closing_time = ?, 
-                    saturday_opening_time = ?, 
-                    saturday_closing_time = ?, 
-                    sunday_opening_time = ?, 
-                    sunday_closing_time = ?, 
-                    status = ?,
-                    id_company = ?
-                WHERE id = ?
-            `;
-
-            console.log('queryString:', queryString);
-            console.log('queryValues:', queryValues);
-
-            mysqlConn.query(queryString, queryValues, (error, results) => {
-                // Terminar la conexión después de manejar los resultados
-                mysqlConn.end();
-
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.sqlMessage);
-                    return res.json({
-                        code: "ERROR",
-                        mensaje: error.sqlMessage
-                    });
-                }
-
-                if (results && results.affectedRows > 0) {
-                    return res.json({
-                        code: "OK",
-                        mensaje: "Registro actualizado correctamente."
-                    });
-                } else {
-                    return res.json({
-                        code: "ERROR",
-                        mensaje: "No se pudo actualizar el registro."
-                    });
-                }
-            });
         });
 
     } catch (e) {
-        console.error(e);
-        res.json({ code: "ERROR", mensaje: e.message });
+
+        console.log(e);
+        res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -2089,13 +2692,11 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 
             if (err) {
 
-                console.error('Error de conexión: ' + err.sqlMessage);
-
+                console.error('error connecting: ' + err.sqlMessage);
                 const jsonResult = {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 }
-
                 res.json(jsonResult);
 
             } else {
@@ -2105,23 +2706,33 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
+
+                    mysqlConn.end((err) => {
+
+                        if (err) {
+                            console.error('Error al cerrar la conexión:', err);
+                        } else {
+                            console.log('Conexión cerrada correctamente.');
+                        }
+
+                    });
+
                     if (error) {
 
-                        console.error('Error ejecutando query: ' + error.sqlMessage);
+                        console.error('Error executing query: ' + error.message);
+
                         const jsonResult = {
                             "code": "ERROR",
                             "mensaje": error.sqlMessage
                         }
-
                         res.json(jsonResult);
 
                     } else {
 
-                        if (results && results.affectedRows != 0) {
-
+                        if (results.affectedRows > 0) {
                             const jsonResult = {
                                 "code": "OK",
-                                "mensaje": "Registro eliminado correctamente."
+                                "mensaje": "Registro Eliminado correctamente."
                             }
 
                             res.json(jsonResult);
@@ -2129,23 +2740,32 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
                         } else {
 
                             const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "No se pudo elmiminar el  registro ."
+                                "code": "OK",
+                                "mensaje": "No se pudo eliminar el registro selecionado."
                             }
 
                             res.json(jsonResult);
                         }
                     }
-
-                    // Terminar la conexión después de manejar los resultados
-                    mysqlConn.end();
                 });
             }
         });
 
     } catch (e) {
+
         console.log(e);
         res.json({ error: e })
+
+        if (mysqlConn) {
+
+            mysqlConn.end((err) => {
+                if (err) {
+                    console.error('Error al cerrar la conexión:', err);
+                } else {
+                    console.log('Conexión cerrada correctamente.');
+                }
+            });
+        }
     }
 });
 
@@ -2249,72 +2869,72 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
             }
         }
     */
-        try {
-            const {
-                id, rut, name, lastname, lastname2, born_date, gender, state_civil, state,
-                city, address, phone, email, date_admission, status, position, contractor,
-                squad, leader_squad, shift, wristband, observation, bank, account_type,
-                account_number, afp, health, company_id
-            } = req.body;
-    
-            // Verificar si el id está presente
-            if (!id) {
-                return res.status(400).json({
+    try {
+        const {
+            id, rut, name, lastname, lastname2, born_date, gender, state_civil, state,
+            city, address, phone, email, date_admission, status, position, contractor,
+            squad, leader_squad, shift, wristband, observation, bank, account_type,
+            account_number, afp, health, company_id
+        } = req.body;
+
+        // Verificar si el id está presente
+        if (!id) {
+            return res.status(400).json({
+                code: "ERROR",
+                mensaje: "ID es obligatorio"
+            });
+        }
+
+        // Asignar valores predeterminados para campos vacíos
+        const processValue = (value) => value === '' ? null : value;
+
+        const processedPosition = processValue(position) ? Number(position) : null;
+        const processedContractor = processValue(contractor) ? Number(contractor) : null;
+        const processedSquad = processValue(squad) ? Number(squad) : null;
+        const processedLeaderSquad = processValue(leader_squad) ? Number(leader_squad) : null;
+        const processedShift = processValue(shift) ? Number(shift) : null;
+        const processedWristband = processValue(wristband) ? Number(wristband) : null;
+
+        // Crear conexión
+        const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect((err) => {
+            if (err) {
+                console.error('Error de conexión:', err.message);
+                return res.status(500).json({
                     code: "ERROR",
-                    mensaje: "ID es obligatorio"
+                    mensaje: 'Error de conexión: ' + err.message
                 });
             }
-    
-            // Asignar valores predeterminados para campos vacíos
-            const processValue = (value) => value === '' ? null : value;
-    
-            const processedPosition = processValue(position) ? Number(position) : null;
-            const processedContractor = processValue(contractor) ? Number(contractor) : null;
-            const processedSquad = processValue(squad) ? Number(squad) : null;
-            const processedLeaderSquad = processValue(leader_squad) ? Number(leader_squad) : null;
-            const processedShift = processValue(shift) ? Number(shift) : null;
-            const processedWristband = processValue(wristband) ? Number(wristband) : null;
-    
-            // Crear conexión
-            const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-    
-            mysqlConn.connect((err) => {
-                if (err) {
-                    console.error('Error de conexión:', err.message);
-                    return res.status(500).json({
-                        code: "ERROR",
-                        mensaje: 'Error de conexión: ' + err.message
-                    });
-                }
-    
-                // Verificar si el RUT ya existe en la misma company_id, excluyendo el id actual
-                const checkRutQuery = `
+
+            // Verificar si el RUT ya existe en la misma company_id, excluyendo el id actual
+            const checkRutQuery = `
                     SELECT id FROM workers 
                     WHERE rut = ? 
                     AND company_id = ? 
                     AND id != ?
                 `;
-                const checkRutValues = [rut, company_id, id];
-                mysqlConn.query(checkRutQuery, checkRutValues, (checkError, checkResults) => {
-                    if (checkError) {
-                        mysqlConn.end();
-                        console.error('Error al verificar RUT:', checkError.message);
-                        return res.status(500).json({
-                            code: "ERROR",
-                            mensaje: 'Error al verificar RUT: ' + checkError.message
-                        });
-                    }
-    
-                    if (checkResults.length > 0) {
-                        mysqlConn.end();
-                        return res.status(400).json({
-                            code: "ERROR",
-                            mensaje: 'El RUT ya está registrado en esta empresa'
-                        });
-                    }
-    
-                    // Actualizar trabajador
-                    const updateQuery = `
+            const checkRutValues = [rut, company_id, id];
+            mysqlConn.query(checkRutQuery, checkRutValues, (checkError, checkResults) => {
+                if (checkError) {
+                    mysqlConn.end();
+                    console.error('Error al verificar RUT:', checkError.message);
+                    return res.status(500).json({
+                        code: "ERROR",
+                        mensaje: 'Error al verificar RUT: ' + checkError.message
+                    });
+                }
+
+                if (checkResults.length > 0) {
+                    mysqlConn.end();
+                    return res.status(400).json({
+                        code: "ERROR",
+                        mensaje: 'El RUT ya está registrado en esta empresa'
+                    });
+                }
+
+                // Actualizar trabajador
+                const updateQuery = `
                         UPDATE workers 
                         SET 
                             rut = ?, 
@@ -2346,37 +2966,37 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
                             company_id = ?
                         WHERE id = ?
                     `;
-    
-                    const updateValues = [
-                        rut, name, lastname, lastname2, born_date, gender, state_civil, state,
-                        city, address, phone, email, date_admission, processedPosition, processedContractor, 
-                        processedSquad, processedLeaderSquad, processedShift, processedWristband, 
-                        observation, bank, account_type, account_number, afp, health, status, company_id, id
-                    ];
-    
-                    mysqlConn.query(updateQuery, updateValues, (updateError, updateResults) => {
-                        mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
-    
-                        if (updateError) {
-                            console.error('Error ejecutando query:', updateError.message);
-                            return res.status(500).json({
-                                code: "ERROR",
-                                mensaje: 'Error ejecutando query: ' + updateError.message
-                            });
-                        }
-    
-                        res.json({
-                            code: "OK",
-                            mensaje: "Registro actualizado"
+
+                const updateValues = [
+                    rut, name, lastname, lastname2, born_date, gender, state_civil, state,
+                    city, address, phone, email, date_admission, processedPosition, processedContractor,
+                    processedSquad, processedLeaderSquad, processedShift, processedWristband,
+                    observation, bank, account_type, account_number, afp, health, status, company_id, id
+                ];
+
+                mysqlConn.query(updateQuery, updateValues, (updateError, updateResults) => {
+                    mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
+
+                    if (updateError) {
+                        console.error('Error ejecutando query:', updateError.message);
+                        return res.status(500).json({
+                            code: "ERROR",
+                            mensaje: 'Error ejecutando query: ' + updateError.message
                         });
+                    }
+
+                    res.json({
+                        code: "OK",
+                        mensaje: "Registro actualizado"
                     });
                 });
             });
-        } catch (e) {
-            console.error(e);
-            res.status(500).json({ error: e.message });
-        }
-    });
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
 router.post('/management-people/workers/deleteWorker', validateToken, (req, res) => {
 
@@ -2549,10 +3169,10 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                 `;
 
                 const queryValues = [
-                    rut, name, lastname, lastname2 || null, born_date || null, gender || null, state_civil || null, state || null, 
-                    city || null, address || null, phone || null, email || null, date_admission || null, status || 1, 
-                    position || null, contractor || null, squad || null, leader_squad || null, shift || null, wristband || null, 
-                    observation || null, bank || null, account_type || null, account_number || null, afp || null, health || null, 
+                    rut, name, lastname, lastname2 || null, born_date || null, gender || null, state_civil || null, state || null,
+                    city || null, address || null, phone || null, email || null, date_admission || null, status || 1,
+                    position || null, contractor || null, squad || null, leader_squad || null, shift || null, wristband || null,
+                    observation || null, bank || null, account_type || null, account_number || null, afp || null, health || null,
                     company_id
                 ];
 
