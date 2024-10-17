@@ -698,6 +698,8 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
         var companies = [];
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
+       
+
         mysqlConn.connect(function (err) {
 
             if (err) {
@@ -707,6 +709,8 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
                 };
+
+                //console.log('companiesss', jsonResult);
 
                 res.json(jsonResult);
 
@@ -718,6 +722,7 @@ router.get('/configuracion/empresas/getEmpresas', validateToken, (req, res) => {
                 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
+                    //console.log('companiesss', queryString);
 
                     mysqlConn.end((err) => {
                         if (err) {
