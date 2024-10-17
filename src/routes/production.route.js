@@ -941,7 +941,7 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
                         "on_ha": 500,
                         "between_ha": 100,
                         "quantity_plants_ha": 10000,
-                        "company_id": element.company_id,
+                        "company_id": 1,
 
                     }
                 ]
@@ -2097,7 +2097,7 @@ router.get('/configuracion/production/getSeasons/:companyID', validateToken, (re
                         });
                     });
 
-                    console.log('seasons', seasons);
+                    //console.log('seasons', seasons);
 
                     return res.json({
                         "code": "OK",

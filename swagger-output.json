@@ -631,102 +631,6 @@
         ]
       }
     },
-    "/api/v1/configuracion/usuarios/createRoles": {
-      "get": {
-        "tags": [
-          "Configuración - Usuarios"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "descripcion": {
-                  "type": "string",
-                  "example": "Cosecheros"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "mensaje": {
-                  "type": "string",
-                  "example": "Rol creado correctamente."
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/configuracion/usuarios/getEstados": {
-      "get": {
-        "tags": [
-          "Configuración - Usuarios"
-        ],
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "estados": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id_estado": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "descripcion": {
-                        "type": "string",
-                        "example": "ACTIVO"
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
     "/api/v1/configuracion/empresas/getEmpresas": {
       "get": {
         "tags": [
@@ -806,6 +710,22 @@
                         "example": "987654321"
                       },
                       "legal_representative_email": {
+                        "type": "string",
+                        "example": "representante1@empresa1.com"
+                      },
+                      "system_representative_name": {
+                        "type": "string",
+                        "example": "Representante 2"
+                      },
+                      "system_representative_rut": {
+                        "type": "string",
+                        "example": "98765432-1"
+                      },
+                      "system_representative_phone": {
+                        "type": "string",
+                        "example": "987654321"
+                      },
+                      "system_representative_email": {
                         "type": "string",
                         "example": "representante1@empresa1.com"
                       },
@@ -900,6 +820,22 @@
                   "example": "987654321"
                 },
                 "legal_representative_email": {
+                  "type": "string",
+                  "example": "representante1@empresa1.com"
+                },
+                "system_representative_name": {
+                  "type": "string",
+                  "example": "Representante 2"
+                },
+                "system_representative_rut": {
+                  "type": "string",
+                  "example": "98765432-1"
+                },
+                "system_representative_phone": {
+                  "type": "string",
+                  "example": "987654321"
+                },
+                "system_representative_email": {
                   "type": "string",
                   "example": "representante1@empresa1.com"
                 },
@@ -1009,6 +945,22 @@
                   "example": "987654321"
                 },
                 "legal_representative_email": {
+                  "type": "string",
+                  "example": "representante1@empresa1.com"
+                },
+                "system_representative_name": {
+                  "type": "string",
+                  "example": "Representante 2"
+                },
+                "system_representative_rut": {
+                  "type": "string",
+                  "example": "98765432-1"
+                },
+                "system_representative_phone": {
+                  "type": "string",
+                  "example": "987654321"
+                },
+                "system_representative_email": {
                   "type": "string",
                   "example": "representante1@empresa1.com"
                 },
@@ -1170,7 +1122,7 @@
                   "type": "number",
                   "example": 1
                 },
-                "idCompany": {
+                "company_id": {
                   "type": "number",
                   "example": 1
                 }
@@ -1197,6 +1149,12 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -1715,12 +1673,6 @@
                 "name": "main"
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -1754,6 +1706,10 @@
                   "example": "Grupo 1"
                 },
                 "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "company_id": {
                   "type": "number",
                   "example": 1
                 }
@@ -1968,15 +1924,15 @@
               "properties": {
                 "id": {
                   "type": "number",
-                  "example": 1
+                  "example": 3
                 },
                 "name": {
                   "type": "string",
-                  "example": "cuadrilla 1"
+                  "example": "a"
                 },
                 "group": {
-                  "type": "number",
-                  "example": 1
+                  "type": "string",
+                  "example": "3"
                 },
                 "status": {
                   "type": "number",
@@ -1984,8 +1940,18 @@
                 },
                 "workers": {
                   "type": "array",
-                  "example": [],
-                  "items": {}
+                  "example": [
+                    2,
+                    3,
+                    49
+                  ],
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "company_id": {
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -2261,7 +2227,7 @@
                   "type": "number",
                   "example": 1
                 },
-                "idCompany": {
+                "id_company": {
                   "type": "number",
                   "example": 1
                 }
@@ -2379,6 +2345,10 @@
                 "status": {
                   "type": "number",
                   "example": 1
+                },
+                "id_company": {
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -2463,9 +2433,6 @@
     },
     "/api/v1/management-people/workers/getWorkers/{companyID}": {
       "get": {
-        "tags": [
-          "Management People - Workers"
-        ],
         "description": "",
         "parameters": [
           {
@@ -2477,142 +2444,12 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "workers": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "rut": {
-                        "type": "string",
-                        "example": "12345678-9"
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "Juan"
-                      },
-                      "lastname": {
-                        "type": "string",
-                        "example": "Perez"
-                      },
-                      "lastname2": {
-                        "type": "string",
-                        "example": "Perez"
-                      },
-                      "born_date": {
-                        "type": "string",
-                        "example": "1990-01-01"
-                      },
-                      "gender": {
-                        "type": "string",
-                        "example": "Masculino"
-                      },
-                      "state_civil": {
-                        "type": "string",
-                        "example": "Soltero"
-                      },
-                      "state": {
-                        "type": "string",
-                        "example": "Maule"
-                      },
-                      "city": {
-                        "type": "string",
-                        "example": "Talca"
-                      },
-                      "address": {
-                        "type": "string",
-                        "example": "Calle 123"
-                      },
-                      "phone": {
-                        "type": "string",
-                        "example": "12345678"
-                      },
-                      "phone_company": {
-                        "type": "string",
-                        "example": "12345678"
-                      },
-                      "date_admission": {
-                        "type": "string",
-                        "example": "2021-01-01"
-                      },
-                      "status": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "position": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "contractor": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "squad": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "leader_squad": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "shift": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "wristband": {
-                        "type": "string",
-                        "example": "12345678"
-                      },
-                      "observation": {
-                        "type": "string",
-                        "example": "Observación"
-                      },
-                      "bank": {
-                        "type": "string",
-                        "example": "Banco"
-                      },
-                      "account_type": {
-                        "type": "string",
-                        "example": "Cuenta Corriente"
-                      },
-                      "account_number": {
-                        "type": "string",
-                        "example": "12345678"
-                      },
-                      "afp": {
-                        "type": "string",
-                        "example": "AFP"
-                      },
-                      "health": {
-                        "type": "string",
-                        "example": "Isapre"
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/management-people/workers/updateWorker": {
@@ -2625,8 +2462,6 @@
           {
             "name": "obj",
             "in": "body",
-            "description": "Actualizar Trabajador",
-            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -2644,11 +2479,11 @@
                 },
                 "lastname": {
                   "type": "string",
-                  "example": "Perez"
+                  "example": "Pérez"
                 },
                 "lastname2": {
                   "type": "string",
-                  "example": "Perez"
+                  "example": "Soto"
                 },
                 "born_date": {
                   "type": "string",
@@ -2656,7 +2491,7 @@
                 },
                 "gender": {
                   "type": "string",
-                  "example": "Masculino"
+                  "example": "M"
                 },
                 "state_civil": {
                   "type": "string",
@@ -2664,11 +2499,11 @@
                 },
                 "state": {
                   "type": "string",
-                  "example": "Maule"
+                  "example": "Región Metropolitana"
                 },
                 "city": {
                   "type": "string",
-                  "example": "Talca"
+                  "example": "Santiago"
                 },
                 "address": {
                   "type": "string",
@@ -2676,17 +2511,69 @@
                 },
                 "phone": {
                   "type": "string",
-                  "example": "12345678"
+                  "example": "+56912345678"
                 },
-                "phone_company": {
+                "email": {
                   "type": "string",
-                  "example": "12345678"
+                  "example": "mail@mail.cl"
                 },
                 "date_admission": {
                   "type": "string",
                   "example": "2021-01-01"
                 },
                 "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "position": {
+                  "type": "string",
+                  "example": "Operador"
+                },
+                "contractor": {
+                  "type": "string",
+                  "example": "Empresa"
+                },
+                "squad": {
+                  "type": "number",
+                  "example": 1
+                },
+                "leader_squad": {
+                  "type": "number",
+                  "example": 0
+                },
+                "shift": {
+                  "type": "number",
+                  "example": 1
+                },
+                "wristband": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "observation": {
+                  "type": "string",
+                  "example": "Observación"
+                },
+                "bank": {
+                  "type": "string",
+                  "example": "Banco"
+                },
+                "account_type": {
+                  "type": "string",
+                  "example": "Cuenta Corriente"
+                },
+                "account_number": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "afp": {
+                  "type": "string",
+                  "example": "AFP"
+                },
+                "health": {
+                  "type": "string",
+                  "example": "Fonasa"
+                },
+                "company_id": {
                   "type": "number",
                   "example": 1
                 }
@@ -2713,6 +2600,12 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -2830,15 +2723,67 @@
                   "type": "string",
                   "example": "12345678"
                 },
-                "phone_company": {
+                "email": {
                   "type": "string",
-                  "example": "12345678"
+                  "example": "email@email.com"
                 },
                 "date_admission": {
                   "type": "string",
                   "example": "2021-01-01"
                 },
                 "status": {
+                  "type": "number",
+                  "example": 1
+                },
+                "position": {
+                  "type": "number",
+                  "example": 1
+                },
+                "contractor": {
+                  "type": "number",
+                  "example": 1
+                },
+                "squad": {
+                  "type": "number",
+                  "example": 1
+                },
+                "leader_squad": {
+                  "type": "number",
+                  "example": 1
+                },
+                "shift": {
+                  "type": "number",
+                  "example": 1
+                },
+                "wristband": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "observation": {
+                  "type": "string",
+                  "example": "Observación"
+                },
+                "bank": {
+                  "type": "string",
+                  "example": "Banco"
+                },
+                "account_type": {
+                  "type": "string",
+                  "example": "Cuenta Corriente"
+                },
+                "account_number": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "afp": {
+                  "type": "string",
+                  "example": "AFP"
+                },
+                "health": {
+                  "type": "string",
+                  "example": "Isapre"
+                },
+                "company_id": {
                   "type": "number",
                   "example": 1
                 }
@@ -3198,6 +3143,15 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -3293,6 +3247,12 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -3318,135 +3278,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "attributes": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "sector": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "specie": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "variety": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "ha_productivas": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "hileras": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "plants": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "min_daily_frecuency": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "max_daily_frecuency": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "harvest_end": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "stimation_good": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "stimation_regular": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "stimation_bad": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "stimation_replant_kg": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "surface": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "interrow_density": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "row_density": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "quantity_plants_ha": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "clasification": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "rotation": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "kg_sector": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "kg_hectares": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "kg_plants": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "porc_regular": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "porc_replant": {
-                        "type": "number",
-                        "example": 10
-                      },
-                      "season": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "company_id": {
-                        "type": "number",
-                        "example": 1
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "OK"
           }
         },
         "security": [
@@ -3552,6 +3384,51 @@
       }
     },
     "/api/v1/configuracion/production/createAttributeSector": {
+      "post": {
+        "tags": [
+          "Production - Attributes Sector"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "obj",
+            "in": "body",
+            "description": "Datos del atributo del sector",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AttributeSector"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "mensaje": {
+                  "type": "string",
+                  "example": "Registro creado correctamente."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/configuracion/production/cloneAttributesSector": {
       "post": {
         "tags": [
           "Production - Attributes Sector"
@@ -4628,6 +4505,12 @@
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -5119,10 +5002,6 @@
                         "example": 1
                       },
                       "max_weight": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "average_weight": {
                         "type": "number",
                         "example": 1
                       },
@@ -7376,6 +7255,39 @@
             "apiKeyAuth": []
           }
         ]
+      }
+    },
+    "/api/v1/notificationScale": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "company_id": {
+                  "example": "any"
+                },
+                "name": {
+                  "example": "any"
+                },
+                "messageContent": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     }
   }
