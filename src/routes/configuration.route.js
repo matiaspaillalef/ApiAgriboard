@@ -60,7 +60,7 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                 queryString += " and u.id_company  = c.id ";
                 queryString += " order by  u.id asc";
 
-                console.log(queryString);
+                //console.log(queryString);
 
 
                 ////console.log(queryString);
@@ -917,7 +917,7 @@ router.post('/configuracion/empresas/createCompany', validateToken, (req, res) =
                             }
 
                             var queryString = `INSERT INTO companies (${insertFields}) VALUES (${insertValues})`;
-console.log(queryString);
+
                             mysqlConn.query(queryString, function (error, resultsInsert, fields) {
 
                                 mysqlConn.end((err) => {
@@ -1042,7 +1042,7 @@ router.post('/configuracion/empresas/updateCompany', validateToken, (req, res) =
                 var queryString = "UPDATE companies";
                 queryString += " SET logo='" + logo + "', name_company='" + name_company + "', rut='" + rut + "', giro='" + giro + "', state='" + state + "', city='" + city + "', address='" + address + "', phone='" + phone + "', web='" + web + "', compensation_box=" + compensation_box + ", legal_representative_name='" + legal_representative_name + "', legal_representative_rut='" + legal_representative_rut + "', legal_representative_phone='" + legal_representative_phone + "', legal_representative_email='" + legal_representative_email + "', status=" + status + "," +  "system_representative_name='" + system_representative_name + "', system_representative_rut='" + system_representative_rut + "', system_representative_phone='" + system_representative_phone + "', system_representative_email='" + system_representative_email + "'";
                 queryString += " WHERE id=" + id;
-                console.log(queryString);
+                //console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
