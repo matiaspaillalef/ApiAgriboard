@@ -3907,7 +3907,6 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
 });
 
 router.post('/configuracion/production/updateHarvestFormat', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Harvest Format']
         #swagger.security = [{
@@ -3929,55 +3928,69 @@ router.post('/configuracion/production/updateHarvestFormat', validateToken, (req
     */
 
     try {
-
         let obj = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
-
             if (err) {
-
                 console.error('error connecting: ' + err.message);
                 return res.json({
                     "code": "ERROR",
                     "mensaje": err.message
                 });
-
             }
 
-            var queryString = "UPDATE harvest_format SET name = ?, tara_base = ?, specie = ?, min_weight = ?, max_weight = ?, quantity_trays = ?, collection = ?, status = ?, company_id = ? WHERE id = ?";
-
-            mysqlConn.query(queryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id, obj.id], function (error) {
-
+            // Verificar si el nombre ya existe para otra compañía
+            var queryString = "SELECT id FROM harvest_format WHERE name = ? AND company_id = ? AND id != ?";
+            mysqlConn.query(queryString, [obj.name, obj.company_id, obj.id], function (error, results) {
                 if (error) {
-
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
                         "code": "ERROR",
                         "mensaje": error.message
                     });
-
                 }
 
-                return res.json({
-                    "code": "OK",
-                    "mensaje": "Registro actualizado correctamente."
-                });
+                if (results && results.length > 0) {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "El nombre: " + obj.name + " ya existe en el sistema para esta compañía."
+                    });
+                } else {
+                    // Realizar la actualización si no existe un duplicado
+                    var updateQueryString = "UPDATE harvest_format SET name = ?, tara_base = ?, specie = ?, min_weight = ?, max_weight = ?, quantity_trays = ?, collection = ?, status = ?, company_id = ? WHERE id = ?";
+                    mysqlConn.query(updateQueryString, [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id, obj.id], function (error) {
+                        mysqlConn.end((err) => {
+                            if (err) {
+                                console.error('Error al cerrar la conexión:', err);
+                            } else {
+                                console.log('Conexión cerrada correctamente.');
+                            }
+                        });
 
+                        if (error) {
+                            console.error('error ejecutando query: ' + error.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": error.message
+                            });
+                        }
+
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro actualizado correctamente."
+                        });
+                    });
+                }
             });
-
-            mysqlConn.end();
-
         });
 
     } catch (e) {
         console.log(e);
         res.json({ error: e.message });
     }
-
 });
-
 
 router.post('/configuracion/production/deleteHarvestFormat', validateToken, (req, res) => {
 
@@ -4062,7 +4075,6 @@ router.post('/configuracion/production/deleteHarvestFormat', validateToken, (req
 });
 
 router.post('/configuracion/production/createHarvestFormat', validateToken, (req, res) => {
-
     /*
         #swagger.tags = ['Production - Harvest Format']
         #swagger.security = [{
@@ -4084,38 +4096,42 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
     */
 
     try {
-
         let obj = req.body;
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect(function (err) {
-
             if (err) {
-
                 console.error('error connecting: ' + err.sqlMessage);
-                const jsonResult = {
+                return res.json({
                     "code": "ERROR",
                     "mensaje": err.sqlMessage
+                });
+            }
+
+            // Verificar que el formato de cosecha no exista para la misma compañía
+            var queryString = "SELECT id FROM harvest_format WHERE name = ? AND company_id = ?";
+            mysqlConn.query(queryString, [obj.name, obj.company_id], function (error, results) {
+                if (error) {
+                    console.error('error ejecutando query: ' + error.sqlMessage);
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": error.sqlMessage
+                    });
                 }
-                res.json(jsonResult);
 
-            } else {
+                if (results && results.length > 0) {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "El nombre: " + obj.name + " ya existe en el sistema para esta compañía."
+                    });
+                } else {
+                    // Construir la consulta SQL para insertar el formato de cosecha
+                    var insertFields = "name, tara_base, specie, min_weight, max_weight, quantity_trays, collection, status, company_id";
+                    var insertValues = [obj.name, obj.tara_base, obj.specie, obj.min_weight, obj.max_weight, obj.quantity_trays, obj.collection, obj.status, obj.company_id];
+                    var queryString = `INSERT INTO harvest_format (${insertFields}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-                // Verificar que el formato de cosecha  no exista
-                var queryString = "SELECT id FROM harvest_format WHERE name ='" + obj.name + "'";
-
-                mysqlConn.query(queryString, function (error, results, fields) {
-                    
-                    if (error) {
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
-
-                        res.json(jsonResult);
-
+                    mysqlConn.query(queryString, insertValues, function (error, resultsInsert) {
                         mysqlConn.end((err) => {
                             if (err) {
                                 console.error('Error al cerrar la conexión:', err);
@@ -4123,85 +4139,36 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
                                 console.log('Conexión cerrada correctamente.');
                             }
                         });
-                        
-                    } else {
-                        if (results && results.length > 0) {
-                            const jsonResult = {
+
+                        if (error) {
+                            console.error('error ejecutando query: ' + error.sqlMessage);
+                            return res.json({
                                 "code": "ERROR",
-                                "mensaje": "El nombre :  " + obj.name + " ya existe en el sistema."
-                            }
-
-                            res.json(jsonResult);
-
-                            mysqlConn.end((err) => {
-                                if (err) {
-                                    console.error('Error al cerrar la conexión:', err);
-                                } else {
-                                    console.log('Conexión cerrada correctamente.');
-                                }
+                                "mensaje": error.sqlMessage
                             });
+                        } 
 
+                        if (resultsInsert && resultsInsert.insertId != 0) {
+                            return res.json({
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente."
+                            });
                         } else {
-                            // Construir la consulta SQL para insertar la empresa
-                            var insertFields = "name, tara_base, specie, min_weight, max_weight, quantity_trays, collection, status, company_id";
-                            var insertValues = `'${obj.name}', '${obj.tara_base}', '${obj.specie}', '${ obj.min_weight}', '${obj.max_weight}', '${obj.quantity_trays}', '${obj.collection}', '${obj.status}', '${obj.company_id}'`;
-                           
-
-                            var queryString = `INSERT INTO harvest_format (${insertFields}) VALUES (${insertValues})`;
-console.log(queryString);
-                            mysqlConn.query(queryString, function (error, resultsInsert, fields) {
-
-                                mysqlConn.end((err) => {
-                                    if (err) {
-                                        console.error('Error al cerrar la conexión:', err);
-                                    } else {
-                                        console.log('Conexión cerrada correctamente.');
-                                    }
-                                });
-
-                                if (error) {
-                                    console.error('error ejecutando query: ' + error.sqlMessage);
-                                    const jsonResult = {
-                                        "code": "ERROR",
-                                        "mensaje": error.sqlMessage
-                                    }
-
-                                    res.json(jsonResult);
-
-                                } else {
-
-                                    if (resultsInsert && resultsInsert.insertId != 0) {
-                                        const jsonResult = {
-                                            "code": "OK",
-                                            "mensaje": "Registro creado correctamente."
-                                        }
-
-                                        res.json(jsonResult);
-
-                                    } else {
-
-                                        const jsonResult = {
-                                            "code": "ERROR",
-                                            "mensaje": "No se pudo crear el registro."
-                                        }
-
-                                        res.json(jsonResult);
-                                    }
-                                }
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": "No se pudo crear el registro."
                             });
                         }
-                    }
-                });
-
-            }
+                    });
+                }
+            });
         });
-
     } catch (e) {
         console.log(e);
         res.json({ error: e.message });
     }
-
 });
+
 
 //PRODUCCIÓN - DEALS
 router.get('/configuracion/production/getDeals/:companyID', validateToken, (req, res) => {

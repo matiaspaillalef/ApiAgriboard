@@ -60,6 +60,8 @@ router.get('/configuracion/usuarios/getUsuarios', validateToken, (req, res) => {
                 queryString += " and u.id_company  = c.id ";
                 queryString += " order by  u.id asc";
 
+                console.log(queryString);
+
 
                 ////console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
