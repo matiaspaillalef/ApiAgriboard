@@ -267,7 +267,7 @@ router.post('/auth/forgot-password', (req, res) => {
                     return res.json({ code: "ERROR", mensaje: "Correo no encontrado." });
                 }
 
-                console.log(results);
+                //console.log(results);
 
                 const userId = results[0].id;
                 const nombre = results[0].name;
@@ -286,7 +286,7 @@ router.post('/auth/forgot-password', (req, res) => {
 
                     const resetUrl = `${process.env.BASE_URL}/reset-password?token=${token}`;
 
-                    console.log(resetUrl);
+                    //console.log(resetUrl);
                     try {
                         await sendPasswordResetEmail(email, resetUrl, userNameFull); // Función que envía el correo
                         res.json({ code: "OK", message: "Correo enviado para restablecer contraseña." });
@@ -349,7 +349,7 @@ router.post('/auth/reset-password', (req, res) => {
 
                 if (results.length === 0 || new Date(results[0].expires) < new Date()) {
                     mysqlConn.end(); 
-                    console.log('Token inválido o expirado.');
+                    //console.log('Token inválido o expirado.');
                     return res.json({ code: "ERROR", message: "Token inválido o expirado." });
                 }
 

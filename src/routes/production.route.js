@@ -967,8 +967,8 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
             }
 
             var queryString = "SELECT * FROM sector_attr a WHERE company_id = ?";
-            console.log(queryString);
-            console.log(companyID);
+            //console.log(queryString);
+            //console.log(companyID);
 
             mysqlConn.query(queryString, [companyID], function (error, results) {
                 if (error) {
@@ -1052,7 +1052,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
             let between_ha  = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
             quantity_plants_ha= 10000 / (on_ha * between_ha) * ha_productivas;
-            console.log(quantity_plants_ha);
+            //console.log(quantity_plants_ha);
         }
 
         const values = [
@@ -1081,7 +1081,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
             }
 
             var queryString = "UPDATE sector_attr SET sector=?,between_ha=?,ha_productivas=?,variety=?,year_harvest=?,quantity_plants_ha=?,specie=?,season=?,company_id=?,on_ha=? WHERE id=?;";
-            console.log(queryString);
+            //console.log(queryString);
 
             mysqlConn.query(queryString, values, function (error, results) {
                 if (error) {
@@ -2309,7 +2309,7 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
                     });
                 }
 
-                console.log('Verificando si la temporada es activa...', obj);
+                //console.log('Verificando si la temporada es activa...', obj);
 
                // Paso 2: Si la temporada es activa, actualizar todas las temporadas a status 2 para la misma compañía
                if (obj.status === 1) {

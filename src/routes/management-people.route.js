@@ -864,7 +864,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
             } else {
 
                 var queryString = "SELECT * FROM `groups` g where id_company = " + companyID;
-                console.log(queryString);
+                //console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -1570,7 +1570,7 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
     try {
         const { name, group, status, idCompany } = req.body;
 
-        console.log('req.body:', req.body);
+        //console.log('req.body:', req.body);
 
         // Crear conexión a la base de datos
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -1743,7 +1743,7 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
     try {
         const { id, name, group, status, workers, company_id } = req.body;
 
-        console.log('req.body:', req.body);
+        //console.log('req.body:', req.body);
 
         // Convertir workers a una cadena JSON
         const workersJson = JSON.stringify(workers);
@@ -2587,8 +2587,8 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
                                 id_company = ?
                             WHERE id = ?`;
 
-                            console.log('queryString:', queryString);
-                            console.log('queryValues:', queryValues);
+                            //console.log('queryString:', queryString);
+                            //console.log('queryValues:', queryValues);
 
                             mysqlConn.query(queryString, queryValues, (error, results) => {
 
@@ -2869,6 +2869,7 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
             }
         }
     */
+
     try {
         const {
             id, rut, name, lastname, lastname2, born_date, gender, state_civil, state,
@@ -2886,7 +2887,10 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
         }
 
         // Asignar valores predeterminados para campos vacíos
-        const processValue = (value) => value === '' ? null : value;
+        const processValue = (value) => {
+            if (value === '') return null;
+            return isNaN(value) ? null : Number(value);
+        };
 
         const processedPosition = processValue(position) ? Number(position) : null;
         const processedContractor = processValue(contractor) ? Number(contractor) : null;
@@ -3115,6 +3119,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
             }
         }
     */
+
     try {
         const {
             rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, email,
@@ -3122,7 +3127,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
             bank, account_type, account_number, afp, health, company_id
         } = req.body;
 
-        console.log('Received data:', req.body);
+        //console.log('Received data:', req.body);
 
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
