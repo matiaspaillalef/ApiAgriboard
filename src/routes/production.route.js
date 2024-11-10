@@ -1420,7 +1420,8 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
                                     "id": element.id,
                                     "name": element.name,
                                     "company_id": element.company_id,
-                                    "status": element.status
+                                    "status": element.status,
+                                    //"species_id": element.species_id
                                 }
                                 varieties.push(jsonResult);
                             });
@@ -1504,8 +1505,11 @@ router.post('/configuracion/production/updateVariety', validateToken, (req, res)
             }
             else {
 
-
-                var queryString = "UPDATE varieties SET name = '" + obj.name + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
+                var queryString = "UPDATE varieties SET name = '" + obj.name + 
+                "', company_id = " + obj.company_id + 
+                ", status = " + obj.status + 
+                //", species_id = " + obj.species_id + 
+                " WHERE id = " + obj.id;
 
                 //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {

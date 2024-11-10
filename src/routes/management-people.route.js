@@ -2819,55 +2819,52 @@ router.get('/management-people/workers/getWorkers/:companyID', validateToken, (r
 });
 
 router.post('/management-people/workers/updateWorker', validateToken, (req, res) => {
-
-
     /*
-        #swagger.tags = ['Management People - Workers']
-
-        #swagger.security = [{
-               "apiKeyAuth": []
-        }]
-
-        #swagger.parameters['obj'] = {
-            in: 'body',
-            schema: {
-                id: 1,
-                rut: "12345678-9",
-                name: "Juan",
-                lastname: "Pérez",
-                lastname2: "Soto",
-                born_date: "1990-01-01",
-                gender: "M",
-                state_civil: "Soltero",
-                state: "Región Metropolitana",
-                city: "Santiago",
-                address: "Calle 123",
-                phone: "+56912345678",
-                email: "mail@mail.cl",
-                date_admission: "2021-01-01",
-                status: 1,
-                position: "Operador",
-                contractor: "Empresa",
-                squad: 1,
-                leader_squad: 0,
-                shift: 1,
-                wristband: "123456",
-                observation: "Observación",
-                bank: "Banco",
-                account_type: "Cuenta Corriente",
-                account_number: "123456",
-                afp: "AFP",
-                health: "Fonasa",
-                company_id: 1
-            }
+    #swagger.tags = ['Management People - Workers']
+    #swagger.security = [{
+        "apiKeyAuth": []
+    }]
+    #swagger.parameters['obj'] = {
+        in: 'body',
+        schema: {
+            id: 1,
+            rut: "12345678-9",
+            name: "Juan",
+            lastname: "Pérez",
+            lastname2: "Soto",
+            born_date: "1990-01-01",
+            gender: "M",
+            state_civil: "Soltero",
+            state: "Región Metropolitana",
+            city: "Santiago",
+            address: "Calle 123",
+            phone: "+56912345678",
+            email: "mail@mail.cl",
+            date_admission: "2021-01-01",
+            status: 1,
+            position: "Operador",
+            contractor: "Empresa",
+            squad: 1,
+            leader_squad: 0,
+            shift: 1,
+            wristband: "123456",
+            observation: "Observación",
+            bank: "Banco",
+            account_type: "Cuenta Corriente",
+            account_number: "123456",
+            afp: "AFP",
+            health: "Fonasa",
+            company_id: 1,
+            is_weigher: 0
         }
+    }
 
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "mensaje": "Registro actualizado"
-            }
+    #swagger.responses[200] = {
+        schema: {
+            "code": "OK",
+            "mensaje": "Registro actualizado"
         }
+    }
     */
 
     try {
@@ -2875,7 +2872,7 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
             id, rut, name, lastname, lastname2, born_date, gender, state_civil, state,
             city, address, phone, email, date_admission, status, position, contractor,
             squad, leader_squad, shift, wristband, observation, bank, account_type,
-            account_number, afp, health, company_id
+            account_number, afp, health, company_id, is_weigher
         } = req.body;
 
         // Verificar si el id está presente
@@ -2886,20 +2883,25 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
             });
         }
 
-        // Asignar valores predeterminados para campos vacíos
+        // Función para procesar valores vacíos
         const processValue = (value) => {
             if (value === '') return null;
             return isNaN(value) ? null : Number(value);
         };
 
-        const processedPosition = processValue(position) ? Number(position) : null;
-        const processedContractor = processValue(contractor) ? Number(contractor) : null;
-        const processedSquad = processValue(squad) ? Number(squad) : null;
-        const processedLeaderSquad = processValue(leader_squad) ? Number(leader_squad) : null;
-        const processedShift = processValue(shift) ? Number(shift) : null;
-        const processedWristband = processValue(wristband) ? Number(wristband) : null;
+        // Procesar valores numéricos
+        const processedPosition = processValue(position);
+        const processedContractor = processValue(contractor);
+        const processedSquad = processValue(squad);
+        const processedLeaderSquad = processValue(leader_squad);
+        const processedShift = processValue(shift);
+        const processedWristband = processValue(wristband);
 
-        // Crear conexión
+        // Asegurarse de que las fechas estén en el formato correcto (YYYY-MM-DD)
+        const formattedBornDate = new Date(born_date).toISOString().split('T')[0];
+        const formattedDateAdmission = new Date(date_admission).toISOString().split('T')[0];
+
+        // Crear conexión MySQL
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
         mysqlConn.connect((err) => {
@@ -2913,12 +2915,13 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
 
             // Verificar si el RUT ya existe en la misma company_id, excluyendo el id actual
             const checkRutQuery = `
-                    SELECT id FROM workers 
-                    WHERE rut = ? 
-                    AND company_id = ? 
-                    AND id != ?
-                `;
+                SELECT id FROM workers 
+                WHERE rut = ? 
+                AND company_id = ? 
+                AND id != ?
+            `;
             const checkRutValues = [rut, company_id, id];
+
             mysqlConn.query(checkRutQuery, checkRutValues, (checkError, checkResults) => {
                 if (checkError) {
                     mysqlConn.end();
@@ -2937,61 +2940,69 @@ router.post('/management-people/workers/updateWorker', validateToken, (req, res)
                     });
                 }
 
-                // Actualizar trabajador
-                const updateQuery = `
-                        UPDATE workers 
-                        SET 
-                            rut = ?, 
-                            name = ?, 
-                            lastname = ?, 
-                            lastname2 = ?, 
-                            born_date = ?,
-                            gender = ?,
-                            state_civil = ?,
-                            state = ?,
-                            city = ?,
-                            address = ?,
-                            phone = ?,
-                            email = ?,
-                            date_admission = ?,
-                            position = ?,
-                            contractor = ?,
-                            squad = ?,
-                            leader_squad = ?,
-                            shift = ?,
-                            wristband = ?,
-                            observation = ?,
-                            bank = ?,
-                            account_type = ?,
-                            account_number = ?,
-                            afp = ?,
-                            health = ?,
-                            status = ?,
-                            company_id = ?
-                        WHERE id = ?
-                    `;
-
-                const updateValues = [
-                    rut, name, lastname, lastname2, born_date, gender, state_civil, state,
-                    city, address, phone, email, date_admission, processedPosition, processedContractor,
-                    processedSquad, processedLeaderSquad, processedShift, processedWristband,
-                    observation, bank, account_type, account_number, afp, health, status, company_id, id
-                ];
-
-                mysqlConn.query(updateQuery, updateValues, (updateError, updateResults) => {
-                    mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
-
-                    if (updateError) {
-                        console.error('Error ejecutando query:', updateError.message);
+                // Verificar si el ID del trabajador existe
+                const checkExistQuery = 'SELECT id FROM workers WHERE id = ?';
+                mysqlConn.query(checkExistQuery, [id], (checkExistError, checkExistResults) => {
+                    if (checkExistError) {
+                        mysqlConn.end();
+                        console.error('Error al verificar existencia del ID:', checkExistError.message);
                         return res.status(500).json({
                             code: "ERROR",
-                            mensaje: 'Error ejecutando query: ' + updateError.message
+                            mensaje: 'Error al verificar existencia: ' + checkExistError.message
                         });
                     }
 
-                    res.json({
-                        code: "OK",
-                        mensaje: "Registro actualizado"
+                    if (checkExistResults.length === 0) {
+                        mysqlConn.end();
+                        return res.status(404).json({
+                            code: "ERROR",
+                            mensaje: 'Trabajador no encontrado'
+                        });
+                    }
+
+                    // Actualizar trabajador
+                    const updateQuery = `
+                        UPDATE workers 
+                        SET 
+                            rut = ?, name = ?, lastname = ?, lastname2 = ?, born_date = ?,
+                            gender = ?, state_civil = ?, state = ?, city = ?, address = ?,
+                            phone = ?, email = ?, date_admission = ?, position = ?, contractor = ?,
+                            squad = ?, leader_squad = ?, shift = ?, wristband = ?, observation = ?,
+                            bank = ?, account_type = ?, account_number = ?, afp = ?, health = ?,
+                            status = ?, company_id = ?, is_weigher = ?
+                        WHERE id = ?
+                    `;
+
+                    const updateValues = [
+                        rut, name, lastname, lastname2, formattedBornDate, gender, state_civil, state,
+                        city, address, phone, email, formattedDateAdmission, processedPosition, processedContractor,
+                        processedSquad, processedLeaderSquad, processedShift, processedWristband,
+                        observation, bank, account_type, account_number, afp, health, status, company_id, is_weigher, id
+                    ];
+
+                    mysqlConn.query(updateQuery, updateValues, (updateError, updateResults) => {
+                        mysqlConn.end();
+
+                        if (updateError) {
+                            console.error('Error ejecutando query:', updateError.message);
+                            return res.status(500).json({
+                                code: "ERROR",
+                                mensaje: 'Error ejecutando query: ' + updateError.message
+                            });
+                        }
+
+                        // Verificar si alguna fila fue afectada
+                        if (updateResults.affectedRows === 0) {
+                            return res.status(400).json({
+                                code: "ERROR",
+                                mensaje: 'No se actualizó ningún registro'
+                            });
+                        }
+
+                        res.json({
+                            code: "OK",
+                            mensaje: "Registro actualizado"
+                        });
                     });
                 });
             });
@@ -3108,7 +3119,8 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                 "account_number": "12345678",
                 "afp": "AFP",
                 "health": "Isapre",
-                "company_id": 1
+                "company_id": 1,
+                "is_weigher": 1
             }
         }
 
@@ -3124,7 +3136,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
         const {
             rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, email,
             date_admission, status, position, contractor, squad, leader_squad, shift, wristband, observation,
-            bank, account_type, account_number, afp, health, company_id
+            bank, account_type, account_number, afp, health, company_id, is_weigher
         } = req.body;
 
         //console.log('Received data:', req.body);
@@ -3169,8 +3181,8 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                     INSERT INTO workers (
                         rut, name, lastname, lastname2, born_date, gender, state_civil, state, city, address, phone, email,
                         date_admission, status, position, contractor, squad, leader_squad, shift, wristband, observation,
-                        bank, account_type, account_number, afp, health, company_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        bank, account_type, account_number, afp, health, company_id, is_weigher
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
                 const queryValues = [
@@ -3178,7 +3190,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                     city || null, address || null, phone || null, email || null, date_admission || null, status || 1,
                     position || null, contractor || null, squad || null, leader_squad || null, shift || null, wristband || null,
                     observation || null, bank || null, account_type || null, account_number || null, afp || null, health || null,
-                    company_id
+                    company_id, is_weigher || 0
                 ];
 
                 // Ejecutar la consulta SQL para insertar el nuevo trabajador
