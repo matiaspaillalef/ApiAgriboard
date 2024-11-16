@@ -1042,7 +1042,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
     try {
         let obj = req.body;
 
-        console.log(obj);
+        console.log('attr', obj);
 
         let quantity_plants_ha = 0;
         
@@ -1051,7 +1051,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
             let on_ha = parseFloat(obj.on_ha);
             let between_ha  = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha) * ha_productivas;
+            quantity_plants_ha= 10000 / (on_ha * between_ha); //* ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
@@ -1206,7 +1206,7 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
             let on_ha = parseFloat(obj.on_ha);
             let between_ha  = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha) * ha_productivas;
+            quantity_plants_ha= 10000 / (on_ha * between_ha); // * ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
