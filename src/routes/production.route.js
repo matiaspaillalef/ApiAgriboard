@@ -2,7 +2,7 @@ import { Router } from 'express'
 const router = Router()
 import validateToken from '../middleware/validateToken.js'
 import mysql from 'mysql';
-import bcrypt, { compareSync } from 'bcrypt';
+//import bcrypt, { compareSync } from 'bcrypt';
 import { filter } from 'compression';
 
 
@@ -20,7 +20,14 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
             in: 'path',
             required: true,
             type: "integer",
-        }  
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
         
         #swagger.responses[200] = {
             schema: {
@@ -46,7 +53,7 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
     try {
 
         let { companyID } = req.params;
-
+        let { status } = req.query;
 
         var grounds = [];
 
@@ -66,7 +73,12 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
             }
             else {
 
-                var queryString = "SELECT * FROM ground g where company_id = " + companyID;
+                var statusQuery = ''
+                if  (status ) {
+                    statusQuery = " AND status = " + status;
+                }
+
+                var queryString = "SELECT * FROM ground g where company_id = " + companyID + statusQuery;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -536,25 +548,58 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
             in: 'path',
             required: true,
             type: "integer",
+        }
+
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
         }  
         
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
-                "sectors": [
+                "workers": [
                     {
-                    "id": 1,
-                    "name": "Sector 1",
-                    "ground_id": 1,
-                    "status": 1
+                    "id": 2,
+                    "rut": "8.765.432-1",
+                    "name": "Maria",
+                    "lastname": "Lopez",
+                    "lastname2": "Rodriguez",
+                    "born_date": "1985-05-15T04:00:00.000Z",
+                    "gender": "Femenino",
+                    "state_civil": "Casado",
+                    "state": "XIII",
+                    "city": "Santiago",
+                    "address": "Avenida 456",
+                    "phone": "876543210",
+                    "phone_company": "876543210",
+                    "date_admission": "2019-06-15T04:00:00.000Z",
+                    "status": 1,
+                    "position": 1,
+                    "contractor": 1,
+                    "squad": 1,
+                    "leader_squad": 1,
+                    "shift": 1,
+                    "wristband": "1A2B3C4D",
+                    "observation": "Ingreso trabajador 9:50 por lejanía",
+                    "bank": "Banco de Chile",
+                    "account_type": "Cuenta Corriente",
+                    "account_number": "000010687709",
+                    "afp": "AFP Provida",
+                    "health": "Fonasa",
+                    "company_id": 1,
+                    "email": null
                     }
-                ]    
+                ]
             }
         } 
     */
     try {
 
         let { companyID } = req.params;
+        let { status } = req.query;
 
         var sectors = [];
 
@@ -574,7 +619,11 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
             }
             else {
 
-                var queryString = "SELECT * FROM sector s WHERE company_id = " + companyID;
+                var statusQuery = ''
+                if  (status ) {
+                    statusQuery = " AND status = " + status;
+                }
+                var queryString = "SELECT * FROM sector s WHERE company_id = " + companyID + statusQuery;;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -928,6 +977,7 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
             required: true,
             type: "integer",
         }
+
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -966,11 +1016,12 @@ router.get('/configuracion/production/getAttributesSector/:companyID', validateT
                 });
             }
 
-            var queryString = "SELECT * FROM sector_attr a WHERE company_id = ?";
+
+            var queryString = "SELECT * FROM sector_attr a WHERE company_id =  " + companyID;
             //console.log(queryString);
             //console.log(companyID);
 
-            mysqlConn.query(queryString, [companyID], function (error, results) {
+            mysqlConn.query(queryString, function (error, results, fields) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
@@ -1042,7 +1093,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
     try {
         let obj = req.body;
 
-        console.log('attr', obj);
+        console.log(obj);
 
         let quantity_plants_ha = 0;
         
@@ -1051,7 +1102,7 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
             let on_ha = parseFloat(obj.on_ha);
             let between_ha  = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha); //* ha_productivas;
+            quantity_plants_ha= 10000 / (on_ha * between_ha);  //ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
@@ -1206,7 +1257,7 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
             let on_ha = parseFloat(obj.on_ha);
             let between_ha  = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha); // * ha_productivas;
+            quantity_plants_ha= 10000 / (on_ha * between_ha); //* ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
@@ -1354,7 +1405,14 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
             in: 'path',
             required: true,
             type: "integer",
-        }  
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
         
         #swagger.responses[200] = {
             schema: {
@@ -1373,7 +1431,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
     try {
 
         let { companyID } = req.params;
-
+        let { status } = req.query;
         //console.log(companyID);
         var varieties = [];
 
@@ -1393,7 +1451,12 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
             }
             else {
 
-                var queryString = "SELECT * FROM varieties v WHERE company_id = " + companyID;
+                var statusQuery = ''
+                if  (status ) {
+                    statusQuery = " AND status = " + status;
+                }
+
+                var queryString = "SELECT * FROM varieties v WHERE company_id = " + companyID + statusQuery;
 
 
                 //console.log(queryString);
@@ -1420,8 +1483,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
                                     "id": element.id,
                                     "name": element.name,
                                     "company_id": element.company_id,
-                                    "status": element.status,
-                                    //"species_id": element.species_id
+                                    "status": element.status
                                 }
                                 varieties.push(jsonResult);
                             });
@@ -1505,11 +1567,8 @@ router.post('/configuracion/production/updateVariety', validateToken, (req, res)
             }
             else {
 
-                var queryString = "UPDATE varieties SET name = '" + obj.name + 
-                "', company_id = " + obj.company_id + 
-                ", status = " + obj.status + 
-                //", species_id = " + obj.species_id + 
-                " WHERE id = " + obj.id;
+
+                var queryString = "UPDATE varieties SET name = '" + obj.name + "', company_id = " + obj.company_id + ", status = " + obj.status + " WHERE id = " + obj.id;
 
                 //console.log(queryString);
                 mysqlConn.query(queryString, function (error, results, fields) {
@@ -1754,6 +1813,13 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
             required: true,
             type: "integer",
         }  
+
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -1771,7 +1837,7 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
     */
     try {
         let { companyID } = req.params;
-
+        let { status } = req.query;
         var species = [];
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -1785,10 +1851,14 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
                 });
             }
 
-            var queryString = "SELECT * FROM species s WHERE company_id = ?";
+            var statusQuery = ''
+            if  (status ) {
+                statusQuery = " AND status = " + status;
+            }
+            var queryString = "SELECT * FROM species s WHERE company_id = " + companyID + statusQuery;
             //console.log(queryString);
 
-            mysqlConn.query(queryString, [companyID], function (error, results) {
+            mysqlConn.query(queryString, function (error, results, fields) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
@@ -2680,7 +2750,16 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
             in: 'path',
             required: true,
             type: "integer",
-        }  
+        } 
+        
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
+        
+
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -2699,7 +2778,7 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
 
     try {
         let { companyID } = req.params;
-
+        let { status } = req.query;
         //console.log(companyID);
 
         var qualities = [];
@@ -2715,9 +2794,13 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
                 });
             }
 
-            var queryString = "SELECT * FROM quality q WHERE company_id = ?";
+            var statusQuery = ''
+            if  (status ) {
+                statusQuery = " AND status = " + status;
+            }
+            var queryString = "SELECT * FROM quality q WHERE company_id = " + companyID + statusQuery;
 
-            mysqlConn.query(queryString, [companyID], function (error, results) {
+            mysqlConn.query(queryString, function (error, results, fields) {
                 if (error) {
                     console.error('error ejecutando query: ' + error.message);
                     return res.json({
@@ -3086,7 +3169,7 @@ router.get('/configuracion/production/getScale/:companyID', validateToken, (req,
                     {
                     "id": 1,
                     "name": "Balanza 1",
-                    "ground": 1;
+                    "ground": 1,
                     "location": "Ubicación 1",
                     "company_id": 1,
                     "status": 1
@@ -3808,7 +3891,15 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
             in: 'path',
             required: true,
             type: "integer",
-        }  
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
+
         #swagger.responses[200] = {
             schema: {
                 "code": "OK",
@@ -3833,6 +3924,7 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
     try {
 
         let { companyID } = req.params;
+        let { status } = req.query;
 
         //console.log(companyID);
 
@@ -3852,9 +3944,14 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
 
             }
 
-            var queryString = "SELECT * FROM harvest_format hf WHERE company_id = ?";
+            var statusQuery = ''
+            if  (status ) {
+                statusQuery = " AND status = " + status;
+            }
 
-            mysqlConn.query(queryString, [companyID], function (error, results) {
+            var queryString = "SELECT * FROM harvest_format hf WHERE company_id = " + companyID + statusQuery;
+
+            mysqlConn.query(queryString, function (error, results, fields) {
 
                 if (error) {
 
@@ -4941,6 +5038,13 @@ router.get('/configuracion/production/getManualHarvesting/:companyID', validateT
                 if (results && results.length > 0) {
 
                     results.forEach(element => {
+                        
+                        let dateTime = new Date(element.harvest_date); 
+                        // Extrae la fecha y hora en tu zona horaria local
+                        let datePart = `${dateTime.getFullYear()}-${String(dateTime.getMonth() + 1).padStart(2, '0')}-${String(dateTime.getDate()).padStart(2, '0')}`;
+                        let timePart = `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`;
+
+
                         manualHarvesting.push({
                             "id": element.id,
                             "ground": element.ground,
@@ -4952,6 +5056,7 @@ router.get('/configuracion/production/getManualHarvesting/:companyID', validateT
                             "worker": element.worker,
                             "worker_rut": element.worker_rut,
                             "harvest_date": element.harvest_date,
+                            "harvest_time": timePart,
                             "quality": element.quality,
                             "boxes": element.boxes,
                             "kg_boxes": element.kg_boxes,
@@ -5030,7 +5135,13 @@ router.post('/configuracion/production/updateManualHarvesting', validateToken, (
         //(obj);
 
         // Convertir la fecha ISO 8601 a formato DATETIME de MySQL
-        let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+        //let date = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+
+        let harvestDateobj = new Date(obj.harvest_date);
+        harvestDateobj.setMinutes(harvestDateobj.getMinutes() - harvestDateobj.getTimezoneOffset());
+        let date = harvestDateobj.toISOString().slice(0, 19).replace('T', ' ');
+
+
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -5046,10 +5157,11 @@ router.post('/configuracion/production/updateManualHarvesting', validateToken, (
 
             }
 
-            var queryString = "UPDATE harvest SET , ground = ?, sector = ?, squad = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, harvest_format = ?, company_id = ? WHERE id = ?";
-
+            var queryString = "UPDATE harvest SET ground = ?, sector = ?, squad = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, harvest_format = ?, company_id = ? WHERE id = ?";
+            console.log(queryString);
+            console.log(obj);
             mysqlConn.query(queryString, [ obj.ground, obj.sector, obj.squad, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.harvest_format, obj.company_id, obj.id], function (error) {
-
+                
                 if (error) {
 
                     console.error('error ejecutando query: ' + error.message);
@@ -5189,7 +5301,10 @@ router.post('/configuracion/production/createManualHarvesting', validateToken, (
         console.log(obj);
 
         // Convertir las fechas ISO 8601 a formato DATETIME de MySQL
-        let harvestDate = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
+        let harvestDateobj = new Date(obj.harvest_date);
+        harvestDateobj.setMinutes(harvestDateobj.getMinutes() - harvestDateobj.getTimezoneOffset());
+        let harvestDate = harvestDateobj.toISOString().slice(0, 19).replace('T', ' ');
+        //let harvestDate = new Date(obj.harvest_date).toISOString().slice(0, 19).replace('T', ' ');
         let syncDate = new Date(obj.sync_date).toISOString().slice(0, 19).replace('T', ' ');
         let dateRegister = new Date(obj.date_register).toISOString().slice(0, 19).replace('T', ' ');
 
@@ -5909,69 +6024,14 @@ router.post('/configuracion/production/createDispatchGuide', validateToken, (req
 
 
 router.post('/configuracion/production/filterResults/:companyID', validateToken, (req, res) => {
-
-    /*
-        #swagger.tags = ['Production - Filter Results']
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-        #swagger.parameters['companyID'] = {
-            in: 'path',
-            required: true,
-            type: "integer",
-        }
-        #swagger.parameters['filters'] = {
-            in: 'body',
-            description: 'Filtros para la búsqueda',
-            required: true,
-            type: "object",
-            schema: { $ref: "#/definitions/ProductionFilters" }
-        }
-
-        #swagger.responses[200] = {
-            schema: {
-                "code": "OK",
-                "results": [
-                    {
-                        "id": 1,
-                        "zone": "Zona 1",
-                        "ground": "Suelo 1",
-                        "sector": "Sector 1",
-                        "squad": "Escuadra 1",
-                        "squad_leader": "Jefe 1",
-                        "batch": "Lote 1",
-                        "worker": 1,
-                        "worker_rut": "12345678-9",
-                        "harvest_date": "2021-01-01 00:00:00",
-                        "specie": 1,
-                        "variety": 1,
-                        "boxes": 100,
-                        "kg_boxes": 20,
-                        "quality": 1,
-                        "row": 1,
-                        "harvest_format": 1,
-                        company_id: 1
-                    }
-                ]
-            }
-        }
-    */
-
     const { companyID } = req.params;
     const filters = req.body; // Los filtros enviados desde el frontend
-
     const totals = filters.totals;
     const shouldGroup = totals === 1;
 
     // Filtra las columnas 'totals'
     const { totals: _, ...filteredFilters } = filters;
     const columns = Object.keys(filteredFilters).filter(key => key !== 'from' && key !== 'to');
-
-
-    const indexOfTotals = columns.indexOf('totals');
-    if (indexOfTotals > -1) {
-        columns.splice(indexOfTotals, 1);
-    }
 
     const selectColumns = [];
     const selectColumnsDetails = ['season', 'boxes', 'kg_boxes', 'turns', 'sync', 'sync_date', 'date_register'];
@@ -5991,7 +6051,7 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
     }, []);
 
     let queryString = `SELECT ${shouldGroup
-        ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
+        ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, MIN(${escapeColumnName('harvest_date')}) AS harvest_date, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
         : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
         } FROM harvest WHERE company_id = ?`;
 
@@ -6027,7 +6087,7 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
 
     for (const [key, value] of Object.entries(filters)) {
         if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to' && key !== 'totals') {
-            if (key === 'date_register') {
+            if (key === 'harvest_date') {
                 queryString += ` AND DATE(${escapeColumnName(key)}) = ?`;
             } else {
                 queryString += ` AND ${escapeColumnName(key)} = ?`;
@@ -6037,14 +6097,15 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
     }
 
     if (shouldGroup) {
-        const selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
+        let selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
         const groupByColumns = [...new Set([...selectColumns, ...columns.filter(col => acceptedGroup.includes(col))])].map(escapeColumnName).join(', ');
-        queryString += ' GROUP BY ' + selectGroupColumns;
+
+        // *** Cambio aquí ***
+        // No se incluye `harvest_date` en el `GROUP BY`
+        queryString += ' GROUP BY ' + groupByColumns;
     }
 
-    //console.log(queryString);
-    //console.log(filters);
-
+    // Ejecutar la consulta
     const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
     mysqlConn.connect(err => {
@@ -6055,6 +6116,112 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
                 mensaje: err.message
             });
         }
+
+        // Ordenar los resultados por fecha de cosecha en orden descendente
+        queryString += ' ORDER BY harvest_date DESC';
+        console.log(queryString);
+        console.log(queryValues);
+        mysqlConn.query(queryString, queryValues, (error, results) => {
+            mysqlConn.end(); // Cerrar la conexión
+            if (error) {
+                console.error('Error executing query: ' + error.message);
+                return res.status(500).json({
+                    code: "ERROR",
+                    mensaje: error.message
+                });
+            }
+
+            if (results.length > 0) {
+                return res.status(200).json({
+                    code: "OK",
+                    results
+                });
+            } else {
+                return res.status(404).json({
+                    code: "ERROR",
+                    mensaje: "No se encuentran registros."
+                });
+            }
+        });
+    });
+});
+
+
+
+router.post('/configuracion/production/filterResultsMonthly/:companyID', validateToken, (req, res) => {
+    const { companyID } = req.params; // ID de la empresa desde la URL
+    const filters = req.body; // Filtros enviados desde el frontend
+    console.log(filters);
+
+    // Verificamos si 'totals' es igual a 1 (es decir, si debemos agrupar)
+    const shouldGroup = filters.totals === 1;
+    const currentMonth = new Date().getMonth() + 1; // Mes actual (1-12)
+
+    // Definir las columnas permitidas para filtrar
+    const acceptedColumns = ['worker', 'worker_rut', 'ground', 'specie'];
+    const columns = Object.keys(filters).filter(key => acceptedColumns.includes(key));
+
+    // Selección de columnas dependiendo de si debemos agrupar o no
+    let selectColumns = shouldGroup 
+        ? ['worker', 'worker_rut', 'ground', 'specie', 'SUM(kg_boxes) AS kg_boxes'] // Si agrupamos, usamos SUM
+        : ['worker', 'worker_rut', 'ground', 'specie', 'SUM(kg_boxes) AS kg_boxes']; // Si no agrupamos, mostramos los valores individuales
+
+    // Si totals no es 1, incluir harvest_date en la selección de columnas
+    if (!shouldGroup) {
+        selectColumns.push('DATE(harvest_date) AS harvest_date'); // Agrupar solo por la fecha, sin hora
+    }
+
+    // Función para escapar nombres de columnas (solo para columnas, no para alias)
+    const escapeColumnName = (col) => mysql.escapeId(col);
+
+    // Comenzamos a construir la consulta SELECT
+    let queryString = `SELECT ${selectColumns.join(', ')} FROM harvest WHERE company_id = ?`;
+
+    // Agregar filtros por mes y año
+    queryString += ` AND MONTH(harvest_date) = ? AND YEAR(harvest_date) = ?`;
+
+    // Crear el array de valores de la consulta
+    const queryValues = [companyID, currentMonth, new Date().getFullYear()];
+
+    // Agregar condiciones adicionales de los filtros (worker, worker_rut, ground, specie)
+    for (const [key, value] of Object.entries(filters)) {
+        if (value !== null && value !== '' && acceptedColumns.includes(key) && key !== 'totals') {
+            if (key === 'worker_rut' && value !== '') {
+                // Si estamos filtrando por worker_rut, también filtramos por worker
+                queryString += ` AND (worker_rut = ? OR worker = ?)`;
+                queryValues.push(value, value);  // Filtra por worker_rut y worker, ambos con el mismo valor
+            } else {
+                queryString += ` AND ${escapeColumnName(key)} = ?`;
+                queryValues.push(value);
+            }
+        }
+    }
+
+    // Si 'totals' es diferente de 1, agrupar también por harvest_date
+    if (!shouldGroup) {
+        queryString += ' GROUP BY worker, worker_rut, ground, specie, DATE(harvest_date)';
+    }else{
+        queryString += ' GROUP BY worker, worker_rut';
+    }
+
+    // Ordenar los resultados por worker y worker_rut
+    queryString += ' ORDER BY worker, worker_rut';
+
+    // Conexión con la base de datos MySQL
+    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+    mysqlConn.connect(err => {
+        if (err) {
+            console.error('Error connecting: ' + err.message);
+            return res.status(500).json({
+                code: "ERROR",
+                mensaje: err.message
+            });
+        }
+
+        // Ejecutar la consulta
+        console.log("Consulta SQL: ", queryString);
+        console.log("Valores de consulta: ", queryValues);
 
         mysqlConn.query(queryString, queryValues, (error, results) => {
             mysqlConn.end(); // Cerrar la conexión
@@ -6081,6 +6248,10 @@ router.post('/configuracion/production/filterResults/:companyID', validateToken,
         });
     });
 });
+
+
+
+
 
 export default router
 

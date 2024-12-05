@@ -3219,6 +3219,103 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
 });
 
 
+router.post('/management-people/workers/deleteAllBand', validateToken, (req, res) => {
+    /*
+    #swagger.tags = ['Management People - Workers']
+    #swagger.security = [{
+        "apiKeyAuth": []
+    }]
+    #swagger.parameters['company_id'] = {
+        in: 'body',
+        schema: {
+            "company_id": 1
+        }
+    }
+
+    #swagger.responses[200] = {
+        schema: {
+            "code": "OK",
+            "mensaje": "Pulseras eliminadas correctamente"
+        }
+    }
+    */
+
+    try {
+        const { company_id } = req.body;
+
+        if (!company_id) {
+            return res.status(400).json({
+                code: "ERROR",
+                mensaje: "company_id es obligatorio"
+            });
+        }
+
+        // Crear conexión MySQL
+        const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect((err) => {
+            if (err) {
+                console.error('Error de conexión:', err.message);
+                return res.status(500).json({
+                    code: "ERROR",
+                    mensaje: 'Error de conexión: ' + err.message
+                });
+            }
+
+            // Verificar si existen trabajadores con el company_id
+            const checkWorkersQuery = 'SELECT id FROM workers WHERE company_id = ?';
+            mysqlConn.query(checkWorkersQuery, [company_id], (checkError, checkResults) => {
+                if (checkError) {
+                    mysqlConn.end();
+                    console.error('Error al verificar trabajadores:', checkError.message);
+                    return res.status(500).json({
+                        code: "ERROR",
+                        mensaje: 'Error al verificar trabajadores: ' + checkError.message
+                    });
+                }
+
+                if (checkResults.length === 0) {
+                    mysqlConn.end();
+                    return res.status(404).json({
+                        code: "ERROR",
+                        mensaje: 'No se encontraron trabajadores para el company_id especificado'
+                    });
+                }
+
+                // Actualizar todos los trabajadores para poner la pulsera a NULL
+                const updateWristbandQuery = 'UPDATE workers SET wristband = NULL WHERE company_id = ?';
+                mysqlConn.query(updateWristbandQuery, [company_id], (updateError, updateResults) => {
+                    mysqlConn.end();
+
+                    if (updateError) {
+                        console.error('Error al actualizar pulseras:', updateError.message);
+                        return res.status(500).json({
+                            code: "ERROR",
+                            mensaje: 'Error al actualizar pulseras: ' + updateError.message
+                        });
+                    }
+
+                    if (updateResults.affectedRows === 0) {
+                        return res.status(400).json({
+                            code: "ERROR",
+                            mensaje: 'No se actualizaron pulseras'
+                        });
+                    }
+
+                    res.json({
+                        code: "OK",
+                        mensaje: "Pulseras eliminadas correctamente"
+                    });
+                });
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
 export default router
 
 
