@@ -1,12 +1,11 @@
 import { Router, json } from 'express'
 const router = Router()
 import validateToken from '../middleware/validateToken.js'
-import mysql from 'mysql';
-import util from 'util';
+import queryAsync from '../utils/bd.js';
 
 // MENÚ
 
-router.get('/getMenubyRol/:rolId', validateToken, (req, res) => {
+router.get('/getMenubyRol/:rolId', validateToken, async (req, res) => {
     /*  
         #swagger.tags = ['Auth']
 
@@ -56,122 +55,91 @@ router.get('/getMenubyRol/:rolId', validateToken, (req, res) => {
         let menuGrandSon = [];
 
 
-        const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        var queryString = `select  m.id,m.name,m.icon,m.url from menu m , menu_rol mr
+                                    where mr.id_rol  =?
+                                    and m.id = mr.id_menu`;
 
-        // node native promisify
-        const query = util.promisify(mysqlConn.query).bind(mysqlConn);
+        const results = await queryAsync(queryString, [rolId]);
 
-        (async () => {
-
-            try {
-
-                var queryString = "select  m.id,m.name,m.icon,m.url from menu m , menu_rol mr ";
-                queryString += " where mr.id_rol  = " + rolId;
-                queryString += " and m.id = mr.id_menu ";
-
-                const rows = await query(queryString);
-
-                if (rows.length > 0) {
+        if (results && results.length > 0) {
 
 
-                    for (const row of rows) {
+            for (const row of results) {
 
-                        menuChildren = [];
+                menuChildren = [];
 
-                        var menuQueryString = "select  *  from children_menu cm ";
-                        menuQueryString += " where cm.id_menu  = " + row.id;
-                        menuQueryString += " order by id asc";
+                var menuQueryString = `select  *  from children_menu cm
+                                            where cm.id_menu  = ?
+                                            order by id asc`;
 
-                        const childRows = await query(menuQueryString);
+                const childRows = await queryAsync(menuQueryString, [row.id]);
 
-                        if (childRows.length > 0) {
+                if (childRows && childRows.length > 0) {
 
-                            for (const childRow of childRows) {
+                    for (const childRow of childRows) {
 
-                                menuGrandSon = [];
+                        menuGrandSon = [];
 
-                                var menuGrandSonQueryString = "select  *  from grand_son_menu gsm ";
-                                menuGrandSonQueryString += " where gsm.id_children_menu  = " + childRow.id;
-                                menuGrandSonQueryString += " order by id asc";
+                        var menuGrandSonQueryString = `select  *  from grand_son_menu gsm
+                                                                where gsm.id_children_menu  =?
+                                                                order by id asc`;
 
-                                const grandSonRows = await query(menuGrandSonQueryString);
+                        const grandSonRows = await queryAsync(menuGrandSonQueryString, [childRow.id]);
 
-                                if (grandSonRows.length > 0) {
+                        if (grandSonRows && grandSonRows.length > 0) {
 
-                                    for (const grandSonRow of grandSonRows) {
+                            for (const grandSonRow of grandSonRows) {
 
-                                        const grandSon = {
-                                            "id": grandSonRow.id,
-                                            "name": grandSonRow.name,
-                                            "url": grandSonRow.url
-                                        };
-
-                                        menuGrandSon.push(grandSon);
-
-                                    }
-                                }
-
-
-
-                                const item = {
-                                    "id": childRow.id,
-                                    "name": childRow.name,
-                                    "url": childRow.url
+                                const grandSon = {
+                                    "id": grandSonRow.id,
+                                    "name": grandSonRow.name,
+                                    "url": grandSonRow.url
                                 };
 
-                                if (menuGrandSon.length > 0) {
-                                    item.children = menuGrandSon;
-                                }
-
-
-
-                                menuChildren.push(item);
+                                menuGrandSon.push(grandSon);
 
                             }
                         }
 
-                        const menu = {
-                            "id": row.id,
-                            "name": row.name,
-                            "url": row.url,
-                            "icon": row.icon,
+                        const item = {
+                            "id": childRow.id,
+                            "name": childRow.name,
+                            "url": childRow.url
                         };
 
-                        if (menuChildren.length > 0) {
-                            menu.children = menuChildren;
+                        if (menuGrandSon.length > 0) {
+                            item.children = menuGrandSon;
                         }
 
-                        menus.push(menu);
+                        menuChildren.push(item);
 
-                    };
+                    }
                 }
-            }
-            finally {
+                const menu = {
+                    "id": row.id,
+                    "name": row.name,
+                    "url": row.url,
+                    "icon": row.icon,
+                };
 
-                mysqlConn.end();
-
-                const jsonResult = {
-                    "code": "OK",
-                    "menus": menus
+                if (menuChildren.length > 0) {
+                    menu.children = menuChildren;
                 }
 
-                res.json(jsonResult);
+                menus.push(menu);
 
+            };
+
+            const jsonResult = {
+                "code": "OK",
+                "menus": menus
             }
 
-
-        })()
-
-    } catch (e) {
-        console.log(e);
-
-        const jsonResult = {
-            "code": "ERROR",
-            "mensaje": "Error al cargar el menú."
+            return res.json(jsonResult);
         }
-
-        res.json(jsonResult);
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
 });
-
 export default router

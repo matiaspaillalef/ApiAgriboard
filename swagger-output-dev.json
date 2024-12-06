@@ -400,31 +400,31 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "example": "Javier"
+                  "example": "javier"
                 },
-                "lastname": {
+                "lastName": {
                   "type": "string",
                   "example": "Donoso"
                 },
-                "mail": {
+                "userEmail": {
                   "type": "string",
                   "example": "donoso.javier@gmail.com"
                 },
-                "password": {
+                "menuRol": {
+                  "type": "number",
+                  "example": 1
+                },
+                "userPassword": {
                   "type": "string",
                   "example": "Mierda123"
                 },
-                "id_company": {
-                  "type": "string",
-                  "example": "1"
+                "menuState": {
+                  "type": "number",
+                  "example": 1
                 },
-                "id_rol": {
-                  "type": "string",
-                  "example": "1"
-                },
-                "id_state": {
-                  "type": "string",
-                  "example": "2"
+                "menuCompany": {
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -473,35 +473,35 @@
               "properties": {
                 "id": {
                   "type": "string",
-                  "example": "31"
+                  "example": "1"
                 },
                 "name": {
                   "type": "string",
-                  "example": "Javier"
+                  "example": "javier"
                 },
-                "lastname": {
+                "lastName": {
                   "type": "string",
-                  "example": "Donosos"
+                  "example": "Donoso"
                 },
-                "mail": {
+                "userEmail": {
                   "type": "string",
-                  "example": "donoso.javier2@gmail.com"
+                  "example": "donoso.javier@gmail.com"
                 },
-                "id_rol": {
-                  "type": "string",
-                  "example": "2"
+                "menuRol": {
+                  "type": "number",
+                  "example": 1
                 },
-                "password": {
+                "userPassword": {
                   "type": "string",
-                  "example": "$2a$10$IzQtd..rT6TmT8Rvpbpfk.i4ETW1MbExpepsNxRo5Nbu3LS8rUOKe"
+                  "example": "Mierda123"
                 },
-                "id_state": {
-                  "type": "string",
-                  "example": "1"
+                "menuState": {
+                  "type": "number",
+                  "example": 1
                 },
-                "id_company": {
-                  "type": "string",
-                  "example": "1"
+                "menuCompany": {
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -568,7 +568,7 @@
                 },
                 "mensaje": {
                   "type": "string",
-                  "example": "Usuario eliminado correctamente."
+                  "example": "Usuario borrado correctamente"
                 }
               },
               "xml": {
@@ -889,16 +889,16 @@
               "type": "object",
               "properties": {
                 "id": {
-                  "type": "string",
-                  "example": "13"
+                  "type": "number",
+                  "example": 1
                 },
                 "logo": {
                   "type": "string",
-                  "example": ""
+                  "example": "logo1.jpg"
                 },
                 "name_company": {
                   "type": "string",
-                  "example": "Empresa 2"
+                  "example": "Empresa 1"
                 },
                 "rut": {
                   "type": "string",
@@ -910,11 +910,11 @@
                 },
                 "state": {
                   "type": "string",
-                  "example": "I"
+                  "example": "Estado 1"
                 },
                 "city": {
                   "type": "string",
-                  "example": "Iquique"
+                  "example": "Ciudad 1"
                 },
                 "address": {
                   "type": "string",
@@ -926,11 +926,11 @@
                 },
                 "web": {
                   "type": "string",
-                  "example": "https://www.empresa1.com"
+                  "example": "www.empresa1.com"
                 },
                 "compensation_box": {
                   "type": "string",
-                  "example": "1"
+                  "example": "Caja 1"
                 },
                 "legal_representative_name": {
                   "type": "string",
@@ -965,8 +965,8 @@
                   "example": "representante1@empresa1.com"
                 },
                 "status": {
-                  "type": "string",
-                  "example": "1"
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -1284,13 +1284,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -1813,13 +1806,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -2447,90 +2433,23 @@
     },
     "/api/v1/management-people/workers/getWorkers/{companyID}": {
       "get": {
-        "tags": [
-          "Management People - Workers"
-        ],
         "description": "",
         "parameters": [
           {
             "name": "companyID",
             "in": "path",
             "required": true,
-            "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "id": {
-                  "type": "number",
-                  "example": 1
-                },
-                "rut": {
-                  "type": "string",
-                  "example": "12345678-9"
-                },
-                "name": {
-                  "type": "string",
-                  "example": "Juan"
-                },
-                "lastname": {
-                  "type": "string",
-                  "example": "Perez"
-                },
-                "giro": {
-                  "type": "string",
-                  "example": "Agricultura"
-                },
-                "phone": {
-                  "type": "string",
-                  "example": "12345678"
-                },
-                "email": {
-                  "type": "string",
-                  "example": "mail@mail.com"
-                },
-                "state": {
-                  "type": "string",
-                  "example": "Maule"
-                },
-                "city": {
-                  "type": "string",
-                  "example": "Talca"
-                },
-                "status": {
-                  "type": "number",
-                  "example": 1
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
           }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/management-people/workers/updateWorker": {
@@ -2657,10 +2576,6 @@
                 "company_id": {
                   "type": "number",
                   "example": 1
-                },
-                "is_weigher": {
-                  "type": "number",
-                  "example": 0
                 }
               }
             }
@@ -2688,9 +2603,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -2874,10 +2786,6 @@
                 "company_id": {
                   "type": "number",
                   "example": 1
-                },
-                "is_weigher": {
-                  "type": "number",
-                  "example": 1
                 }
               }
             }
@@ -2923,13 +2831,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -3156,13 +3057,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -3175,124 +3069,27 @@
                   "type": "string",
                   "example": "OK"
                 },
-                "workers": {
+                "sectors": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "properties": {
                       "id": {
                         "type": "number",
-                        "example": 2
-                      },
-                      "rut": {
-                        "type": "string",
-                        "example": "8.765.432-1"
+                        "example": 1
                       },
                       "name": {
                         "type": "string",
-                        "example": "Maria"
+                        "example": "Sector 1"
                       },
-                      "lastname": {
-                        "type": "string",
-                        "example": "Lopez"
-                      },
-                      "lastname2": {
-                        "type": "string",
-                        "example": "Rodriguez"
-                      },
-                      "born_date": {
-                        "type": "string",
-                        "example": "1985-05-15T04:00:00.000Z"
-                      },
-                      "gender": {
-                        "type": "string",
-                        "example": "Femenino"
-                      },
-                      "state_civil": {
-                        "type": "string",
-                        "example": "Casado"
-                      },
-                      "state": {
-                        "type": "string",
-                        "example": "XIII"
-                      },
-                      "city": {
-                        "type": "string",
-                        "example": "Santiago"
-                      },
-                      "address": {
-                        "type": "string",
-                        "example": "Avenida 456"
-                      },
-                      "phone": {
-                        "type": "string",
-                        "example": "876543210"
-                      },
-                      "phone_company": {
-                        "type": "string",
-                        "example": "876543210"
-                      },
-                      "date_admission": {
-                        "type": "string",
-                        "example": "2019-06-15T04:00:00.000Z"
+                      "ground_id": {
+                        "type": "number",
+                        "example": 1
                       },
                       "status": {
                         "type": "number",
                         "example": 1
-                      },
-                      "position": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "contractor": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "squad": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "leader_squad": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "shift": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "wristband": {
-                        "type": "string",
-                        "example": "1A2B3C4D"
-                      },
-                      "observation": {
-                        "type": "string",
-                        "example": "Ingreso trabajador 9:50 por lejanía"
-                      },
-                      "bank": {
-                        "type": "string",
-                        "example": "Banco de Chile"
-                      },
-                      "account_type": {
-                        "type": "string",
-                        "example": "Cuenta Corriente"
-                      },
-                      "account_number": {
-                        "type": "string",
-                        "example": "000010687709"
-                      },
-                      "afp": {
-                        "type": "string",
-                        "example": "AFP Provida"
-                      },
-                      "health": {
-                        "type": "string",
-                        "example": "Fonasa"
-                      },
-                      "company_id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "email": {}
+                      }
                     }
                   }
                 }
@@ -3481,71 +3278,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "attributes": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "season": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "sector": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "specie": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "variety": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "year_harvest": {
-                        "type": "number",
-                        "example": 2024
-                      },
-                      "ha_productivas": {
-                        "type": "number",
-                        "example": 100
-                      },
-                      "on_ha": {
-                        "type": "number",
-                        "example": 500
-                      },
-                      "between_ha": {
-                        "type": "number",
-                        "example": 100
-                      },
-                      "quantity_plants_ha": {
-                        "type": "number",
-                        "example": 10000
-                      },
-                      "company_id": {
-                        "type": "number",
-                        "example": 1
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "OK"
           }
         },
         "security": [
@@ -3752,13 +3485,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -3961,13 +3687,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -4601,13 +4320,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -4844,10 +4556,6 @@
                       "name": {
                         "type": "string",
                         "example": "Balanza 1"
-                      },
-                      "ground": {
-                        "type": "number",
-                        "example": 1
                       },
                       "location": {
                         "type": "string",
@@ -5256,13 +4964,6 @@
             "in": "path",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)"
           }
         ],
         "responses": {
@@ -5953,6 +5654,10 @@
                         "type": "number",
                         "example": 1
                       },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
                       "ground": {
                         "type": "string",
                         "example": "Suelo 1"
@@ -6607,44 +6312,138 @@
     },
     "/api/v1/configuracion/production/filterResults/{companyID}": {
       "post": {
+        "tags": [
+          "Production - Filter Results"
+        ],
         "description": "",
         "parameters": [
           {
             "name": "companyID",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer"
           },
           {
-            "name": "body",
+            "name": "filters",
             "in": "body",
+            "description": "Filtros para la búsqueda",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "totals": {
-                  "example": "any"
-                },
-                "from": {
-                  "example": "any"
-                },
-                "to": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/ProductionFilters"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "zone": {
+                        "type": "string",
+                        "example": "Zona 1"
+                      },
+                      "ground": {
+                        "type": "string",
+                        "example": "Suelo 1"
+                      },
+                      "sector": {
+                        "type": "string",
+                        "example": "Sector 1"
+                      },
+                      "squad": {
+                        "type": "string",
+                        "example": "Escuadra 1"
+                      },
+                      "squad_leader": {
+                        "type": "string",
+                        "example": "Jefe 1"
+                      },
+                      "batch": {
+                        "type": "string",
+                        "example": "Lote 1"
+                      },
+                      "worker": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "worker_rut": {
+                        "type": "string",
+                        "example": "12345678-9"
+                      },
+                      "harvest_date": {
+                        "type": "string",
+                        "example": "2021-01-01 00:00:00"
+                      },
+                      "specie": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "variety": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "boxes": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "kg_boxes": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "quality": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "row": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "harvest_format": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "company_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/filter/dashboard/dataKgDay/{companyID}/{groundID}": {
@@ -6864,6 +6663,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -6945,6 +6747,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7019,6 +6824,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7093,6 +6901,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7167,6 +6978,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7241,6 +7055,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7322,6 +7139,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7425,6 +7245,9 @@
                 "name": "main"
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -7465,298 +7288,6 @@
             "description": "Internal Server Error"
           }
         }
-      }
-    },
-    "/api/v1/app/createHarvest/": {
-      "post": {
-        "tags": [
-          "APP"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "groundId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "sectorId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "speciesId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "varietyId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "worker": {
-                  "type": "string",
-                  "example": "15.099.034-3"
-                },
-                "qualityId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "formatId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "batch": {
-                  "type": "number",
-                  "example": 1
-                },
-                "boxes": {
-                  "type": "number",
-                  "example": 1
-                },
-                "weight": {
-                  "type": "number",
-                  "example": 1
-                },
-                "temperature": {
-                  "type": "number",
-                  "example": 17
-                },
-                "humidity": {
-                  "type": "number",
-                  "example": 16
-                },
-                "date": {
-                  "type": "string",
-                  "example": "2024-08-06 10:00:00"
-                },
-                "dateUtc": {
-                  "type": "string",
-                  "example": "2024-08-06 10:00:00"
-                },
-                "userId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "seasonId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "companyId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "isManual": {
-                  "type": "number",
-                  "example": 0
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "mensaje": {
-                  "type": "string",
-                  "example": "registro creado correctamente."
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/app/syncFromApp/": {
-      "post": {
-        "tags": [
-          "APP"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "rut": {
-                  "type": "string",
-                  "example": "15.099.034-3"
-                },
-                "name": {
-                  "type": "string",
-                  "example": "javier"
-                },
-                "lastname": {
-                  "type": "string",
-                  "example": "Donoso"
-                },
-                "lastname2": {
-                  "type": "string",
-                  "example": "Rendich"
-                },
-                "wristband": {
-                  "type": "string",
-                  "example": "123456789"
-                },
-                "email": {
-                  "type": "string",
-                  "example": "prueba@prueba.cl"
-                },
-                "contractor": {
-                  "type": "number",
-                  "example": 1
-                },
-                "squad": {
-                  "type": "number",
-                  "example": 1
-                },
-                "last_update": {
-                  "type": "string",
-                  "example": "2024-08-06 10:00:00"
-                },
-                "company_id": {
-                  "type": "number",
-                  "example": 1
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "mensaje": {
-                  "type": "string",
-                  "example": "registro creado correctamente."
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/app/getAttributesSector/{companyID}": {
-      "get": {
-        "tags": [
-          "APP"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "companyID",
-            "in": "path",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "attributes": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "season": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "sector": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "specie": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "variety": {
-                        "type": "number",
-                        "example": 1
-                      },
-                      "year_harvest": {
-                        "type": "number",
-                        "example": 2024
-                      },
-                      "ha_productivas": {
-                        "type": "number",
-                        "example": 100
-                      },
-                      "on_ha": {
-                        "type": "number",
-                        "example": 500
-                      },
-                      "between_ha": {
-                        "type": "number",
-                        "example": 100
-                      },
-                      "quantity_plants_ha": {
-                        "type": "number",
-                        "example": 10000
-                      },
-                      "company_id": {
-                        "type": "number",
-                        "example": 1
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ]
       }
     }
   }

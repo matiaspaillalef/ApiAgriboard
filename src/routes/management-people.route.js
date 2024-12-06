@@ -3,7 +3,7 @@ const router = Router()
 //import Usuario from '../models/usuario.model.js'
 import validateToken from '../middleware/validateToken.js'
 import mysql from 'mysql';
-import bcrypt from 'bcrypt';
+//import bcrypt from 'bcrypt';
 
 //Management People - Positions
 
@@ -403,7 +403,15 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
             in: 'path',
             required: true,
             type: "integer",
-        }  
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
+
         
         #swagger.responses[200] = {
             schema: {
@@ -423,9 +431,10 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
     */
     try {
 
-        let { companyID } = req.params;
+        let { companyID, } = req.params;
+        let { status } = req.query;
         var contractors = [];
-        //console.log("aqui", companyID);
+        //console.log("aqui", status);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -442,8 +451,12 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
 
             }
             else {
+                var statusQuery = ''
+                if  (status ) {
+                    statusQuery = " AND status = " + status;
+                }
 
-                var queryString = "SELECT * FROM contractors where id_company = " + companyID;
+                var queryString = "SELECT * FROM contractors where id_company = " + companyID + statusQuery;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -508,6 +521,8 @@ router.get('/management-people/contractors/getContractors/:companyID', validateT
 }
 
 );
+
+
 
 router.post('/management-people/contractors/createContractor', validateToken, (req, res) => {
     /*  
@@ -864,7 +879,7 @@ router.get('/management-people/groups/getGroups/:companyID', validateToken, (req
             } else {
 
                 var queryString = "SELECT * FROM `groups` g where id_company = " + companyID;
-                //console.log(queryString);
+                console.log(queryString);
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -1434,7 +1449,14 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
             in: 'path',
             required: true,
             type: "integer",
-        } 
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
         
         
         #swagger.responses[200] = {
@@ -1450,6 +1472,7 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
     try {
         let squads = [];
         let { companyID } = req.params;
+        let { status } = req.query;
 
         let mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -1465,8 +1488,11 @@ router.get('/management-people/squads/getSquads/:companyID', validateToken, (req
                 res.json(jsonResult);
 
             } else {
-
-                let queryString = "SELECT * FROM squads where id_company = " + companyID;
+                var statusQuery = ''
+                if  (status ) {
+                    statusQuery = " AND status = " + status;
+                }
+                let queryString = "SELECT * FROM squads where id_company = " + companyID + statusQuery;
 
                 mysqlConn.query(queryString, function (error, results, fields) {
 
@@ -1570,7 +1596,7 @@ router.post('/management-people/squads/createSquad', validateToken, (req, res) =
     try {
         const { name, group, status, idCompany } = req.body;
 
-        //console.log('req.body:', req.body);
+        console.log('req.body:', req.body);
 
         // Crear conexión a la base de datos
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -1743,7 +1769,7 @@ router.post('/management-people/squads/updateSquad', validateToken, (req, res) =
     try {
         const { id, name, group, status, workers, company_id } = req.body;
 
-        //console.log('req.body:', req.body);
+        console.log('req.body:', req.body);
 
         // Convertir workers a una cadena JSON
         const workersJson = JSON.stringify(workers);
@@ -2587,8 +2613,8 @@ router.post('/management-people/shifts/updateShift', validateToken, (req, res) =
                                 id_company = ?
                             WHERE id = ?`;
 
-                            //console.log('queryString:', queryString);
-                            //console.log('queryValues:', queryValues);
+                            console.log('queryString:', queryString);
+                            console.log('queryValues:', queryValues);
 
                             mysqlConn.query(queryString, queryValues, (error, results) => {
 
@@ -2772,7 +2798,46 @@ router.post('/management-people/shifts/deleteShift', validateToken, (req, res) =
 
 //Management People - Workers
 router.get('/management-people/workers/getWorkers/:companyID', validateToken, (req, res) => {
+
+            /*
+        #swagger.tags = ['Management People - Workers']
+
+        #swagger.security = [{
+               "apiKeyAuth": []
+        }]
+
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+        }
+            
+        #swagger.parameters['status'] = {
+            in: 'query',
+            required: false,
+            type: 'string',
+            description: 'filtrar por estado del registro (ej. 1 = activo, 0 = inactivo)'
+        }
+
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "id": 1,
+                "rut": "12345678-9",
+                "name": "Juan",
+                "lastname": "Perez",
+                "giro": "Agricultura",
+                "phone": "12345678",
+                "email": "mail@mail.com",
+                "state": "Maule",
+                "city": "Talca",
+                "status": 1
+            }
+        } 
+    */
+
     const { companyID } = req.params;
+    let { status } = req.query;
 
     console.log('Request Params:', req.params);
 
@@ -2787,11 +2852,13 @@ router.get('/management-people/workers/getWorkers/:companyID', validateToken, (r
             });
         }
 
-        const queryString = `
-            SELECT * FROM workers WHERE company_id = ?
-        `;
+        var statusQuery = ''
+        if  (status ) {
+            statusQuery = " AND status = " + status;
+        }
+        const queryString = "SELECT * FROM  workers WHERE company_id =  " + companyID + statusQuery;
 
-        mysqlConn.query(queryString, [companyID], (error, results) => {
+        mysqlConn.query(queryString, function (error, results, fields) {
             // Terminar la conexión después de manejar los resultados
             mysqlConn.end();
 
@@ -3139,7 +3206,11 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
             bank, account_type, account_number, afp, health, company_id, is_weigher
         } = req.body;
 
-        //console.log('Received data:', req.body);
+        console.log('Received data:', req.body);
+
+        const rutFormatted = formatRut(rut);
+
+        console.log('rutFormatted', rutFormatted);
 
         const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
@@ -3157,8 +3228,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                 SELECT COUNT(*) AS count FROM workers 
                 WHERE rut = ? AND company_id = ?
             `;
-
-            mysqlConn.query(checkQuery, [rut, company_id], (error, results) => {
+            mysqlConn.query(checkQuery, [rutFormatted, company_id], (error, results) => {
                 if (error) {
                     mysqlConn.end();
                     console.error('Error checking for duplicate:', error.message);
@@ -3186,7 +3256,7 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
                 `;
 
                 const queryValues = [
-                    rut, name, lastname, lastname2 || null, born_date || null, gender || null, state_civil || null, state || null,
+                    rutFormatted, name, lastname, lastname2 || null, born_date || null, gender || null, state_civil || null, state || null,
                     city || null, address || null, phone || null, email || null, date_admission || null, status || 1,
                     position || null, contractor || null, squad || null, leader_squad || null, shift || null, wristband || null,
                     observation || null, bank || null, account_type || null, account_number || null, afp || null, health || null,
@@ -3217,7 +3287,6 @@ router.post('/management-people/workers/createWorker', validateToken, (req, res)
         res.json({ code: "ERROR", mensaje: e.message });
     }
 });
-
 
 router.post('/management-people/workers/deleteAllBand', validateToken, (req, res) => {
     /*
@@ -3315,6 +3384,20 @@ router.post('/management-people/workers/deleteAllBand', validateToken, (req, res
     }
 });
 
+function formatRut(rut) {
+    if (!rut) return ""; // Retornar vacío si no se ingresa nada
+  
+    // Remover cualquier carácter que no sea un número o una "k/K"
+    const cleanRut = rut.replace(/[^0-9kK]/g, "");
+  
+    // Separar el dígito verificador
+    const body = cleanRut.slice(0, -1); // Todo menos el último carácter
+    const verifier = cleanRut.slice(-1).toUpperCase(); // Último carácter
+  
+    // Añadir puntos y guión al cuerpo del RUT
+    const formattedBody = body.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${formattedBody}-${verifier}`;
+  }
 
 export default router
 

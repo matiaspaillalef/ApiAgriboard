@@ -4,6 +4,8 @@ import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import queryAsync from '../utils/bd.js';
+
 
 const router = Router();
 
@@ -128,12 +130,12 @@ async function enviarReportePorCorreo(email, nombre, datos) {
 
     console.log("Correo enviado a: %s", email);
 }
-
+/*
 // Configura el cron para ejecutar la función a las 23:59 cada día
 cron.schedule('59 23 * * *', () => {
     generarYEnviarReportesDiarios();
 });
-
+*/
 // Función para generar y enviar reportes diarios
 async function generarYEnviarReportesDiarios() {
     const query = `
@@ -172,21 +174,9 @@ async function generarYEnviarReportesDiarios() {
             w.email, g.name;
     `;
 
-    // Crear conexión dentro de la función
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
     try {
-        // Promesa para ejecutar la consulta
-        const results = await new Promise((resolve, reject) => {
-            mysqlConn.query(query, (error, results) => {
-                if (error) {
-                    console.error('Error ejecutando query:', error.sqlMessage);
-                    reject(error);
-                } else {
-                    resolve(results);
-                }
-            });
-        });
+
+        const results = await queryAsync(query);
 
         if (results.length === 0) {
             console.log("No hay datos para enviar.");
@@ -220,15 +210,6 @@ async function generarYEnviarReportesDiarios() {
         }
     } catch (error) {
         console.error('Error en la generación o envío de reportes:', error);
-    } finally {
-        // Cierre de la conexión a la base de datos
-        mysqlConn.end((err) => {
-            if (err) {
-                console.error('Error al cerrar la conexión:', err);
-            } else {
-                console.log('Conexión cerrada correctamente.');
-            }
-        });
     }
 }
 
@@ -236,10 +217,10 @@ async function generarYEnviarReportesDiarios() {
 
 router.post('/notificationScale', async (req, res) => {
     try {
-      const { company_id, name, messageContent } = req.body;
-  
-      // Define el contenido HTML del correo
-      const htmlContent = `
+        const { company_id, name, messageContent } = req.body;
+
+        // Define el contenido HTML del correo
+        const htmlContent = `
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -320,29 +301,29 @@ router.post('/notificationScale', async (req, res) => {
         </body>
         </html>
       `;
-  
-      // Configura el correo
-      const mailOptions = {
-        from: 'noreply@agrisoft.cl',
-        to: 'gerardo@agrisoft.cl, m.paillalef.c@gmail.com, donoso.javier@gmail.com', //TODO : Hay que definir quienes recibiran estos mails
-        subject: `Mensaje sobre la pesa ${name} de la empresa ${company_id}`,
-        html: htmlContent,
-      };
-  
-      // Envía el correo
-      const info = await transporter.sendMail(mailOptions);
-  
-      console.log('Correo enviado:', info.response);
-  
-      // Envía una respuesta exitosa
-      res.status(200).json({ message: 'Correo enviado exitosamente' });
+
+        // Configura el correo
+        const mailOptions = {
+            from: 'noreply@agrisoft.cl',
+            to: 'gerardo@agrisoft.cl, m.paillalef.c@gmail.com, donoso.javier@gmail.com', //TODO : Hay que definir quienes recibiran estos mails
+            subject: `Mensaje sobre la pesa ${name} de la empresa ${company_id}`,
+            html: htmlContent,
+        };
+
+        // Envía el correo
+        const info = await transporter.sendMail(mailOptions);
+
+        console.log('Correo enviado:', info.response);
+
+        // Envía una respuesta exitosa
+        res.status(200).json({ message: 'Correo enviado exitosamente' });
     } catch (error) {
-      console.error('Error al enviar el correo:', error);
-      // Envía una respuesta de error
-      res.status(500).json({ message: 'Error al enviar el correo' });
+        console.error('Error al enviar el correo:', error);
+        // Envía una respuesta de error
+        res.status(500).json({ message: 'Error al enviar el correo' });
     }
-  });
-  
+});
+
 
 
 

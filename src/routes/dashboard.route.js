@@ -1,10 +1,9 @@
 import { Router } from 'express'
 const router = Router()
 import validateToken from '../middleware/validateToken.js'
-import mysql from 'mysql';
-import bcrypt from 'bcrypt';
+import queryAsync from '../utils/bd.js';
 
-router.get('/filter/dashboard/dataKgDay/:companyID/:groundID', validateToken, (req, res) => {
+router.get('/filter/dashboard/dataKgDay/:companyID/:groundID', validateToken, async (req, res) => {
     /*
         #swagger.tags = ['Dashboard - Filter']
 
@@ -38,51 +37,35 @@ router.get('/filter/dashboard/dataKgDay/:companyID/:groundID', validateToken, (r
 
 
     let { companyID, groundID } = req.params;
-    var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-    mysqlConn.connect(function (err) {
+    try {
 
-        if (err) {
+        var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = ? AND ground = ? and date(harvest_date)  = CURDATE()";
 
-            console.error('error connecting: ' + err.sqlMessage);
-            const jsonResult = {
-                "code": "ERROR",
-                "mensaje": err.sqlMessage
-            }
+        const results = await queryAsync(queryString, [companyID, groundID]);
 
-            res.json(jsonResult);
+        if (results && results.length > 0) {
 
-        } else {
-
-            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID;
-            //var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND season = (SELECT MAX(season) FROM harvest WHERE company_id = " + companyID + " AND ground = " + groundID + ")";
-
-            mysqlConn.query(queryString, function (error, results, fields) {
-
-                if (error) {
-                    console.error('error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    res.json(jsonResult);
-                } else {
-
-                    const jsonResult = {
-                        "code": "OK",
-                        "data": results[0]
-                    }
-                    res.json(jsonResult);
-                }
-
+            return res.json({
+                "code": "OK",
+                "data": results[0]
             });
+        }
+        else {
 
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
         }
 
-    });
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
-router.get('/filter/dashboard/dataKgDayQlty/:companyID/:groundID/:qualityID', validateToken, (req, res) => {
+router.get('/filter/dashboard/dataKgDayQlty/:companyID/:groundID/:qualityID', validateToken, async (req, res) => {
     /*
         #swagger.tags = ['Dashboard - Filter']
 
@@ -116,50 +99,35 @@ router.get('/filter/dashboard/dataKgDayQlty/:companyID/:groundID/:qualityID', va
 
 
     let { companyID, groundID, qualityID } = req.params;
-    var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-    mysqlConn.connect(function (err) {
+    try {
 
-        if (err) {
+        var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = ? AND ground = ? AND quality = ? and date(harvest_date)  = CURDATE()";
 
-            console.error('error connecting: ' + err.sqlMessage);
-            const jsonResult = {
-                "code": "ERROR",
-                "mensaje": err.sqlMessage
-            }
+        const results = await queryAsync(queryString, [companyID, groundID, qualityID]);
 
-            res.json(jsonResult);
+        if (results && results.length > 0) {
 
-        } else {
-
-            var queryString = "SELECT SUM(kg_boxes) AS kg_boxes FROM harvest WHERE company_id  = " + companyID + " AND ground = " + groundID + " AND quality = " + qualityID;
-
-            mysqlConn.query(queryString, function (error, results, fields) {
-
-                if (error) {
-                    console.error('error ejecutando query: ' + error.sqlMessage);
-                    const jsonResult = {
-                        "code": "ERROR",
-                        "mensaje": error.sqlMessage
-                    }
-                    res.json(jsonResult);
-                } else {
-                    const jsonResult = {
-                        "code": "OK",
-                        "data": results[0]
-                    }
-                    res.json(jsonResult);
-                }
-
+            return res.json({
+                "code": "OK",
+                "data": results[0]
             });
-
         }
+        else {
 
-    });
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
 
-router.post('/filter/dashboard/dataKgSeason/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataKgSeason/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -196,22 +164,13 @@ router.post('/filter/dashboard/dataKgSeason/:companyID/:groundID', validateToken
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
@@ -228,30 +187,30 @@ router.post('/filter/dashboard/dataKgSeason/:companyID/:groundID', validateToken
               )
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID, companyID, groundID], function (error, results) {
+        const results = await queryAsync(queryString, [companyID, groundID, companyID, groundID]);
 
+        if (results && results.length > 0) {
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+            return res.json({
+                "code": "OK",
+                "data": results[0]
+            });
+        }
+        else {
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
-
-            const jsonResult = {
-                code: "OK",
-                data: results[0]
-            };
-            res.json(jsonResult);
-        });
-    });
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
 
-router.post('/filter/dashboard/dataKgSeasonQlty/:companyID/:groundID/:qualityID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataKgSeasonQlty/:companyID/:groundID/:qualityID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -294,24 +253,17 @@ router.post('/filter/dashboard/dataKgSeasonQlty/:companyID/:groundID/:qualityID'
 
     const { companyID, groundID, qualityID } = req.params;
 
-    // Validar que companyID, groundID y qualityID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID) || isNaN(qualityID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa, ID del terreno o ID de la calidad inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID, groundID y qualityID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID) || isNaN(qualityID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa, ID del terreno o ID de la calidad inválidos"
             });
         }
+
 
         const queryString = `
             SELECT SUM(kg_boxes) AS kg_boxes
@@ -328,33 +280,30 @@ router.post('/filter/dashboard/dataKgSeasonQlty/:companyID/:groundID/:qualityID'
               )
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID, qualityID, companyID, groundID, qualityID], function (error, results) {
+        const results = await queryAsync(queryString, [companyID, groundID, qualityID, companyID, groundID, qualityID]);
 
+        if (results && results.length > 0) {
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+            return res.json({
+                "code": "OK",
+                "data": results[0]
+            });
+        }
+        else {
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
-
-            const jsonResult = {
-                code: "OK",
-                data: results[0]
-            };
-            res.json(jsonResult);
-        });
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
-    );
-
-}
-);
+});
 
 
-router.post('/filter/dashboard/dataWorkersCount/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataWorkersCount/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -391,60 +340,50 @@ router.post('/filter/dashboard/dataWorkersCount/:companyID/:groundID', validateT
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
+
+
 
         const queryString = `
             SELECT COUNT(DISTINCT worker) AS workersCount FROM harvest mh
             WHERE company_id = ?
             AND ground = ?
             AND season = (SELECT MAX(season) FROM harvest WHERE company_id = ? AND ground = ?)
+            AND DATE(mh.harvest_date) = CURDATE()
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID, companyID, groundID], function (error, results) {
+        const results = await queryAsync(queryString, [companyID, groundID, companyID, groundID]);
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+        if (results && results.length > 0) {
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
+            return res.json({
+                "code": "OK",
+                "data": results[0]
+            });
+        }
+        else {
 
-            // Cambiar la propiedad 'workersCount' en el objeto de resultado
-            const jsonResult = {
-                code: "OK",
-                data: {
-                    workersCount: results[0].workersCount.toString()
-                }
-            };
-
-            res.json(jsonResult);
-
-        });
-    });
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
 
-router.post('/filter/dashboard/dataWorkersWeek/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataWorkersWeek/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -481,58 +420,29 @@ router.post('/filter/dashboard/dataWorkersWeek/:companyID/:groundID', validateTo
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.message);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
         const queryString = `
-            SELECT 
-                TIMESTAMPDIFF(WEEK, 
-                    (SELECT date_from 
-                     FROM season 
-                     WHERE date_from <= CURDATE() 
-                       AND date_until >= CURDATE()
-                       AND id = (
-                         SELECT MAX(season)
-                         FROM harvest
-                         WHERE company_id = ? 
-                           AND ground = ?
-                       )
-                     LIMIT 1
-                    ),
-                    CURDATE()
-                ) AS semanas
+            SELECT count(*) cantidad from harvest h 
+            WHERE DATE(h.harvest_date) = CURDATE()
+            AND company_id = ? 
+            AND ground = ?
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID], function (error, results) {
+        const results = await queryAsync(queryString, [companyID, groundID]);
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
-
-            if (error) {
-                console.error('Error ejecutando query: ' + error.message);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
+        if (results && results.length > 0) {
 
             // Verificar si el resultado existe y es válido
-            const weeksCount = results[0] && results[0].semanas !== null ? results[0].semanas : 0;
+            const weeksCount = results[0] && results[0].cantidad !== null ? results[0].cantidad : 0;
 
             const jsonResult = {
                 code: "OK",
@@ -541,14 +451,24 @@ router.post('/filter/dashboard/dataWorkersWeek/:companyID/:groundID', validateTo
                 }
             };
 
-            res.json(jsonResult);
+            return res.json(jsonResult);
 
-        });
-    });
+        } else {
+
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
 
-router.post('/filter/dashboard/dataVaritiesDay/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataVaritiesDay/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -585,68 +505,67 @@ router.post('/filter/dashboard/dataVaritiesDay/:companyID/:groundID', validateTo
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
+
+
         const queryString = `
         SELECT 
-            v.name, 
+            v.name AS variety,
+            s.name AS specie,
+            s2.name AS sector,
             SUM(mh.kg_boxes) AS cantidad, 
             SUM(mh.boxes) AS cajas 
         FROM 
             harvest mh
         JOIN 
-            varieties v 
-        ON 
-            v.id = mh.variety
+            varieties v
+            ON v.id = mh.variety
+        JOIN 
+            species s
+            ON s.id = mh.specie 
+        JOIN 
+            sector s2 
+            ON s2.id = mh.sector
         WHERE 
             DATE(mh.harvest_date) = CURDATE()
             AND mh.company_id = ?
             AND mh.ground = ?
         GROUP BY 
-            v.name;
-    `;
-        mysqlConn.query(queryString, [companyID, groundID], function (error, results) {
+            v.name, s.name;`;
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+        const results = await queryAsync(queryString, [companyID, groundID]);
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
+        if (results && results.length > 0) {
 
-            const jsonResult = {
-                code: "OK",
-                data: results
-            };
-            res.json(jsonResult);
-        });
+            return res.json({
+                "code": "OK",
+                "data": results
+            });
+        }
+        else {
+
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+        }
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
-    );
+});
 
-}
-);
-
-router.post('/filter/dashboard/dataDispatchGuideDay/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataDispatchGuideDay/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -683,73 +602,65 @@ router.post('/filter/dashboard/dataDispatchGuideDay/:companyID/:groundID', valid
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
         const queryString = `
-            SELECT 
-    dg.correlative, 
-    ex.name AS exporter_name, 
-    dg.boxes, 
-    dg.kg, 
-    q.abbreviation 
-FROM 
-    dispatch_guide dg 
-JOIN 
-    exporters ex 
-ON 
-    dg.client = ex.id
-JOIN 
-    quality q 
-ON 
-    dg.quality = q.id
-WHERE 
-    DATE(dg.date) = CURDATE()
-    AND dg.company_id = ?
-    AND dg.ground = ?
-    `;
-        mysqlConn.query(queryString, [companyID, groundID], function (error, results) {
+                            SELECT 
+                    dg.correlative, 
+                    ex.name AS exporter_name, 
+                    dg.boxes, 
+                    dg.kg, 
+                    q.abbreviation 
+                FROM 
+                    dispatch_guide dg 
+                JOIN 
+                    exporters ex 
+                ON 
+                    dg.client = ex.id
+                JOIN 
+                    quality q 
+                ON 
+                    dg.quality = q.id
+                WHERE 
+                    DATE(dg.date) = CURDATE()
+                    AND dg.company_id = ?
+                    AND dg.ground = ?
+                    `;
 
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+        const results = await queryAsync(queryString, [companyID, groundID]);
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
+        if (results && results.length > 0) {
 
-            const jsonResult = {
-                code: "OK",
-                data: results
-            };
-            res.json(jsonResult);
-        });
+            return res.json({
+                "code": "OK",
+                "data": results[0]
+            });
+
+        }
+        else {
+
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
-    );
-
-}
-);
+});
 
 
-router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID', validateToken, (req, res) => {
+router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID', validateToken, async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -789,22 +700,13 @@ router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID'
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
+    try {
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.sqlMessage);
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
@@ -831,36 +733,32 @@ router.post('/filter/dashboard/dataVarietySeasonPercentage/:companyID/:groundID'
                 v.name;
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID, companyID, groundID], function (error, results) {
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.sqlMessage);
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
+        const results = await queryAsync(queryString, [companyID, groundID, companyID, groundID]);
 
-            // Calcular el porcentaje de cada variedad
-            const totalCantidad = results.reduce((acc, curr) => acc + curr.cantidad, 0);
-            const data = results.map(item => ({
-                variety: item.variety,
-                percentage: totalCantidad > 0 ? (item.cantidad / totalCantidad) * 100 : 0
-            }));
+        if (results && results.length > 0) {
 
-            const jsonResult = {
-                code: "OK",
-                data
-            };
-            res.json(jsonResult);
-        });
-    });
+            return res.json({
+                "code": "OK",
+                "data": results[0]
+            });
+
+        }
+        else {
+
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
-
-
-router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundID', (req, res) => {
+router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundID', async (req, res) => {
 
     /*
         #swagger.tags = ['Dashboard - Filter']
@@ -899,22 +797,14 @@ router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundI
 
     const { companyID, groundID } = req.params;
 
-    // Validar que companyID y groundID sean números enteros válidos
-    if (isNaN(companyID) || isNaN(groundID)) {
-        return res.status(400).json({
-            code: "ERROR",
-            message: "ID de la empresa o ID del terreno inválidos"
-        });
-    }
 
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+    try {
 
-    mysqlConn.connect(function (err) {
-        if (err) {
-            console.error('Error connecting: ' + err.message); // Cambiado a err.message para un mensaje más claro
-            return res.status(500).json({
+        // Validar que companyID y groundID sean números enteros válidos
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
                 code: "ERROR",
-                message: "Error de conexión a la base de datos"
+                message: "ID de la empresa o ID del terreno inválidos"
             });
         }
 
@@ -939,19 +829,9 @@ router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundI
                 fecha;
         `;
 
-        mysqlConn.query(queryString, [companyID, groundID, companyID, groundID], function (error, results) {
-            mysqlConn.end(); // Asegúrate de cerrar la conexión
+        const results = await queryAsync(queryString, [companyID, groundID, companyID, groundID]);
 
-            if (error) {
-                console.error('Error ejecutando query: ' + error.message); // Cambiado a error.message para un mensaje más claro
-                return res.status(500).json({
-                    code: "ERROR",
-                    message: "Error al ejecutar la consulta"
-                });
-            }
-
-            // Verifica que `results` tenga los datos esperados
-            /*console.log('Query Results:', results);*/
+        if (results && results.length > 0) {
 
             const data = {
                 humedad: results.map(row => row.humedad),
@@ -959,14 +839,216 @@ router.post('/filter/dashboard/dataHumidityTemperatureSeason/:companyID/:groundI
                 fechas: results.map(row => row.fecha)
             };
 
-            res.json({
+            return res.json({
                 code: "OK",
                 data
             });
-        });
-    });
+
+        }
+        else {
+
+            return res.json({
+                "code": "OK",
+                "data": 0
+            });
+
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
 
+router.post('/filter/dashboard/avgKgBoxes/:companyID/:groundID', validateToken, async (req, res) => {
+    /*
+        #swagger.tags = ['Dashboard - Filter']
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['companyID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+            description: "ID de la empresa para filtrar los datos"
+        }
+        #swagger.parameters['groundID'] = {
+            in: 'path',
+            required: true,
+            type: "integer",
+            description: "ID del terreno para filtrar los datos"
+        }
+        #swagger.responses[200] = {
+            schema: {
+                "code": "OK",
+                "data": {
+                    "avgKgBoxes": 4.5
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            schema: {
+                "code": "ERROR",
+                "message": "Error al obtener los datos"
+            }
+        }
+    */
+
+    const { companyID, groundID } = req.params;
+
+    try {
+
+
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
+                code: "ERROR",
+                message: "ID de la empresa o ID del terreno inválidos"
+            });
+        }
+
+        const queryString = `
+            SELECT 
+                AVG(kg_boxes) AS avgKgBoxes
+            FROM 
+                harvest
+            WHERE 
+                company_id = ? AND 
+                ground = ? AND 
+                WEEK(harvest_date, 1) = WEEK(CURDATE(), 1) AND 
+                YEAR(harvest_date) = YEAR(CURDATE())
+        `;
+
+        const results = await queryAsync(queryString, [companyID, groundID]);
+
+        const avgKgBoxes = results[0]?.avgKgBoxes || 0;
+
+        res.json({
+            code: "OK",
+            data: {
+                avgKgBoxes: parseFloat(avgKgBoxes.toFixed(2))
+            }
+        });
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
+});
+
+router.post('/filter/dashboard/daysOfHarvest/:companyID/:groundID', validateToken, async (req, res) => {
+    /*
+    #swagger.tags = ['Management Crops - Harvest']
+    #swagger.security = [{
+        "apiKeyAuth": []
+    }]
+    #swagger.parameters['companyID'] = {
+        in: 'path',
+        required: true,
+        type: "integer",
+        description: "ID de la empresa para filtrar los datos"
+    }
+    #swagger.parameters['groundID'] = {
+        in: 'path',
+        required: true,
+        type: "integer",
+        description: "ID del terreno para filtrar los datos"
+    }
+    #swagger.responses[200] = {
+        schema: {
+            "code": "OK",
+            "data": [
+                {
+                    "especie": "Palta",
+                    "variedad": "Variedad A",
+                    "dias_cosecha": 10
+                },
+                {
+                    "especie": "Limón",
+                    "variedad": "Variedad B",
+                    "dias_cosecha": 5
+                }
+            ]
+        }
+    }
+    #swagger.responses[400] = {
+        schema: {
+            "code": "ERROR",
+            "message": "Error al obtener los datos"
+        }
+    }
+    #swagger.responses[404] = {
+        schema: {
+            "code": "ERROR",
+            "message": "No se encontraron datos"
+        }
+    }
+    */
+
+    const { companyID, groundID } = req.params;
+    try {
+
+        if (isNaN(companyID) || isNaN(groundID)) {
+            return res.status(400).json({
+                code: "ERROR",
+                message: "ID de la empresa o ID del terreno inválidos"
+            });
+        }
+
+        // Consulta SQL
+        const queryString = `
+            SELECT 
+                s.name AS especie, 
+                v.name AS variedad, 
+                COUNT(DISTINCT DATE(mh.harvest_date)) AS dias_cosecha
+            FROM 
+                harvest mh
+            JOIN 
+                varieties v ON mh.variety = v.id
+            JOIN 
+                species s ON mh.specie = s.id
+            JOIN 
+                season sea ON mh.season = sea.id
+            WHERE 
+                mh.company_id = ? 
+                AND mh.ground = ? 
+                AND sea.company_id = ? 
+                AND sea.id = (
+                    SELECT MAX(id) 
+                    FROM season 
+                    WHERE company_id = mh.company_id 
+                    AND NOW() BETWEEN sea.date_from AND sea.date_until
+                )
+                AND mh.harvest_date BETWEEN sea.date_from AND sea.date_until
+            GROUP BY 
+                s.name, v.name 
+            ORDER BY 
+                s.name, v.name;
+        `;
+
+        const results = await queryAsync(queryString, [companyID, groundID, companyID]);
+
+        // Verificar si se encontraron resultados
+        if (results && results.length > 0) {
+            const data = results.map(row => ({
+                especie: row.especie,
+                variedad: row.variedad,
+                dias_cosecha: row.dias_cosecha
+            }));
+
+            return res.json({
+                code: "OK",
+                data
+            });
+        } else {
+            return res.status(404).json({
+                code: "ERROR",
+                message: "No se encontraron datos para los parámetros proporcionados"
+            });
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
+});
 
 export default router;
 

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 const router = Router();
-import bcrypt from 'bcrypt';
-import mysql from 'mysql';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import queryAsync from '../utils/bd.js';
 
 
 // Función para generar el token de restablecimiento
@@ -14,10 +14,12 @@ function generateResetToken() {
 // Función para enviar el correo de restablecimiento
 async function sendPasswordResetEmail(to, url, nombre) {
     let transporter = nodemailer.createTransport({
-        service: 'Gmail',
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // Usa `true` solo si el puerto es 465
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
+            user: "agrisoftAws@gmail.com",
+            pass: "Agr1S0ft.24"
         }
     });
 
@@ -94,7 +96,7 @@ async function sendPasswordResetEmail(to, url, nombre) {
 }
 
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     /*  
         #swagger.tags = ['Auth']
         
@@ -121,111 +123,64 @@ router.post('/login', (req, res) => {
     try {
 
         let { usuario, password } = req.body;
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
 
-        mysqlConn.connect(function (err) {
+        var queryString = "select  u.id,u.name,u.lastname,u.mail,u.id_rol,u.id_state as estado, u.password ,u.id_company, c.status from users u, companies c ";
+        queryString += " where mail='" + usuario + "'";
+        queryString += " and u.id_company = c.id";
 
-            if (err) {
+        let results = await queryAsync(queryString);
 
-                console.error('error connecting: ' + err.sqlMessage);
+        if (results && results.length > 0) {
+
+            if (results[0].status == 2 || results[0].estado == 2) {
+
                 const jsonResult = {
                     "code": "ERROR",
-                    "mensaje": err.sqlMessage
+                    "mensaje": 'Empresa o usuario inactivo.'
                 }
 
                 res.json(jsonResult);
 
             } else {
+                //Javi coloque esto porque estaba agregando a la contraseña espacios enblanco y no los podia controlar
+                const passwordMatch = await bcrypt.compare(password.trim(), results[0].password.trim());
 
-                var queryString = "select  u.id,u.name,u.lastname,u.mail,u.id_rol,u.id_state as estado, u.password ,u.id_company, c.status from users u, companies c ";
-                queryString += " where mail='" + usuario + "'";
-                queryString += " and u.id_company = c.id";
+                if (passwordMatch == true) {
 
-                ////console.log(queryString);
-                mysqlConn.query(queryString, function (error, results, fields) {
+                    const jsonResult = {
+                        "code": "OK",
+                        "userId": results[0].id,
+                        "nombre": results[0].name,
+                        "apellido": results[0].lastname,
+                        "mail": results[0].mail,
+                        "rol": results[0].id_rol,
+                        "estado": results[0].id_state,
+                        "idCompany": results[0].id_company
+                    };
 
-                    if (error) {
-                        console.error('error ejecutando query: ' + error.sqlMessage);
-                        const jsonResult = {
-                            "code": "ERROR",
-                            "mensaje": error.sqlMessage
-                        }
+                    res.json(jsonResult);
 
-                        res.json(jsonResult);
+                } else {
 
-                    } else {
-
-                        if (results && results.length > 0) {
-
-                            if (results[0].status == 2 || results[0].estado == 2) {
-
-                                const jsonResult = {
-                                    "code": "ERROR",
-                                    "mensaje": 'Empresa o usuario inactivo.'
-                                }
-
-                                res.json(jsonResult);
-
-                            } else {
-                                //Javi coloque esto porque estaba agregando a la contraseña espacios enblanco y no los podia controlar
-                                const storedPasswordHash = results[0].password.trim();
-                                const passwordResult = bcrypt.compareSync(password, storedPasswordHash);
-
-                                if (passwordResult == true) {
-
-                                    const jsonResult = {
-                                        "code": "OK",
-                                        "userId": results[0].id,
-                                        "nombre": results[0].name,
-                                        "apellido": results[0].lastname,
-                                        "mail": results[0].mail,
-                                        "rol": results[0].id_rol,
-                                        "estado": results[0].id_state,
-                                        "idCompany": results[0].id_company
-                                    };
-
-                                    res.json(jsonResult);
-
-                                } else {
-
-                                    const jsonResult = {
-                                        "code": "ERROR",
-                                        "mensaje": "Usuario o contraseña incorrecta."
-                                    }
-
-                                    res.json(jsonResult);
-
-                                }
-
-                            }
-
-
-
-                        } else {
-
-                            const jsonResult = {
-                                "code": "ERROR",
-                                "mensaje": "Usuario o contraseña incorrecta."
-                            }
-
-                            res.json(jsonResult);
-                        }
+                    const jsonResult = {
+                        "code": "ERROR",
+                        "mensaje": "Usuario o contraseña incorrecta."
                     }
-                });
 
-                mysqlConn.end();
+                    res.json(jsonResult);
+
+                }
 
             }
-        });
-
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e })
+        }
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
 });
 
 // Ruta para solicitar el restablecimiento de contraseña
-router.post('/auth/forgot-password', (req, res) => {
+router.post('/auth/forgot-password', async (req, res) => {
     /*  
         #swagger.tags = ['Autenticación']
         #swagger.parameters['obj'] = {
@@ -242,74 +197,67 @@ router.post('/auth/forgot-password', (req, res) => {
         } 
     */
     try {
-        const { email } = req.body;
+        const { userEmail } = req.body;
 
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        // Usar parámetros en lugar de concatenar valores directamente
+        const query = "SELECT id, name, lastname FROM users WHERE mail = ?";
+        const results = await queryAsync(query, [userEmail]);
 
-        mysqlConn.connect(async function (err) {
-            if (err) {
-                console.error('Error conectando: ' + err.message);
-                return res.json({ code: "ERROR", mensaje: err.message });
+        if (results.length === 0) {
+
+            const jsonResult = {
+                "code": "ERROR",
+                "mensaje": "Correo no encontrado."
             }
 
-            // Usar parámetros en lugar de concatenar valores directamente
-            const query = "SELECT id, name, lastname FROM users WHERE mail = ?";
-            mysqlConn.query(query, [email], async function (error, results) {
-                if (error) {
-                    console.error('Error ejecutando query: ' + error.message);
-                    mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
-                    return res.json({ code: "ERROR", mensaje: error.message });
-                }
+            return res.json(jsonResult);
 
-                if (results.length === 0) {
-                    mysqlConn.end(); // Cierra la conexión antes de responder
-                    return res.json({ code: "ERROR", mensaje: "Correo no encontrado." });
-                }
+        }
 
-                //console.log(results);
+        const userId = results[0].id;
+        const nombre = results[0].name;
+        const apellido = results[0].lastname;
+        const userNameFull = nombre + ' ' + apellido;
 
-                const userId = results[0].id;
-                const nombre = results[0].name;
-                const apellido = results[0].lastname;
-                const userNameFull = nombre + ' ' + apellido;
-                const token = generateResetToken(); // Función que genera un token
-                const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+        const token = generateResetToken(); // Función que genera un token
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
-                const insertQuery = "INSERT INTO password_resets (user_id, token, expires) VALUES (?, ?, ?)";
-                mysqlConn.query(insertQuery, [userId, token, expires], async function (error) {
-                    if (error) {
-                        console.error('Error ejecutando query: ' + error.message);
-                        mysqlConn.end(); // Asegúrate de cerrar la conexión aquí
-                        return res.json({ code: "ERROR", mensaje: error.message });
-                    }
+        const insertQuery = "INSERT INTO password_resets (user_id, token, expires) VALUES (?, ?, ?)";
 
-                    const resetUrl = `${process.env.BASE_URL}/reset-password?token=${token}`;
+        const insertResult = await queryAsync(insertQuery, [userId, token, expires]);
 
-                    //console.log(resetUrl);
-                    try {
-                        await sendPasswordResetEmail(email, resetUrl, userNameFull); // Función que envía el correo
-                        res.json({ code: "OK", message: "Correo enviado para restablecer contraseña." });
-                    } catch (emailError) {
-                        console.error('Error enviando el correo: ' + emailError.message);
-                        res.json({ code: "ERROR", mensaje: "No se pudo enviar el correo." });
-                    } finally {
-                        mysqlConn.end(); // Asegúrate de cerrar la conexión al final
-                    }
-                });
-            });
-        });
-    } catch (e) {
-        console.log(e);
-        res.json({ error: e.message });
+        if (insertResult && insertResult.affectedRows != 0) {
+
+            const resetUrl = `${process.env.BASE_URL}/reset-password?token=${token}`;
+
+            try {
+
+                await sendPasswordResetEmail(userEmail, resetUrl, userNameFull); // Función que envía el correo
+                return res.json({ code: "OK", message: "Correo enviado para restablecer contraseña." });
+
+            } catch (emailError) {
+
+                console.error('Error enviando el correo: ' + emailError.message);
+                return res.json({ code: "ERROR", mensaje: "No se pudo enviar el correo." });
+            }
+        }
+        else {
+            const jsonResult = {
+                "code": "ERROR",
+                "mensaje": "Ocurrio un error al recuperar contraseña."
+            }
+
+            return res.json(jsonResult);
+        }
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
 });
 
-
-
-
-
 // Ruta para restablecer la contraseña
-router.post('/auth/reset-password', (req, res) => {
+router.post('/auth/reset-password', async (req, res) => {
     /*  
         #swagger.tags = ['Autenticación']
         #swagger.parameters['obj'] = {
@@ -329,60 +277,47 @@ router.post('/auth/reset-password', (req, res) => {
     try {
         const { token, password } = req.body;
 
-        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        // Consulta para obtener el user_id y la fecha de expiración
 
-        mysqlConn.connect(async function (err) {
-            if (err) {
-                console.error('Error connecting: ' + err.message);
-                return res.json({ code: "ERROR", message: err.message });
+
+        const results = await queryAsync("SELECT user_id, expires FROM password_resets WHERE token = ?", [token]);
+
+        if (results.length === 0 || new Date(results[0].expires) < new Date()) {
+
+            console.log('Token inválido o expirado.');
+            return res.json({ code: "ERROR", message: "Token inválido o expirado." });
+        }
+
+        const userId = results[0].user_id;
+
+        const hashedPassword = await bcrypt.hash(password.trim(), 10); // Hashea la nueva contraseña
+
+        // Actualiza la contraseña en la base de datos
+
+        const updateQuery = await queryAsync("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, userId]);
+
+
+        if (updateQuery && updateQuery.affectedRows != 0) {
+
+
+            const deleteQuery = await queryAsync("DELETE FROM password_resets WHERE token = ?", [token]);
+
+            if (deleteQuery && deleteQuery.affectedRows != 0) {
+
+                return res.json({ code: "OK", message: "Contraseña actualizada correctamente." });
+
             }
 
-            // Consulta para obtener el user_id y la fecha de expiración
-            const query = "SELECT user_id, expires FROM password_resets WHERE token = ?";
-            mysqlConn.query(query, [token], async function (error, results) {
-                if (error) {
-                    console.error('Error executing query: ' + error.message);
-                    mysqlConn.end();
-                    return res.json({ code: "ERROR", message: error.message });
-                }
+        }
+        else {
 
-                if (results.length === 0 || new Date(results[0].expires) < new Date()) {
-                    mysqlConn.end(); 
-                    //console.log('Token inválido o expirado.');
-                    return res.json({ code: "ERROR", message: "Token inválido o expirado." });
-                }
+            return res.json({ code: "ERROR", message: "Error al actualizar contraseña." });
 
-                const userId = results[0].user_id;
-                const hashedPassword = await bcrypt.hash(password, 10); // Hashea la nueva contraseña
+        }
 
-                // Actualiza la contraseña en la base de datos
-                const updateQuery = "UPDATE users SET password = ? WHERE id = ?";
-                mysqlConn.query(updateQuery, [hashedPassword, userId], function (error) {
-                    if (error) {
-                        console.error('Error executing query: ' + error.message);
-                        mysqlConn.end();
-                        return res.json({ code: "ERROR", message: error.message });
-                    }
-
-                    // Elimina el token después de restablecer la contraseña
-                    const deleteQuery = "DELETE FROM password_resets WHERE token = ?";
-                    mysqlConn.query(deleteQuery, [token], function (error) {
-                        mysqlConn.end(); 
-                        if (error) {
-                            console.error('Error executing query: ' + error.message);
-                            return res.json({ code: "ERROR", message: error.message });
-                        }
-
-                        res.json({ code: "OK", message: "Contraseña actualizada correctamente." });
-                    });
-                });
-            });
-
-
-        });
-    } catch (e) {
-        console.log(e);
-        res.json({ code: "ERROR", message: e.message });
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
     }
 });
 

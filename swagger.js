@@ -8,7 +8,7 @@ const doc = {
         title: "Api Agrisoft",
         description: ""
     },
-    host: "localhost:" + process.env.PORT,
+    host: "api-agrisoft.com",
     basePath: "/",
     schemes: ['http', 'https'],
     consumes: ['application/json'],

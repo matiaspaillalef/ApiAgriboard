@@ -18,6 +18,7 @@ import menuRouter from './routes/menu.route.js'
 import productionRouter from './routes/production.route.js'
 import dashboardRouter from './routes/dashboard.route.js'
 import alerts from './routes/alerts.route.js'
+import appRouter from './routes/app.route.js'
 
 
 
@@ -39,6 +40,7 @@ app.use('/api/v1', managementPeopleRouter);
 app.use('/api/v1', productionRouter);
 app.use('/api/v1', dashboardRouter);
 app.use('/api/v1', alerts);
+app.use('/api/v1', appRouter);
 
 
 

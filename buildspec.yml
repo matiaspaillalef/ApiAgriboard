@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18  # Especifica la versión de Node.js
+    commands:
+      - echo "Instalando dependencias..."
+      - npm install
+
+
+  build:
+    commands:
+      - echo "Construyendo la imagen Docker..."
+      - docker build -t api-agrisoft .  # Construye la imagen Docker
+
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: './'  # Define el directorio base para los artefactos

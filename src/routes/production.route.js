@@ -4,6 +4,8 @@ import validateToken from '../middleware/validateToken.js'
 import mysql from 'mysql';
 //import bcrypt, { compareSync } from 'bcrypt';
 import { filter } from 'compression';
+import queryAsync from '../utils/bd.js';
+import moment from 'moment-timezone';
 
 
 //PRODUCCIÓN - CAMPOS
@@ -74,7 +76,7 @@ router.get('/configuracion/production/getGround/:companyID', validateToken, (req
             else {
 
                 var statusQuery = ''
-                if  (status ) {
+                if (status) {
                     statusQuery = " AND status = " + status;
                 }
 
@@ -169,51 +171,51 @@ router.post('/configuracion/production/updateGround', validateToken, (req, res) 
             }
         } 
     */
-        try {
-            let obj = req.body;
-            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-    
-            mysqlConn.connect(function (err) {
-                if (err) {
-                    console.error('error connecting: ' + err.sqlMessage);
-                    return res.json({ "code": "ERROR", "mensaje": err.sqlMessage });
+    try {
+        let obj = req.body;
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.sqlMessage);
+                return res.json({ "code": "ERROR", "mensaje": err.sqlMessage });
+            }
+
+            //console.log('Datos recibidos: ', JSON.stringify(obj, null, 2));
+
+            // Verificar si el ID existe
+            var checkIdQuery = `SELECT * FROM ground WHERE id = ?`;
+            mysqlConn.query(checkIdQuery, [obj.id], function (idCheckError, idCheckResults) {
+                if (idCheckError) {
+                    console.error('error verificando ID: ' + idCheckError.sqlMessage);
+                    return res.json({ "code": "ERROR", "mensaje": idCheckError.sqlMessage });
                 }
-    
-                //console.log('Datos recibidos: ', JSON.stringify(obj, null, 2));
-    
-                // Verificar si el ID existe
-                var checkIdQuery = `SELECT * FROM ground WHERE id = ?`;
-                mysqlConn.query(checkIdQuery, [obj.id], function (idCheckError, idCheckResults) {
-                    if (idCheckError) {
-                        console.error('error verificando ID: ' + idCheckError.sqlMessage);
-                        return res.json({ "code": "ERROR", "mensaje": idCheckError.sqlMessage });
-                    }
-    
-                    if (idCheckResults.length === 0) {
-                        return res.json({ "code": "ERROR", "mensaje": "No se encontró el registro con ese ID." });
-                    }
-    
-                    // Verificamos si ya existe un campo con el mismo nombre para el mismo company_id, excluyendo el registro actual
-                    var checkQuery = `
+
+                if (idCheckResults.length === 0) {
+                    return res.json({ "code": "ERROR", "mensaje": "No se encontró el registro con ese ID." });
+                }
+
+                // Verificamos si ya existe un campo con el mismo nombre para el mismo company_id, excluyendo el registro actual
+                var checkQuery = `
                         SELECT COUNT(*) as count 
                         FROM ground 
                         WHERE LOWER(name) = LOWER(?) 
                         AND company_id = ? 
                         AND id != ?
                     `;
-    
-                    mysqlConn.query(checkQuery, [obj.name, obj.company_id, obj.id], function (checkError, checkResults) {
-                        if (checkError) {
-                            console.error('error ejecutando checkQuery: ' + checkError.sqlMessage);
-                            return res.json({ "code": "ERROR", "mensaje": checkError.sqlMessage });
-                        }
-    
-                        if (checkResults[0].count > 0) {
-                            return res.json({ "code": "ERROR", "mensaje": "Ya existe un campo con ese nombre dentro de la misma compañía." });
-                        }
-    
-                        // Realizamos la actualización
-                        var queryString = `
+
+                mysqlConn.query(checkQuery, [obj.name, obj.company_id, obj.id], function (checkError, checkResults) {
+                    if (checkError) {
+                        console.error('error ejecutando checkQuery: ' + checkError.sqlMessage);
+                        return res.json({ "code": "ERROR", "mensaje": checkError.sqlMessage });
+                    }
+
+                    if (checkResults[0].count > 0) {
+                        return res.json({ "code": "ERROR", "mensaje": "Ya existe un campo con ese nombre dentro de la misma compañía." });
+                    }
+
+                    // Realizamos la actualización
+                    var queryString = `
                             UPDATE ground 
                             SET 
                                 name = ?, 
@@ -227,35 +229,35 @@ router.post('/configuracion/production/updateGround', validateToken, (req, res) 
                                 status = ? 
                             WHERE id = ?
                         `;
-    
-                        mysqlConn.query(queryString, [
-                            obj.name, 
-                            obj.state, 
-                            obj.city, 
-                            obj.address, 
-                            obj.latitude,
-                            obj.longitude,
-                            obj.zone, 
-                            obj.company_id, 
-                            obj.status, 
-                            obj.id
-                        ], function (error, results, fields) {
-                            if (error) {
-                                console.error('error ejecutando query: ', error);
-                                return res.json({ "code": "ERROR", "mensaje": "Ocurrió un error en la consulta de actualización." });
-                            } else {
-                                return res.json({ "code": "OK", "mensaje": "Registro actualizado correctamente." });
-                            }
-                        });
+
+                    mysqlConn.query(queryString, [
+                        obj.name,
+                        obj.state,
+                        obj.city,
+                        obj.address,
+                        obj.latitude,
+                        obj.longitude,
+                        obj.zone,
+                        obj.company_id,
+                        obj.status,
+                        obj.id
+                    ], function (error, results, fields) {
+                        if (error) {
+                            console.error('error ejecutando query: ', error);
+                            return res.json({ "code": "ERROR", "mensaje": "Ocurrió un error en la consulta de actualización." });
+                        } else {
+                            return res.json({ "code": "OK", "mensaje": "Registro actualizado correctamente." });
+                        }
                     });
                 });
             });
-    
-        } catch (e) {
-            console.log(e);
-            res.json({ error: e.message });
-        }
-    });
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
 
 router.post('/configuracion/production/deleteGround', validateToken, (req, res) => {
 
@@ -365,7 +367,7 @@ router.post('/configuracion/production/deleteGround', validateToken, (req, res) 
                     console.log('Conexión cerrada correctamente.');
                 }
             });
-        } 
+        }
     }
 });
 
@@ -409,7 +411,7 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
                 res.json(jsonResult);
 
             } else {
-                
+
                 // Verificar si ya existe un campo con el mismo nombre dentro del mismo company_id
                 const checkQuery = `
                     SELECT COUNT(*) AS count FROM ground 
@@ -458,61 +460,61 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
                             });
                         } else {
 
-                                // Si no existe, proceder a insertar el nuevo campo
-                                var queryString = `
+                            // Si no existe, proceder a insertar el nuevo campo
+                            var queryString = `
                                     INSERT INTO ground (name, state, city, address, latitude, longitude, zone, company_id, status) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 `;
 
-                                const values = [
-                                    obj.name, obj.state, obj.city, obj.address,
-                                    obj.latitude == null ? null : obj.latitude,
-                                    obj.longitude == null ? null : obj.longitude,
-                                    obj.zone, obj.company_id, obj.status
-                                ];
+                            const values = [
+                                obj.name, obj.state, obj.city, obj.address,
+                                obj.latitude == null ? null : obj.latitude,
+                                obj.longitude == null ? null : obj.longitude,
+                                obj.zone, obj.company_id, obj.status
+                            ];
 
-                                mysqlConn.query(queryString, values, function (error, resultsInsert, fields) {
+                            mysqlConn.query(queryString, values, function (error, resultsInsert, fields) {
 
 
-                                    mysqlConn.end((err) => {
-                                        if (err) {
-                                            console.error('Error al cerrar la conexión:', err);
-                                        } else {
-                                            console.log('Conexión cerrada correctamente.');
-                                        }
-                                    });
-    
-    
-                                    if (error) {
-    
-                                        console.error('error ejecutando query: ' + error.sqlMessage);
-                                        const jsonResult = {
-                                            "code": "ERROR",
-                                            "mensaje": error.sqlMessage
-                                        }
-                                        res.json(jsonResult);
-    
-                                    }
-                                    else {
-                                        
-                                        if (resultsInsert.insertId != 0) {
-    
-                                            const jsonResult = {
-                                                "code": "OK",
-                                                "mensaje": "campo creado correctamente."
-                                            }
-                                            res.json(jsonResult);
-    
-                                        } else {
-    
-                                            const jsonResult = {
-                                                "code": "ERROR",
-                                                "mensaje": "No se pudo crear el campo."
-                                            }
-                                            res.json(jsonResult);
-                                        }
+                                mysqlConn.end((err) => {
+                                    if (err) {
+                                        console.error('Error al cerrar la conexión:', err);
+                                    } else {
+                                        console.log('Conexión cerrada correctamente.');
                                     }
                                 });
+
+
+                                if (error) {
+
+                                    console.error('error ejecutando query: ' + error.sqlMessage);
+                                    const jsonResult = {
+                                        "code": "ERROR",
+                                        "mensaje": error.sqlMessage
+                                    }
+                                    res.json(jsonResult);
+
+                                }
+                                else {
+
+                                    if (resultsInsert.insertId != 0) {
+
+                                        const jsonResult = {
+                                            "code": "OK",
+                                            "mensaje": "campo creado correctamente."
+                                        }
+                                        res.json(jsonResult);
+
+                                    } else {
+
+                                        const jsonResult = {
+                                            "code": "ERROR",
+                                            "mensaje": "No se pudo crear el campo."
+                                        }
+                                        res.json(jsonResult);
+                                    }
+                                }
+                            });
                         }
                     }
                 });
@@ -531,7 +533,7 @@ router.post('/configuracion/production/createGround', validateToken, (req, res) 
                     console.log('Conexión cerrada correctamente.');
                 }
             });
-        } 
+        }
     }
 });
 
@@ -620,7 +622,7 @@ router.get('/configuracion/production/getSectorsBarracks/:companyID', validateTo
             else {
 
                 var statusQuery = ''
-                if  (status ) {
+                if (status) {
                     statusQuery = " AND status = " + status;
                 }
                 var queryString = "SELECT * FROM sector s WHERE company_id = " + companyID + statusQuery;;
@@ -1096,13 +1098,13 @@ router.post('/configuracion/production/updateAttributeSector', validateToken, (r
         console.log(obj);
 
         let quantity_plants_ha = 0;
-        
+
         if (parseFloat(obj.on_ha) != 0 && parseFloat(obj.ha_productivas) && parseFloat(obj.between_ha)) {
 
             let on_ha = parseFloat(obj.on_ha);
-            let between_ha  = parseFloat(obj.between_ha);
+            let between_ha = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha);  //ha_productivas;
+            quantity_plants_ha = 10000 / (on_ha * between_ha);  //ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
@@ -1255,9 +1257,9 @@ router.post('/configuracion/production/createAttributeSector', validateToken, (r
         if (parseFloat(obj.on_ha) != 0 && parseFloat(obj.ha_productivas) && parseFloat(obj.between_ha)) {
 
             let on_ha = parseFloat(obj.on_ha);
-            let between_ha  = parseFloat(obj.between_ha);
+            let between_ha = parseFloat(obj.between_ha);
             let ha_productivas = parseFloat(obj.ha_productivas);
-            quantity_plants_ha= 10000 / (on_ha * between_ha); //* ha_productivas;
+            quantity_plants_ha = 10000 / (on_ha * between_ha); //* ha_productivas;
             //console.log(quantity_plants_ha);
         }
 
@@ -1344,11 +1346,11 @@ router.post('/configuracion/production/cloneAttributesSector', validateToken, (r
     */
     try {
 
-        let {id}  = req.body;
+        let { id } = req.body;
         console.log(id);
-        
-        let  queryString = "insert into sector_attr (sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha)";   
-        queryString += "  select sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha  from sector_attr where id = " +  id;
+
+        let queryString = "insert into sector_attr (sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha)";
+        queryString += "  select sector, specie, variety, ha_productivas, quantity_plants_ha, season, company_id, year_harvest, on_ha, between_ha  from sector_attr where id = " + id;
         console.log('Executing query:', queryString);
 
         var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
@@ -1452,7 +1454,7 @@ router.get('/configuracion/production/getVarieties/:companyID', validateToken, (
             else {
 
                 var statusQuery = ''
-                if  (status ) {
+                if (status) {
                     statusQuery = " AND status = " + status;
                 }
 
@@ -1852,7 +1854,7 @@ router.get('/configuracion/production/getSpecies/:companyID', validateToken, (re
             }
 
             var statusQuery = ''
-            if  (status ) {
+            if (status) {
                 statusQuery = " AND status = " + status;
             }
             var queryString = "SELECT * FROM species s WHERE company_id = " + companyID + statusQuery;
@@ -2385,63 +2387,63 @@ router.post('/configuracion/production/createSeason', validateToken, (req, res) 
 
                 //console.log('Verificando si la temporada es activa...', obj);
 
-               // Paso 2: Si la temporada es activa, actualizar todas las temporadas a status 2 para la misma compañía
-               if (obj.status === 1) {
-                const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                
-                mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, 1], function (insertError, results) {
-                    if (insertError) {
-                        mysqlConn.end();
-                        console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": insertError.message
-                        });
-                    }
-            
-                    // Obtener el ID de la nueva temporada
-                    const newSeasonId = results.insertId;
-            
-                    // Actualizar todas las temporadas a status 2, excluyendo la nueva
-                    const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ? AND id != ? AND status = 1";
-                    mysqlConn.query(updateQuery, [obj.company_id, newSeasonId], function (updateError) {
-                        mysqlConn.end();
-            
-                        if (updateError) {
-                            console.error('Error al actualizar las temporadas existentes: ' + updateError.message);
+                // Paso 2: Si la temporada es activa, actualizar todas las temporadas a status 2 para la misma compañía
+                if (obj.status === 1) {
+                    const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+                    mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, 1], function (insertError, results) {
+                        if (insertError) {
+                            mysqlConn.end();
+                            console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
                             return res.json({
                                 "code": "ERROR",
-                                "mensaje": 'Error al actualizar las temporadas existentes: ' + updateError.message
+                                "mensaje": insertError.message
                             });
                         }
-            
+
+                        // Obtener el ID de la nueva temporada
+                        const newSeasonId = results.insertId;
+
+                        // Actualizar todas las temporadas a status 2, excluyendo la nueva
+                        const updateQuery = "UPDATE season SET status = 2 WHERE company_id = ? AND id != ? AND status = 1";
+                        mysqlConn.query(updateQuery, [obj.company_id, newSeasonId], function (updateError) {
+                            mysqlConn.end();
+
+                            if (updateError) {
+                                console.error('Error al actualizar las temporadas existentes: ' + updateError.message);
+                                return res.json({
+                                    "code": "ERROR",
+                                    "mensaje": 'Error al actualizar las temporadas existentes: ' + updateError.message
+                                });
+                            }
+
+                            return res.json({
+                                "code": "OK",
+                                "mensaje": "Registro creado correctamente y temporadas actualizadas."
+                            });
+                        });
+                    });
+                } else {
+                    // Paso 4: Insertar la nueva temporada sin actualizar el status de otras temporadas
+                    const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
+                        mysqlConn.end();
+
+                        if (insertError) {
+                            console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
+                            return res.json({
+                                "code": "ERROR",
+                                "mensaje": insertError.message
+                            });
+                        }
+
                         return res.json({
                             "code": "OK",
-                            "mensaje": "Registro creado correctamente y temporadas actualizadas."
+                            "mensaje": "Registro creado correctamente."
                         });
                     });
-                });
-            } else {
-                // Paso 4: Insertar la nueva temporada sin actualizar el status de otras temporadas
-                const insertQuery = "INSERT INTO season (name, period, date_from, date_until, shifts, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                mysqlConn.query(insertQuery, [obj.name, obj.period, date_from, date_until, shifts, obj.company_id, obj.status], function (insertError, results) {
-                    mysqlConn.end();
-            
-                    if (insertError) {
-                        console.error('Error al ejecutar la consulta de inserción: ' + insertError.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": insertError.message
-                        });
-                    }
-            
-                    return res.json({
-                        "code": "OK",
-                        "mensaje": "Registro creado correctamente."
-                    });
-                });
-            }
-            
+                }
+
             });
         });
     } catch (e) {
@@ -2795,7 +2797,7 @@ router.get('/configuracion/production/getQuality/:companyID', validateToken, (re
             }
 
             var statusQuery = ''
-            if  (status ) {
+            if (status) {
                 statusQuery = " AND status = " + status;
             }
             var queryString = "SELECT * FROM quality q WHERE company_id = " + companyID + statusQuery;
@@ -3341,7 +3343,7 @@ router.post('/configuracion/production/updateScale', validateToken, (req, res) =
 });
 
 
-    
+
 
 router.post('/configuracion/production/deleteScale', validateToken, (req, res) => {
 
@@ -3447,72 +3449,72 @@ router.post('/configuracion/production/createScale', validateToken, (req, res) =
         }
     */
 
-        try {
-            let obj = req.body;
-    
-            var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
-    
-            mysqlConn.connect(function (err) {
-                if (err) {
-                    console.error('error connecting: ' + err.message);
+    try {
+        let obj = req.body;
+
+        var mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+
+        mysqlConn.connect(function (err) {
+            if (err) {
+                console.error('error connecting: ' + err.message);
+                return res.json({
+                    "code": "ERROR",
+                    "mensaje": err.message
+                });
+            }
+
+            // Primero, verifica si ya existe una escala con el mismo nombre y company_id
+            var checkQueryString = "SELECT * FROM scale WHERE name = ? AND company_id = ?";
+            mysqlConn.query(checkQueryString, [obj.name, obj.company_id], function (checkError, checkResults) {
+                if (checkError) {
+                    console.error('error ejecutando query de verificación: ' + checkError.message);
                     return res.json({
                         "code": "ERROR",
-                        "mensaje": err.message
+                        "mensaje": checkError.message
                     });
                 }
-    
-                // Primero, verifica si ya existe una escala con el mismo nombre y company_id
-                var checkQueryString = "SELECT * FROM scale WHERE name = ? AND company_id = ?";
-                mysqlConn.query(checkQueryString, [obj.name, obj.company_id], function (checkError, checkResults) {
-                    if (checkError) {
-                        console.error('error ejecutando query de verificación: ' + checkError.message);
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": checkError.message
-                        });
-                    }
-    
-                    // Si ya existe una balanza con ese nombre y company_id
-                    if (checkResults.length > 0) {
-                        return res.json({
-                            "code": "ERROR",
-                            "mensaje": "Ya existe una balanza con el mismo nombre para esta compañía."
-                        });
-                    }
-    
-                    // Si no existe, procede a insertar la nueva balanza
-                    var queryString = "INSERT INTO scale (name, ground, location, company_id, status) VALUES (?, ?, ?, ?, ?)";
-                    mysqlConn.query(queryString, [obj.name, obj.ground, obj.location, obj.company_id, obj.status], function (error, results) {
-                        if (error) {
-                            console.error('error ejecutando query de inserción: ' + error.message);
-                            return res.json({
-                                "code": "ERROR",
-                                "mensaje": error.message
-                            });
-                        }
-    
-                        if (results && results.insertId) {
-                            return res.json({
-                                "code": "OK",
-                                "mensaje": "Registro creado correctamente."
-                            });
-                        } else {
-                            return res.json({
-                                "code": "ERROR",
-                                "mensaje": "No se pudo crear el registro."
-                            });
-                        }
+
+                // Si ya existe una balanza con ese nombre y company_id
+                if (checkResults.length > 0) {
+                    return res.json({
+                        "code": "ERROR",
+                        "mensaje": "Ya existe una balanza con el mismo nombre para esta compañía."
                     });
-    
-                    mysqlConn.end();
+                }
+
+                // Si no existe, procede a insertar la nueva balanza
+                var queryString = "INSERT INTO scale (name, ground, location, company_id, status) VALUES (?, ?, ?, ?, ?)";
+                mysqlConn.query(queryString, [obj.name, obj.ground, obj.location, obj.company_id, obj.status], function (error, results) {
+                    if (error) {
+                        console.error('error ejecutando query de inserción: ' + error.message);
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": error.message
+                        });
+                    }
+
+                    if (results && results.insertId) {
+                        return res.json({
+                            "code": "OK",
+                            "mensaje": "Registro creado correctamente."
+                        });
+                    } else {
+                        return res.json({
+                            "code": "ERROR",
+                            "mensaje": "No se pudo crear el registro."
+                        });
+                    }
                 });
+
+                mysqlConn.end();
             });
-    
-        } catch (e) {
-            console.log(e);
-            res.json({ error: e.message });
-        }
-    });
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.json({ error: e.message });
+    }
+});
 
 //PRODUCCIÓN - SCALE REGISTER
 
@@ -3945,7 +3947,7 @@ router.get('/configuracion/production/getHarvestFormat/:companyID', validateToke
             }
 
             var statusQuery = ''
-            if  (status ) {
+            if (status) {
                 statusQuery = " AND status = " + status;
             }
 
@@ -4247,7 +4249,7 @@ router.post('/configuracion/production/createHarvestFormat', validateToken, (req
                                 "code": "ERROR",
                                 "mensaje": error.sqlMessage
                             });
-                        } 
+                        }
 
                         if (resultsInsert && resultsInsert.insertId != 0) {
                             return res.json({
@@ -5038,8 +5040,8 @@ router.get('/configuracion/production/getManualHarvesting/:companyID', validateT
                 if (results && results.length > 0) {
 
                     results.forEach(element => {
-                        
-                        let dateTime = new Date(element.harvest_date); 
+
+                        let dateTime = new Date(element.harvest_date);
                         // Extrae la fecha y hora en tu zona horaria local
                         let datePart = `${dateTime.getFullYear()}-${String(dateTime.getMonth() + 1).padStart(2, '0')}-${String(dateTime.getDate()).padStart(2, '0')}`;
                         let timePart = `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`;
@@ -5160,8 +5162,8 @@ router.post('/configuracion/production/updateManualHarvesting', validateToken, (
             var queryString = "UPDATE harvest SET ground = ?, sector = ?, squad = ?, batch = ?, worker = ?, worker_rut = ?, harvest_date = ?, specie = ?, variety = ?, boxes = ?, kg_boxes = ?, quality = ?, harvest_format = ?, company_id = ? WHERE id = ?";
             console.log(queryString);
             console.log(obj);
-            mysqlConn.query(queryString, [ obj.ground, obj.sector, obj.squad, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.harvest_format, obj.company_id, obj.id], function (error) {
-                
+            mysqlConn.query(queryString, [obj.ground, obj.sector, obj.squad, obj.batch, obj.worker, obj.worker_rut, date, obj.specie, obj.variety, obj.boxes, obj.kg_boxes, obj.quality, obj.harvest_format, obj.company_id, obj.id], function (error) {
+
                 if (error) {
 
                     console.error('error ejecutando query: ' + error.message);
@@ -5452,7 +5454,16 @@ router.get('/configuracion/production/getRegularizationProduction/:companyID', v
 
                 if (results && results.length > 0) {
 
+
+
+
                     results.forEach(element => {
+
+                        let dateTime = new Date(element.harvest_date);
+                        // Extrae la fecha y hora en tu zona horaria local
+                        let datePart = `${dateTime.getFullYear()}-${String(dateTime.getMonth() + 1).padStart(2, '0')}-${String(dateTime.getDate()).padStart(2, '0')}`;
+                        let timePart = `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`;
+
                         manualHarvesting.push({
                             "id": element.id,
                             "ground": element.ground,
@@ -5464,6 +5475,7 @@ router.get('/configuracion/production/getRegularizationProduction/:companyID', v
                             "worker": element.worker,
                             "worker_rut": element.worker_rut,
                             "harvest_date": element.harvest_date,
+                            "harvest_time": timePart,
                             "quality": element.quality,
                             "boxes": element.boxes,
                             "kg_boxes": element.kg_boxes,
@@ -5483,7 +5495,7 @@ router.get('/configuracion/production/getRegularizationProduction/:companyID', v
                             "company_id": element.company_id
                         });
                     });
-
+                    console.log(manualHarvesting);
                     return res.json({
                         "code": "OK",
                         "manualHarvesting": manualHarvesting
@@ -6023,130 +6035,139 @@ router.post('/configuracion/production/createDispatchGuide', validateToken, (req
 
 
 
-router.post('/configuracion/production/filterResults/:companyID', validateToken, (req, res) => {
-    const { companyID } = req.params;
-    const filters = req.body; // Los filtros enviados desde el frontend
-    const totals = filters.totals;
-    const shouldGroup = totals === 1;
+router.post('/configuracion/production/filterResults/:companyID', validateToken, async (req, res) => {
 
-    // Filtra las columnas 'totals'
-    const { totals: _, ...filteredFilters } = filters;
-    const columns = Object.keys(filteredFilters).filter(key => key !== 'from' && key !== 'to');
+    try {
 
-    const selectColumns = [];
-    const selectColumnsDetails = ['season', 'boxes', 'kg_boxes', 'turns', 'sync', 'sync_date', 'date_register'];
-    const acceptedGroup = ['ground', 'sector', 'turns', 'sync', 'sync_date', 'date_register', 'worker', 'worker_rut', 'specie', 'variety', 'harvest_format', 'season', 'weigther_rut', 'contractor'];
 
-    // Función para escapar nombres de columnas
-    const escapeColumnName = (col) => mysql.escapeId(col);
 
-    // Construye las condiciones para la cláusula WHERE
-    const conditions = columns.reduce((acc, key) => {
-        if (filters[key] !== '') {
-            acc.push(`${escapeColumnName(key)} = ?`);
-        } else {
-            acc.push(`${escapeColumnName(key)} IS NULL`);
-        }
-        return acc;
-    }, []);
+        const { companyID } = req.params;
+        const filters = req.body; // Los filtros enviados desde el frontend
+        const totals = filters.totals;
+        const shouldGroup = totals === 1;
 
-    let queryString = `SELECT ${shouldGroup
-        ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, MIN(${escapeColumnName('harvest_date')}) AS harvest_date, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
-        : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
-        } FROM harvest WHERE company_id = ?`;
+        // Filtra las columnas 'totals'
+        const { totals: _, ...filteredFilters } = filters;
+        const columns = Object.keys(filteredFilters).filter(key => key !== 'from' && key !== 'to');
 
-    const queryValues = [companyID];
+        const selectColumns = [];
+        const selectColumnsDetails = ['season', 'boxes', 'kg_boxes', 'turns', 'sync', 'sync_date', 'date_register'];
+        const acceptedGroup = ['ground', 'sector', 'turns', 'sync', 'sync_date', 'date_register', 'worker', 'worker_rut', 'specie', 'variety', 'harvest_format', 'season', 'weigther_rut', 'contractor'];
 
-    // Validar y añadir la condición de la fecha de inicio
-    if (filters.from) {
-        const fromDate = new Date(filters.from);
-        if (!isNaN(fromDate.getTime())) { // Verifica que la fecha es válida
-            queryString += ` AND DATE(harvest_date) >= ?`;
-            queryValues.push(filters.from);
-        } else {
-            return res.status(400).json({
-                code: "ERROR",
-                mensaje: "Fecha de inicio inválida."
-            });
-        }
-    }
+        // Función para escapar nombres de columnas
+        const escapeColumnName = (col) => mysql.escapeId(col);
 
-    // Validar y añadir la condición de la fecha final
-    if (filters.to) {
-        const toDate = new Date(filters.to);
-        if (!isNaN(toDate.getTime())) { // Verifica que la fecha es válida
-            queryString += ` AND DATE(harvest_date) <= ?`;
-            queryValues.push(filters.to);
-        } else {
-            return res.status(400).json({
-                code: "ERROR",
-                mensaje: "Fecha final inválida."
-            });
-        }
-    }
-
-    for (const [key, value] of Object.entries(filters)) {
-        if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to' && key !== 'totals') {
-            if (key === 'harvest_date') {
-                queryString += ` AND DATE(${escapeColumnName(key)}) = ?`;
+        // Construye las condiciones para la cláusula WHERE
+        const conditions = columns.reduce((acc, key) => {
+            if (filters[key] !== '') {
+                acc.push(`${escapeColumnName(key)} = ?`);
             } else {
-                queryString += ` AND ${escapeColumnName(key)} = ?`;
+                acc.push(`${escapeColumnName(key)} IS NULL`);
             }
-            queryValues.push(value);
+            return acc;
+        }, []);
+
+        let queryString = `SELECT ${shouldGroup
+            ? `${[...selectColumns, ...columns].map(escapeColumnName).join(', ')}, MIN(${escapeColumnName('harvest_date')}) AS harvest_date, SUM(boxes) AS boxes, SUM(kg_boxes) AS kg_boxes`
+            : [...selectColumnsDetails, ...columns].map(escapeColumnName).join(', ')
+            } FROM harvest WHERE company_id = ?`;
+
+        const queryValues = [companyID];
+
+        // Validar y añadir la condición de la fecha de inicio
+        if (filters.from) {
+            const fromDate = new Date(filters.from);
+            if (!isNaN(fromDate.getTime())) { // Verifica que la fecha es válida
+                queryString += ` AND DATE(harvest_date) >= ?`;
+                queryValues.push(filters.from);
+            } else {
+                return res.status(400).json({
+                    code: "ERROR",
+                    mensaje: "Fecha de inicio inválida."
+                });
+            }
         }
-    }
 
-    if (shouldGroup) {
-        let selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
-        const groupByColumns = [...new Set([...selectColumns, ...columns.filter(col => acceptedGroup.includes(col))])].map(escapeColumnName).join(', ');
+        // Validar y añadir la condición de la fecha final
+        if (filters.to) {
+            const toDate = new Date(filters.to);
+            if (!isNaN(toDate.getTime())) { // Verifica que la fecha es válida
+                queryString += ` AND DATE(harvest_date) <= ?`;
+                queryValues.push(filters.to);
+            } else {
+                return res.status(400).json({
+                    code: "ERROR",
+                    mensaje: "Fecha final inválida."
+                });
+            }
+        }
 
-        // *** Cambio aquí ***
-        // No se incluye `harvest_date` en el `GROUP BY`
-        queryString += ' GROUP BY ' + groupByColumns;
-    }
+        for (const [key, value] of Object.entries(filters)) {
+            if (value !== null && value !== '' && value !== undefined && key !== 'from' && key !== 'to' && key !== 'totals') {
+                if (key === 'harvest_date') {
+                    queryString += ` AND DATE(${escapeColumnName(key)}) = ?`;
+                } else {
+                    queryString += ` AND ${escapeColumnName(key)} = ?`;
+                }
+                queryValues.push(value);
+            }
+        }
 
-    // Ejecutar la consulta
-    const mysqlConn = mysql.createConnection(JSON.parse(process.env.DBSETTING));
+        if (shouldGroup) {
+            let selectGroupColumns = [...selectColumns, ...columns].map(escapeColumnName).join(', ');
+            const groupByColumns = [...new Set([...selectColumns, ...columns.filter(col => acceptedGroup.includes(col))])].map(escapeColumnName).join(', ');
 
-    mysqlConn.connect(err => {
-        if (err) {
-            console.error('Error connecting: ' + err.message);
-            return res.status(500).json({
-                code: "ERROR",
-                mensaje: err.message
-            });
+            // *** Cambio aquí ***
+            // No se incluye `harvest_date` en el `GROUP BY`
+            queryString += ' GROUP BY ' + groupByColumns;
         }
 
         // Ordenar los resultados por fecha de cosecha en orden descendente
         queryString += ' ORDER BY harvest_date DESC';
-        console.log(queryString);
-        console.log(queryValues);
-        mysqlConn.query(queryString, queryValues, (error, results) => {
-            mysqlConn.end(); // Cerrar la conexión
-            if (error) {
-                console.error('Error executing query: ' + error.message);
-                return res.status(500).json({
-                    code: "ERROR",
-                    mensaje: error.message
-                });
-            }
+        //console.log("query de filtros", queryString);
+        //console.log("values  de filtros", queryValues);
+        const results = await queryAsync(queryString, queryValues);
 
-            if (results.length > 0) {
-                return res.status(200).json({
-                    code: "OK",
-                    results
-                });
-            } else {
-                return res.status(404).json({
-                    code: "ERROR",
-                    mensaje: "No se encuentran registros."
-                });
-            }
-        });
-    });
+        if (results.length > 0) {
+
+            const adjustedResults = results.map(item => {
+                // Ajustar la fecha harvest_date a la zona horaria de Chile (sin cambiar el formato visual)
+                if (item.harvest_date) {
+                    // Descontar 3 horas (ajuste horario)
+                    item.harvest_date = moment(item.harvest_date).utcOffset(-3, true).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                }
+
+                // Ajustar la fecha date_register de la misma manera si es necesario
+                if (item.date_register) {
+                    // Descontar 3 horas (ajuste horario)
+                    item.date_register = moment(item.date_register).utcOffset(-3, true).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                }
+
+                // Ajustar la fecha sync_date de la misma manera si es necesario
+                if (item.sync_date) {
+                    // Descontar 3 horas (ajuste horario)
+                    item.sync_date = moment(item.sync_date).utcOffset(-3, true).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                }
+
+                return item;
+            });
+            console.log("results  de filtros", adjustedResults);
+            return res.status(200).json({
+                code: "OK",
+                results: adjustedResults
+            });
+        } else {
+            return res.status(404).json({
+                code: "ERROR",
+                mensaje: "No se encuentran registros."
+            });
+        }
+
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+        res.json({ code: "ERROR", mensaje: error.message });
+    }
 });
-
-
 
 router.post('/configuracion/production/filterResultsMonthly/:companyID', validateToken, (req, res) => {
     const { companyID } = req.params; // ID de la empresa desde la URL
@@ -6248,10 +6269,6 @@ router.post('/configuracion/production/filterResultsMonthly/:companyID', validat
         });
     });
 });
-
-
-
-
 
 export default router
 
